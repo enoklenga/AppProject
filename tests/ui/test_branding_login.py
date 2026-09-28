@@ -26,11 +26,26 @@ class BrandingLoginTests(SimpleTestCase):
         self.assertEqual(content.count("{% block content %}"), 1)
 
     def test_login_template_has_branding_structure(self):
-        content = (BASE_DIR / "templates" / "registration" / "login.html").read_text(encoding="utf-8")
-        self.assertIn("{% block body_class %}page-login{% endblock %}", content)
-        self.assertIn("auth-brand", content)
-        self.assertIn("images/branding/leftrack-mark.png", content)
-        self.assertIn("auth-login", content)
+        content = (
+            BASE_DIR
+            / "templates"
+            / "registration"
+            / "login.html"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn(
+            "{% block body_class %}page-login{% endblock %}",
+            content,
+        )
+        self.assertIn("login-scene", content)
+        self.assertIn("login-panel", content)
+        self.assertIn("login-card", content)
+        self.assertIn("login-brand", content)
+        self.assertIn("login-brand-mark", content)
+        self.assertIn(
+            "images/branding/leftrack-mark.png",
+            content,
+        )
         self.assertIn("{% csrf_token %}", content)
 
 
@@ -41,7 +56,13 @@ class BrandingLoginTests(SimpleTestCase):
             / "css"
             / "login.css"
         ).read_text(encoding="utf-8")
-        self.assertIn(".auth-login", content)
+
+        self.assertIn(".login-scene", content)
+        self.assertIn(".login-hero-image", content)
+        self.assertIn(
+            "login-hero-leftrack.webp",
+            content,
+        )
         self.assertIn("linear-gradient", content)
 
     def test_login_does_not_add_reset_action(self):
