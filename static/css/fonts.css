@@ -1,0 +1,9 @@
+/* Inter (variabile, sottoinsieme latino) servito dal progetto: nessuna
+   richiesta a Google Fonts dai browser degli utenti (GDPR). Licenza: OFL. */
+@font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../fonts/inter-var-latin.woff") format("woff");
+}

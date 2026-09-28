@@ -6,7 +6,6 @@ questa parte gestisce tutto ciò che riguarda i periodi mensili — calcolo del
 valore economico di un periodo, chiusura e riapertura (spec §7bis).
 """
 from dataclasses import dataclass
-from datetime import date
 from decimal import Decimal
 
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -72,8 +71,43 @@ def _verifica_admin(attore) -> None:
         )
 
 
+_CACHE_TARIFFA = "_lef_tariffa_vigente"
+
+
+def precarica_tariffe(righe) -> None:
+    """Risolve in blocco la tariffa vigente di ogni riga ore.
+
+    Evita una query per riga (N+1) su dashboard, report e chiusura mensile:
+    tutte le tariffe delle assegnazioni coinvolte vengono lette con una sola
+    query e abbinate in memoria. Il risultato viene memorizzato sull'istanza
+    e riutilizzato da ``tariffa_vigente``.
+    """
+    da_risolvere = [r for r in righe if not hasattr(r, _CACHE_TARIFFA)]
+    if not da_risolvere:
+        return
+
+    per_chiave: dict[tuple, list[TariffaAssegnazione]] = {}
+    tariffe = TariffaAssegnazione.objects.filter(
+        assegnazione_id__in={r.assegnazione_id for r in da_risolvere},
+    ).order_by("-valida_dal")
+    for tariffa in tariffe:
+        per_chiave.setdefault(
+            (tariffa.assegnazione_id, tariffa.tipo_attivita), []
+        ).append(tariffa)
+
+    for riga in da_risolvere:
+        trovata = None
+        for tariffa in per_chiave.get((riga.assegnazione_id, riga.tipo_attivita), ()):
+            if tariffa.valida_dal <= riga.data:
+                trovata = tariffa
+                break
+        setattr(riga, _CACHE_TARIFFA, trovata)
+
+
 def tariffa_vigente(riga: RigaOre) -> TariffaAssegnazione | None:
-    return (
+    if hasattr(riga, _CACHE_TARIFFA):
+        return getattr(riga, _CACHE_TARIFFA)
+    tariffa = (
         TariffaAssegnazione.objects.filter(
             assegnazione=riga.assegnazione,
             tipo_attivita=riga.tipo_attivita,
@@ -82,6 +116,8 @@ def tariffa_vigente(riga: RigaOre) -> TariffaAssegnazione | None:
         .order_by("-valida_dal")
         .first()
     )
+    setattr(riga, _CACHE_TARIFFA, tariffa)
+    return tariffa
 
 
 def valorizza_periodo(anno: int, mese: int) -> RiepilogoPeriodo:
@@ -95,6 +131,7 @@ def valorizza_periodo(anno: int, mese: int) -> RiepilogoPeriodo:
             "assegnazione__consulente",
             "assegnazione__commessa",
             "assegnazione__commessa__cliente",
+            "assegnazione__fase",
         )
         .order_by(
             "data",
@@ -108,6 +145,7 @@ def valorizza_periodo(anno: int, mese: int) -> RiepilogoPeriodo:
     totale_ore = 0
     totale_importo_ore = Decimal("0.00")
 
+    precarica_tariffe(righe)
     for riga in righe:
         totale_ore += riga.ore
         tariffa = tariffa_vigente(riga)
@@ -142,6 +180,7 @@ def valorizza_periodo(anno: int, mese: int) -> RiepilogoPeriodo:
             "assegnazione__consulente",
             "assegnazione__commessa",
             "assegnazione__commessa__cliente",
+            "assegnazione__fase",
         )
         .order_by("-data", "assegnazione__commessa__codice")
     )

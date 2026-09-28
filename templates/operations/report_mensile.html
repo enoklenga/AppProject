@@ -46,7 +46,7 @@
 
             <div class="field {% if field.errors %}field-has-error{% endif %}">
 
-                {{ field.label_tag }}
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                 {{ field }}
 
                 {% if field.errors %}
@@ -96,7 +96,7 @@
                 <span>Valore ore</span>
 
                 <strong>
-                    € {{ report.dashboard.totale_valore_ore|floatformat:2 }}
+                    €&nbsp;{{ report.dashboard.totale_valore_ore|floatformat:"2g" }}
                 </strong>
 
             </article>
@@ -107,7 +107,7 @@
                 <span>Spese</span>
 
                 <strong>
-                    € {{ report.dashboard.totale_spese|floatformat:2 }}
+                    €&nbsp;{{ report.dashboard.totale_spese|floatformat:"2g" }}
                 </strong>
 
             </article>
@@ -118,7 +118,7 @@
                 <span>Totale valorizzato</span>
 
                 <strong>
-                    € {{ report.dashboard.totale_fatturabile|floatformat:2 }}
+                    €&nbsp;{{ report.dashboard.totale_fatturabile|floatformat:"2g" }}
                 </strong>
 
             </article>
@@ -267,7 +267,7 @@
                                 </td>
 
 
-                                <td class="table-primary">
+                                <td class="table-primary table-code">
                                     {{ riga.assegnazione.commessa.codice }}
                                 </td>
 

@@ -10,7 +10,6 @@ from .authentication import ExpiringTokenAuthentication
 from .models import ApiTokenMetadata
 from .permissions import IsAdminLEF
 from .security_serializers import (
-    AdminTokenSerializer,
     RevokeTokenResponseSerializer,
     TokenIssueResponseSerializer,
     TokenStatusSerializer,

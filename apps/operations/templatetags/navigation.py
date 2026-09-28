@@ -701,7 +701,7 @@ def build_navigation_data(
         if route == "operations:dashboard-admin" and getattr(
             user, "is_direzione_generale", False
         ):
-            current_label = "Executive Dashboard"
+            current_label = "Dashboard direzionale"
 
         if route == section_root:
 

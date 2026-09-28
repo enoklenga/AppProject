@@ -45,12 +45,8 @@
         sizes="180x180"
         href="{% static 'images/branding/apple-touch-icon.png' %}">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet">
+    <link rel="preload" href="{% static 'fonts/inter-var-latin.woff' %}" as="font" type="font/woff" crossorigin>
+    <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
 
     <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
     <link rel="stylesheet" href="{% static 'css/app.css' %}">
@@ -1461,7 +1457,7 @@
                        href="{% url 'operations:dashboard-admin' %}">
                         <span class="nav-indicator" aria-hidden="true"></span>
                         <svg class="nav-icon" aria-hidden="true"><use href="#icon-chart"></use></svg>
-                        <span class="nav-link-label">Executive Dashboard</span>
+                        <span class="nav-link-label">Dashboard direzionale</span>
                     </a>
 
                     <a class="nav-link{% if current_section == 'report' %} is-active{% endif %}"
@@ -1572,12 +1568,12 @@
 
         <div class="sidebar-user">
 
-            <div
-                class="user-avatar"
-                aria-hidden="true">
-
-                {{ user.email|slice:":1"|upper }}
-
+            <div class="user-avatar" aria-hidden="true">
+                {% if user.foto_profilo %}
+                    <img class="user-avatar-image" src="{{ user.foto_profilo.url }}" alt="">
+                {% else %}
+                    {{ user.first_name|default:user.email|slice:":1"|upper }}
+                {% endif %}
             </div>
 
 
@@ -1666,12 +1662,12 @@
                         </div>
 
 
-                        <div
-                            class="user-avatar user-avatar-small"
-                            aria-hidden="true">
-
-                            {{ user.email|slice:":1"|upper }}
-
+                        <div class="user-avatar user-avatar-small" aria-hidden="true">
+                            {% if user.foto_profilo %}
+                                <img class="user-avatar-image" src="{{ user.foto_profilo.url }}" alt="">
+                            {% else %}
+                                {{ user.first_name|default:user.email|slice:":1"|upper }}
+                            {% endif %}
                         </div>
 
 
@@ -1683,6 +1679,12 @@
 
 
                     <div class="user-dropdown-menu">
+
+                        <a href="{% url 'accounts:profile' %}">
+                            <svg class="btn-icon" aria-hidden="true"><use href="#icon-users"></use></svg>
+                            Il mio profilo
+                        </a>
+
 
                         <a href="{% url 'tasks:my-task-list' %}">
                             <svg class="btn-icon" aria-hidden="true"><use href="#icon-task-list"></use></svg>
@@ -1710,7 +1712,7 @@
 
                             <button type="submit">
                                 <svg class="btn-icon" aria-hidden="true"><use href="#icon-log-out"></use></svg>
-                                Logout
+                                Esci
                             </button>
 
                         </form>

@@ -1,12 +1,12 @@
 from django import forms
+
+from apps.common.widgets import DateInput
 from django.db.models import Q
 
-from apps.projects.models import Assegnazione, Commessa
+from apps.projects.models import Assegnazione
 from .models import RigaOre, SpesaTrasferta
 
 
-class DateInput(forms.DateInput):
-    input_type = "date"
 
 
 class ApprovazioneForm(forms.Form):

@@ -15,9 +15,9 @@
             <tr>
                 <td>{{ voce.etichetta }}</td>
                 <td>{{ voce.ore }}</td>
-                <td>€ {{ voce.valore_ore|floatformat:2 }}</td>
-                <td>€ {{ voce.spese|floatformat:2 }}</td>
-                <td><strong>€ {{ voce.totale|floatformat:2 }}</strong></td>
+                <td>€&nbsp;{{ voce.valore_ore|floatformat:"2g" }}</td>
+                <td>€&nbsp;{{ voce.spese|floatformat:"2g" }}</td>
+                <td><strong>€&nbsp;{{ voce.totale|floatformat:"2g" }}</strong></td>
                 <td>
                     {% if voce.righe_senza_tariffa %}
                         <span class="badge badge-bloccata">

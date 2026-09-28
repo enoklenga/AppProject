@@ -24,7 +24,7 @@
     <div class="form-grid">
         {% for field in form.visible_fields %}
             <div class="field field-full">
-                {{ field.label_tag }}
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                 {{ field }}
                 {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
                 {{ field.errors }}

@@ -182,7 +182,7 @@
 
             </svg>
 
-            Applica
+            Applica filtri
 
         </button>
 
@@ -873,7 +873,7 @@
                                 </td>
 
 
-                                <td class="table-primary">
+                                <td class="table-primary table-code">
 
                                     {{ pianificazione.assegnazione.commessa.codice }}
 
@@ -916,19 +916,19 @@
 
                                     {% if pianificazione.confermata %}
 
-                                        <span class="badge badge-attiva">
+                                        <span class="badge badge-success">
                                             Confermata
                                         </span>
 
                                     {% elif pianificazione.data <= oggi %}
 
-                                        <span class="badge badge-chiusa">
+                                        <span class="badge badge-warning">
                                             Da confermare
                                         </span>
 
                                     {% else %}
 
-                                        <span class="badge badge-attiva">
+                                        <span class="badge badge-info">
                                             Pianificata
                                         </span>
 

@@ -22,7 +22,7 @@
 
         <p>
             Totale del periodo:
-            <strong>€ {{ totale_spese|floatformat:2 }}</strong>.
+            <strong>€&nbsp;{{ totale_spese|floatformat:"2g" }}</strong>.
         </p>
 
     </div>
@@ -327,7 +327,7 @@
                         <td class="table-numeric">
 
                             <strong class="timesheet-value">
-                                € {{ spesa.importo|floatformat:2 }}
+                                €&nbsp;{{ spesa.importo|floatformat:"2g" }}
                             </strong>
 
                         </td>

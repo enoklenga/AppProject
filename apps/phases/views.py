@@ -8,7 +8,7 @@ from apps.projects.models import Commessa
 
 from .forms import FaseForm
 from .models import FaseCommessa
-from .permissions import can_delete_fase, can_edit_fase, can_manage_fasi
+from .permissions import can_edit_fase, can_manage_fasi
 from .selectors import (
     fasi_for_commessa,
     manageable_commesse_for_phases,

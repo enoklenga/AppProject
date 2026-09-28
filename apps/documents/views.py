@@ -4,7 +4,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
-from apps.projects.models import Assegnazione, Commessa
+from apps.projects.models import Assegnazione
 from apps.phases.models import FaseCommessa
 
 from .forms import DocumentoUploadForm
@@ -58,15 +58,24 @@ def document_list(request):
     # filtro e per decidere se mostrare il pulsante "Carica documento".
     puo_caricare = manageable_projects_for_upload(request.user).exists()
 
+    # Il pulsante "Elimina" deve comparire solo a chi può davvero eliminare
+    # (stessa regola applicata dalla vista document_delete): evita link che
+    # portano a un 403 per Commerciale, Direzione e documenti privati.
+    documenti = list(
+        queryset.select_related("commessa", "commessa__cliente", "fase", "caricato_da")
+    )
+    for documento in documenti:
+        documento.puo_eliminare = can_delete_document(request.user, documento)
+
     context = {
-        "documenti": queryset,
+        "documenti": documenti,
         "commesse": commesse,
         "categorie": DocumentoCommessa.Categoria.choices,
         "commessa_selezionata": commessa_id or "",
         "fase_selezionata": fase_id or "",
         "fasi": fasi,
         "categoria_selezionata": categoria or "",
-        "totale": queryset.count(),
+        "totale": len(documenti),
         "puo_caricare": puo_caricare,
     }
 

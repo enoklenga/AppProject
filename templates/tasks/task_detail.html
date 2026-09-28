@@ -327,7 +327,7 @@
 
                     <div class="field">
 
-                        {{ status_form.stato.label_tag }}
+                        <label for="{{ status_form.stato.id_for_label }}">{{ status_form.stato.label }}</label>
 
                         {{ status_form.stato }}
 
@@ -453,7 +453,7 @@
 
                 <div class="field">
 
-                    {{ comment_form.testo.label_tag }}
+                    <label for="{{ comment_form.testo.id_for_label }}">{{ comment_form.testo.label }}</label>
 
                     {{ comment_form.testo }}
 

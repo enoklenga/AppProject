@@ -1,5 +1,5 @@
 from apps.projects.models import Commessa
-from apps.projects.permissions import is_active_pm, is_active_team_member, is_active_phase_member
+from apps.projects.permissions import is_active_team_member, is_active_phase_member
 from apps.accounts.access import can_view_all_documents
 
 from .models import DocumentoCommessa

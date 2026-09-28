@@ -32,7 +32,7 @@
 
         {% for field in form.visible_fields %}
             <div class="field {% if field.errors %}field-has-error{% endif %}">
-                {{ field.label_tag }}
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                 {{ field }}
 
                 {% if field.errors %}

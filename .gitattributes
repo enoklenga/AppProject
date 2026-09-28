@@ -1,0 +1,17 @@
+# Normalizzazione fine riga (revisione 28/09/2026).
+# Script shell, file .env, Dockerfile e configurazioni Nginx vengono eseguiti
+# su Linux: devono avere fine riga LF, altrimenti "\r" finisce nei valori
+# (es. "INFO\r" come livello di log) o rompe gli script ("bad interpreter").
+* text=auto
+*.sh text eol=lf
+.env* text eol=lf
+*.env.example text eol=lf
+Dockerfile text eol=lf
+*.conf text eol=lf
+*.conf.example text eol=lf
+*.yml text eol=lf
+*.ps1 text eol=crlf
+*.woff binary
+*.png binary
+*.webp binary
+*.ico binary

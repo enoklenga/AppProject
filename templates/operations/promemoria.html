@@ -99,7 +99,7 @@
 
                             <div class="field {% if field.errors %}field-has-error{% endif %}">
 
-                                {{ field.label_tag }}
+                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                                 {{ field }}
 
                                 {% if field.help_text %}
@@ -214,7 +214,7 @@
 
                             <div class="field {% if field.errors %}field-has-error{% endif %}">
 
-                                {{ field.label_tag }}
+                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                                 {{ field }}
 
                                 {% if field.help_text %}

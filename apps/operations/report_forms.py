@@ -1,12 +1,12 @@
 from django import forms
 
+from apps.common.widgets import MonthInput
+
 from apps.accounts.models import User
 from apps.projects.models import Cliente, Commessa
 from apps.phases.models import FaseCommessa
 
 
-class MonthInput(forms.DateInput):
-    input_type = "month"
 
 
 class ReportMensileFilterForm(forms.Form):

@@ -817,3 +817,94 @@
 .app-authenticated .table td.table-primary {
     text-align: left !important;
 }
+
+/* --------------------------------------------------------------------------
+   STATUS PALETTE — un colore per significato (revisione finale 28/09/2026)
+   Prima alcuni stati non avevano colore (Da fare, In corso, Da iniziare, OK)
+   e tutte le fasi del workflow commessa erano verdi.
+   -------------------------------------------------------------------------- */
+
+.app-authenticated .badge-success,
+.app-authenticated .badge-completata,
+.app-authenticated .badge-attiva,
+.app-authenticated .badge-aperta,
+.app-authenticated .badge-wf-in_esecuzione {
+    color: var(--ds-success);
+    background: var(--ds-success-soft);
+    border-color: var(--ds-success-border);
+}
+
+.app-authenticated .badge-warning,
+.app-authenticated .badge-in-attesa,
+.app-authenticated .badge-da-completare,
+.app-authenticated .badge-sospesa,
+.app-authenticated .badge-wf-handover,
+.app-authenticated .badge-wf-sospesa {
+    color: var(--ds-warning);
+    background: var(--ds-warning-soft);
+    border-color: var(--ds-warning-border);
+}
+
+.app-authenticated .badge-info,
+.app-authenticated .badge-modificabile,
+.app-authenticated .badge-in_corso,
+.app-authenticated .badge-wf-pianificazione {
+    color: var(--ds-primary);
+    background: var(--ds-primary-soft);
+    border-color: #cfe0fb;
+}
+
+.app-authenticated .badge-danger,
+.app-authenticated .badge-errore,
+.app-authenticated .badge-rifiutata {
+    color: var(--ds-danger);
+    background: var(--ds-danger-soft);
+    border-color: var(--ds-danger-border);
+}
+
+.app-authenticated .badge-neutral,
+.app-authenticated .badge-chiusa,
+.app-authenticated .badge-conclusa,
+.app-authenticated .badge-bloccata,
+.app-authenticated .badge-da_fare,
+.app-authenticated .badge-da_iniziare,
+.app-authenticated .badge-wf-da_prendere_in_carico,
+.app-authenticated .badge-wf-chiusa {
+    color: #4f6078;
+    background: #eef2f7;
+    border-color: #dbe3ee;
+}
+
+.app-authenticated .badge-wf-in_chiusura {
+    color: #6a3fc9;
+    background: #f3eefe;
+    border-color: #ddd0fa;
+}
+
+/* Codici commessa e nomi nelle tabelle: niente a capo sul trattino
+   ("ACM-ERP-\n26"). Il sotto-testo (cliente, email) resta libero di andare a capo. */
+.app-authenticated .data-table td.table-code,
+.app-authenticated .data-table .table-secondary-strong,
+.app-authenticated .data-table .table-stack > strong:first-child,
+.app-authenticated .data-table td.table-date,
+.app-authenticated .data-table td.table-money,
+.app-authenticated .data-table td.table-numeric {
+    white-space: nowrap;
+}
+
+/* Rifiuto approvazione: azione distruttiva, stesso rosso degli altri "danger". */
+.app-authenticated .approval-reject-confirm.button-danger {
+    color: #fff;
+    background: var(--ds-danger);
+    border-color: var(--ds-danger);
+}
+
+/* Tabelle più larghe del pannello: ombra sul bordo che segnala lo scorrimento
+   orizzontale (prima le colonne finali risultavano "tagliate" senza indizi). */
+.app-authenticated .table-wrapper.is-scrollable {
+    background:
+        linear-gradient(to right, #fff 30%, rgba(255, 255, 255, 0)) left center / 28px 100% no-repeat local,
+        linear-gradient(to left, #fff 30%, rgba(255, 255, 255, 0)) right center / 28px 100% no-repeat local,
+        radial-gradient(farthest-side at 0 50%, rgba(11, 40, 82, .14), rgba(11, 40, 82, 0)) left center / 12px 100% no-repeat scroll,
+        radial-gradient(farthest-side at 100% 50%, rgba(11, 40, 82, .14), rgba(11, 40, 82, 0)) right center / 12px 100% no-repeat scroll;
+}

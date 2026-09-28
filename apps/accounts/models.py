@@ -2,12 +2,20 @@ import uuid
 
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.db.models.functions import Lower
 
 from apps.common.models import UUIDTimeStampedModel
 
 from .managers import UserManager
+
+
+def validate_profile_photo_size(file):
+    """Limita gli avatar a 3 MB per evitare upload eccessivi."""
+    max_bytes = 3 * 1024 * 1024
+    if file.size > max_bytes:
+        raise ValidationError("La foto profilo non può superare 3 MB.")
 
 
 class User(AbstractUser):
@@ -26,6 +34,17 @@ class User(AbstractUser):
     username = None
     email = models.EmailField("email", unique=True)
     telefono = models.CharField(max_length=30, blank=True)
+    foto_profilo = models.ImageField(
+        "foto profilo",
+        upload_to="avatars/%Y/%m/",
+        blank=True,
+        null=True,
+        validators=[
+            FileExtensionValidator(allowed_extensions=("jpg", "jpeg", "png", "webp")),
+            validate_profile_photo_size,
+        ],
+        help_text="JPG, PNG o WebP. Dimensione massima 3 MB.",
+    )
     ruolo = models.CharField(
         max_length=30,
         choices=Ruolo.choices,

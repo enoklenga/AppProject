@@ -31,7 +31,7 @@
 
                     <h1>{{ commessa.codice }}</h1>
 
-                    <span class="badge badge-{{ commessa.stato|lower }}">
+                    <span class="badge badge-wf badge-wf-{{ commessa.workflow_stato|lower }}">
                         {{ commessa.get_workflow_stato_display }}
                     </span>
 
@@ -113,7 +113,7 @@
 
         <div class="metric-grid teamwork-progress-grid">
             <article class="metric-card">
-                <span>Avanzamento ore</span>
+                <span>Avanzamento agenda</span>
                 <strong>{{ agenda_progress.percentuale_ore|floatformat:"-1" }}%</strong>
                 <small>{{ agenda_progress.ore_risolte }} / {{ agenda_progress.ore_pianificate }} h risolte</small>
             </article>

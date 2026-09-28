@@ -63,7 +63,7 @@
 
                 <div class="field field-full {% if form.titolo.errors %}field-has-error{% endif %}">
 
-                    {{ form.titolo.label_tag }}
+                    <label for="{{ form.titolo.id_for_label }}">{{ form.titolo.label }}</label>
                     {{ form.titolo }}
 
                     {% if form.titolo.errors %}
@@ -77,7 +77,7 @@
 
                 <div class="field {% if form.commessa.errors %}field-has-error{% endif %}">
 
-                    {{ form.commessa.label_tag }}
+                    <label for="{{ form.commessa.id_for_label }}">{{ form.commessa.label }}</label>
                     {{ form.commessa }}
 
                     {% if form.commessa.errors %}
@@ -91,7 +91,7 @@
 
                 <div class="field {% if form.fase.errors %}field-has-error{% endif %}">
 
-                    {{ form.fase.label_tag }}
+                    <label for="{{ form.fase.id_for_label }}">{{ form.fase.label }}</label>
                     {{ form.fase }}
 
                     {% if form.fase.errors %}
@@ -105,7 +105,7 @@
 
                 <div class="field {% if form.assegnato_a.errors %}field-has-error{% endif %}">
 
-                    {{ form.assegnato_a.label_tag }}
+                    <label for="{{ form.assegnato_a.id_for_label }}">{{ form.assegnato_a.label }}</label>
                     {{ form.assegnato_a }}
 
                     {% if form.assegnato_a.errors %}
@@ -119,7 +119,7 @@
 
                 <div class="field {% if form.priorita.errors %}field-has-error{% endif %}">
 
-                    {{ form.priorita.label_tag }}
+                    <label for="{{ form.priorita.id_for_label }}">{{ form.priorita.label }}</label>
                     {{ form.priorita }}
 
                     {% if form.priorita.errors %}
@@ -133,7 +133,7 @@
 
                 <div class="field {% if form.data_inizio.errors %}field-has-error{% endif %}">
 
-                    {{ form.data_inizio.label_tag }}
+                    <label for="{{ form.data_inizio.id_for_label }}">{{ form.data_inizio.label }}</label>
                     {{ form.data_inizio }}
 
                     {% if form.data_inizio.errors %}
@@ -147,7 +147,7 @@
 
                 <div class="field {% if form.data_scadenza.errors %}field-has-error{% endif %}">
 
-                    {{ form.data_scadenza.label_tag }}
+                    <label for="{{ form.data_scadenza.id_for_label }}">{{ form.data_scadenza.label }}</label>
                     {{ form.data_scadenza }}
 
                     {% if form.data_scadenza.errors %}
@@ -161,7 +161,7 @@
 
                 <div class="field field-full {% if form.descrizione.errors %}field-has-error{% endif %}">
 
-                    {{ form.descrizione.label_tag }}
+                    <label for="{{ form.descrizione.id_for_label }}">{{ form.descrizione.label }}</label>
                     {{ form.descrizione }}
 
                     {% if form.descrizione.errors %}

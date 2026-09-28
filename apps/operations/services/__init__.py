@@ -14,6 +14,7 @@ esattamente come prima.
 from .periodi import (
     RigaValorizzata,
     RiepilogoPeriodo,
+    precarica_tariffe,
     tariffa_vigente,
     valorizza_periodo,
     righe_senza_tariffa,
@@ -44,7 +45,7 @@ from .promemoria import (
 )
 
 __all__ = [
-    "RigaValorizzata", "RiepilogoPeriodo", "tariffa_vigente", "valorizza_periodo",
+    "RigaValorizzata", "RiepilogoPeriodo", "precarica_tariffe", "tariffa_vigente", "valorizza_periodo",
     "righe_senza_tariffa", "chiudi_periodo", "riapri_periodo",
     "AggregatoEconomico", "AvanzamentoCommessa", "DashboardAdminData",
     "AvanzamentoConsulentePM", "DashboardPMData", "dashboard_admin",

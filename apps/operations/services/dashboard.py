@@ -8,13 +8,13 @@ from collections import defaultdict
 from dataclasses import dataclass
 from decimal import Decimal
 
-from django.core.exceptions import PermissionDenied, ValidationError
-from django.db.models import Q, Sum
+from django.core.exceptions import PermissionDenied
+from django.db.models import Sum
 
-from apps.projects.models import Assegnazione, Cliente, Commessa
+from apps.projects.models import Assegnazione, Commessa
 from apps.timesheets.models import RigaOre, SpesaTrasferta
 
-from .periodi import tariffa_vigente
+from .periodi import precarica_tariffe, tariffa_vigente
 
 
 @dataclass(frozen=True)
@@ -189,6 +189,7 @@ def dashboard_admin(
         fase_id=fase_id,
     )
     righe = list(righe_qs.order_by("data", "created_at"))
+    precarica_tariffe(righe)
 
     spese_qs = SpesaTrasferta.objects.select_related(
         "assegnazione",

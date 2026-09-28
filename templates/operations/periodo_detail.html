@@ -344,7 +344,7 @@
                     <span>Spese totali</span>
 
                     <strong>
-                        € {{ riepilogo.totale_spese|floatformat:2 }}
+                        €&nbsp;{{ riepilogo.totale_spese|floatformat:"2g" }}
                     </strong>
                 </div>
 
@@ -399,7 +399,7 @@
             <span>Valore ore</span>
 
             <strong>
-                € {{ riepilogo.totale_importo_ore|floatformat:2 }}
+                €&nbsp;{{ riepilogo.totale_importo_ore|floatformat:"2g" }}
             </strong>
 
         </article>
@@ -410,7 +410,7 @@
             <span>Spese</span>
 
             <strong>
-                € {{ riepilogo.totale_spese|floatformat:2 }}
+                €&nbsp;{{ riepilogo.totale_spese|floatformat:"2g" }}
             </strong>
 
         </article>
@@ -421,7 +421,7 @@
             <span>Totale fatturabile valorizzato</span>
 
             <strong>
-                € {{ riepilogo.totale_fatturabile|floatformat:2 }}
+                €&nbsp;{{ riepilogo.totale_fatturabile|floatformat:"2g" }}
             </strong>
 
         </article>
@@ -558,7 +558,7 @@
                                 </td>
 
 
-                                <td class="table-primary">
+                                <td class="table-primary table-code">
                                     {{ riga.assegnazione.commessa.codice }}
                                 </td>
 
@@ -689,7 +689,7 @@
                             </td>
 
 
-                            <td class="table-primary">
+                            <td class="table-primary table-code">
                                 {{ elemento.riga.assegnazione.commessa.codice }}
                             </td>
 
@@ -729,7 +729,7 @@
                                     <div class="table-stack">
 
                                         <strong>
-                                            € {{ elemento.tariffa.tariffa_oraria|floatformat:2 }}
+                                            €&nbsp;{{ elemento.tariffa.tariffa_oraria|floatformat:"2g" }}
                                         </strong>
 
                                         <span>
@@ -754,7 +754,7 @@
                                 {% if elemento.importo is not None %}
 
                                     <strong>
-                                        € {{ elemento.importo|floatformat:2 }}
+                                        €&nbsp;{{ elemento.importo|floatformat:"2g" }}
                                     </strong>
 
                                 {% else %}
@@ -887,7 +887,7 @@
                             </td>
 
 
-                            <td class="table-primary">
+                            <td class="table-primary table-code">
                                 {{ spesa.assegnazione.commessa.codice }}
                             </td>
 
@@ -909,7 +909,7 @@
                             <td class="table-numeric">
 
                                 <strong>
-                                    € {{ spesa.importo|floatformat:2 }}
+                                    €&nbsp;{{ spesa.importo|floatformat:"2g" }}
                                 </strong>
 
                             </td>
@@ -1038,7 +1038,7 @@
 
                 <div class="field">
 
-                    {{ form_riapertura.motivazione.label_tag }}
+                    <label for="{{ form_riapertura.motivazione.id_for_label }}">{{ form_riapertura.motivazione.label }}</label>
 
                     {{ form_riapertura.motivazione }}
 
@@ -1205,7 +1205,7 @@
 
                 <div class="field">
 
-                    {{ form_chiusura.motivazione.label_tag }}
+                    <label for="{{ form_chiusura.motivazione.id_for_label }}">{{ form_chiusura.motivazione.label }}</label>
 
                     {{ form_chiusura.motivazione }}
 

@@ -9,7 +9,6 @@ from drf_spectacular.utils import (
     extend_schema_view,
 )
 from rest_framework import status, viewsets
-from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.reverse import reverse as api_reverse
@@ -46,7 +45,6 @@ from .serializers import (
     CommessaSerializer,
     MeSerializer,
     PeriodoMensileSerializer,
-    DeleteVersionSerializer,
     RigaOreCreateSerializer,
     RigaOreMutationResponseSerializer,
     RigaOreSerializer,
@@ -56,7 +54,6 @@ from .serializers import (
     SpesaTrasfertaSerializer,
     SpesaUpdateSerializer,
     TokenLoginSerializer,
-    UserSummarySerializer,
 )
 from .service_errors import raise_api_service_error
 from .security_serializers import TokenIssueResponseSerializer

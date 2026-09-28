@@ -1,4 +1,6 @@
 from django import forms
+
+from apps.common.widgets import DateInput
 from django.utils import timezone
 
 from apps.projects.models import Assegnazione, TariffaAssegnazione
@@ -25,11 +27,7 @@ class PianificazioneForm(forms.Form):
 
     data = forms.DateField(
         label="Data",
-        widget=forms.DateInput(
-            attrs={
-                "type": "date",
-            }
-        ),
+        widget=DateInput(),
     )
 
     ore_pianificate = forms.IntegerField(

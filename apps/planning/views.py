@@ -188,15 +188,19 @@ def _build_event(
     pianificazione,
     mostra_consulente,
 ):
+    # Cache per-richiesta dei controlli di supervisione (evita N+1 sul calendario).
+    cache = request.__dict__.setdefault("_lef_planning_perm_cache", {})
     return {
         "object": pianificazione,
         "can_edit": can_edit_planning(
             request.user,
             pianificazione,
+            cache,
         ),
         "can_delete": can_delete_planning(
             request.user,
             pianificazione,
+            cache,
         ),
         "can_confirm": can_confirm_planning(
             request.user,
@@ -1093,9 +1097,9 @@ def pianificazione_delete(
 
 @login_required
 def pianificazione_confirm(request, pk):
+    """La risorsa conferma che la sessione in agenda è stata svolta."""
     if not can_view_operational_details(request.user):
         raise PermissionDenied("La pianificazione è riservata ai profili operativi.")
-    """La risorsa conferma che la sessione in agenda è stata svolta."""
     pianificazione = get_object_or_404(
         GiornoPianificato.objects.select_related(
             "assegnazione",

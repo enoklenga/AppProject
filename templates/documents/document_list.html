@@ -394,7 +394,7 @@
                                     </a>
 
 
-                                    {% if request.user.is_admin_lef or documento.commessa.stato == "APERTA" %}
+                                    {% if documento.puo_eliminare %}
 
                                         <a
                                             class="row-action row-action-danger document-action-icon"

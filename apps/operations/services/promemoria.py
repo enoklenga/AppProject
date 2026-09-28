@@ -6,8 +6,7 @@ composizione e invio delle email di promemoria.
 """
 import calendar
 from dataclasses import dataclass
-from datetime import date, datetime, time
-from typing import Iterable
+from datetime import date, time
 
 from django.conf import settings
 from django.core.exceptions import ValidationError

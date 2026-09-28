@@ -6,7 +6,6 @@ from django.db.models import Count, Q, Sum
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
-from django.utils import timezone
 from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView
 

@@ -1,9 +1,8 @@
-from apps.projects.models import Assegnazione, Commessa
+from apps.projects.models import Assegnazione
 from apps.projects.permissions import is_active_phase_member, is_active_pm
 from apps.projects.workflow import commessa_permette_nuovo_lavoro, fase_permette_nuovo_lavoro
 from apps.accounts.access import can_view_tasks_portfolio
 
-from .models import Task
 
 
 def _is_authenticated(user):

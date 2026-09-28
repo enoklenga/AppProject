@@ -11,11 +11,13 @@ from .views import (
     SkillMatrixUserUpdateView,
     SkillMatrixView,
     SkillUpdateView,
+    UserProfileUpdateView,
 )
 
 app_name = "accounts"
 
 urlpatterns = [
+    path("profilo/", UserProfileUpdateView.as_view(), name="profile"),
     path("", ConsulenteListView.as_view(), name="consulente-list"),
     path("nuovo/", ConsulenteCreateView.as_view(), name="consulente-create"),
     path(

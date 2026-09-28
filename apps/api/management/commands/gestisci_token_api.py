@@ -5,7 +5,6 @@ from rest_framework.authtoken.models import Token
 from apps.api.token_services import (
     ensure_token_metadata,
     issue_token,
-    mask_token,
     revoke_token,
     token_status,
 )

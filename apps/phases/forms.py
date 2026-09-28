@@ -1,5 +1,7 @@
 from django import forms
 
+from apps.common.widgets import DateInput
+
 from apps.projects.models import Commessa
 
 from .models import FaseCommessa
@@ -43,13 +45,13 @@ class FaseForm(forms.Form):
     data_inizio = forms.DateField(
         label="Data inizio",
         required=True,
-        widget=forms.DateInput(attrs={"type": "date"}),
+        widget=DateInput(),
     )
 
     data_fine_prevista = forms.DateField(
         label="Data fine prevista (opzionale)",
         required=False,
-        widget=forms.DateInput(attrs={"type": "date"}),
+        widget=DateInput(),
     )
 
     def __init__(self, *args, user=None, commessa_bloccata=None, **kwargs):

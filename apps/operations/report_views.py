@@ -1,11 +1,8 @@
-from datetime import date
 
 from django.http import HttpResponse
 from django.shortcuts import render
-from django.urls import reverse
 from django.utils import timezone
 
-from apps.phases.models import FaseCommessa
 from django.views import View
 
 from apps.common.mixins import ReportsReadRequiredMixin

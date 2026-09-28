@@ -1,17 +1,14 @@
-from datetime import date
 
 from django import forms
+
+from apps.common.widgets import DateInput, MonthInput
 from django.conf import settings
 
 from .models import ConfigurazionePromemoria
 
 
-class DateInput(forms.DateInput):
-    input_type = "date"
 
 
-class MonthInput(forms.DateInput):
-    input_type = "month"
 
 
 class PeriodoFiltroForm(forms.Form):

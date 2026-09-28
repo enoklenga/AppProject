@@ -56,7 +56,7 @@
 
                 <div class="field field-full {% if form.commessa.errors %}field-has-error{% endif %}">
 
-                    {{ form.commessa.label_tag }}
+                    <label for="{{ form.commessa.id_for_label }}">{{ form.commessa.label }}</label>
                     {{ form.commessa }}
 
                     {% if form.commessa.help_text %}
@@ -76,7 +76,7 @@
 
                 <div class="field field-full {% if form.nome.errors %}field-has-error{% endif %}">
 
-                    {{ form.nome.label_tag }}
+                    <label for="{{ form.nome.id_for_label }}">{{ form.nome.label }}</label>
                     {{ form.nome }}
 
                     {% if form.nome.errors %}
@@ -90,7 +90,7 @@
 
                 <div class="field {% if form.stato.errors %}field-has-error{% endif %}">
 
-                    {{ form.stato.label_tag }}
+                    <label for="{{ form.stato.id_for_label }}">{{ form.stato.label }}</label>
                     {{ form.stato }}
 
                     {% if form.stato.errors %}
@@ -104,7 +104,7 @@
 
                 <div class="field {% if form.ordine.errors %}field-has-error{% endif %}">
 
-                    {{ form.ordine.label_tag }}
+                    <label for="{{ form.ordine.id_for_label }}">{{ form.ordine.label }}</label>
                     {{ form.ordine }}
 
                     {% if form.ordine.help_text %}
@@ -124,7 +124,7 @@
 
                 <div class="field {% if form.data_inizio.errors %}field-has-error{% endif %}">
 
-                    {{ form.data_inizio.label_tag }}
+                    <label for="{{ form.data_inizio.id_for_label }}">{{ form.data_inizio.label }}</label>
                     {{ form.data_inizio }}
 
                     {% if form.data_inizio.errors %}
@@ -138,7 +138,7 @@
 
                 <div class="field {% if form.data_fine_prevista.errors %}field-has-error{% endif %}">
 
-                    {{ form.data_fine_prevista.label_tag }}
+                    <label for="{{ form.data_fine_prevista.id_for_label }}">{{ form.data_fine_prevista.label }}</label>
                     {{ form.data_fine_prevista }}
 
                     {% if form.data_fine_prevista.errors %}
@@ -152,7 +152,7 @@
 
                 <div class="field field-full {% if form.descrizione.errors %}field-has-error{% endif %}">
 
-                    {{ form.descrizione.label_tag }}
+                    <label for="{{ form.descrizione.id_for_label }}">{{ form.descrizione.label }}</label>
                     {{ form.descrizione }}
 
                     {% if form.descrizione.errors %}

@@ -42,7 +42,7 @@
                         </div>
                     {% else %}
                         <div class="field field-full {% if field.errors %}field-has-error{% endif %}">
-                            {{ field.label_tag }}
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                             {{ field }}
                             {% if field.help_text %}<div class="field-help">{{ field.help_text }}</div>{% endif %}
                             {% if field.errors %}<div class="field-errors">{{ field.errors }}</div>{% endif %}
@@ -57,7 +57,7 @@
             {% endif %}
             <div class="form-actions form-actions-modern">
                 <a class="button button-ghost" href="{% url 'projects:commessa-teamwork' commessa.pk %}">Annulla</a>
-                <button class="button button-primary" type="submit">Salva handover</button>
+                <button class="button button-primary" type="submit"><svg class="btn-icon" aria-hidden="true"><use href="#icon-check"></use></svg>Salva handover</button>
             </div>
         </form>
     </section>

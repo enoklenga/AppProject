@@ -1,4 +1,6 @@
 from django import forms
+
+from apps.common.widgets import DateInput
 from django.core.exceptions import ValidationError
 
 from apps.accounts.models import User
@@ -7,7 +9,6 @@ from apps.phases.models import FaseCommessa
 
 from .models import Task
 from .selectors import (
-    assignable_users_for_project,
     assignable_users_for_phase,
     manageable_projects_for_user,
     manageable_phases_for_user,
@@ -78,21 +79,13 @@ class TaskForm(forms.Form):
     data_inizio = forms.DateField(
         label="Data inizio",
         required=False,
-        widget=forms.DateInput(
-            attrs={
-                "type": "date",
-            }
-        ),
+        widget=DateInput(),
     )
 
     data_scadenza = forms.DateField(
         label="Data scadenza",
         required=False,
-        widget=forms.DateInput(
-            attrs={
-                "type": "date",
-            }
-        ),
+        widget=DateInput(),
     )
 
     def __init__(

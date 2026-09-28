@@ -113,7 +113,7 @@
             <use href="#icon-filter"></use>
         </svg>
 
-        Filtra
+        Applica filtri
 
     </button>
 
@@ -344,7 +344,7 @@
 
                         <td class="table-status">
                             <div class="table-stack">
-                                <span class="badge badge-{{ commessa.stato|lower }}">
+                                <span class="badge badge-wf badge-wf-{{ commessa.workflow_stato|lower }}">
                                     {{ commessa.get_workflow_stato_display }}
                                 </span>
                                 {% if commessa.stato == 'CHIUSA' %}

@@ -164,7 +164,7 @@
 
 
             <button
-                class="button button-primary"
+                class="button button-secondary"
                 type="submit">
 
                 <svg class="btn-icon" aria-hidden="true">
@@ -213,7 +213,7 @@
             </span>
 
             <strong class="kpi-value">
-                € {{ dashboard.totale_valore_ore|floatformat:2 }}
+                €&nbsp;{{ dashboard.totale_valore_ore|floatformat:"2g" }}
             </strong>
 
             <span class="kpi-meta">
@@ -232,7 +232,7 @@
             </span>
 
             <strong class="kpi-value">
-                € {{ dashboard.totale_spese|floatformat:2 }}
+                €&nbsp;{{ dashboard.totale_spese|floatformat:"2g" }}
             </strong>
 
             <span class="kpi-meta">
@@ -252,7 +252,7 @@
             </span>
 
             <strong class="kpi-value">
-                € {{ dashboard.totale_fatturabile|floatformat:2 }}
+                €&nbsp;{{ dashboard.totale_fatturabile|floatformat:"2g" }}
             </strong>
 
             <span class="kpi-meta">
@@ -556,19 +556,19 @@
 
 
                             <td class="table-money">
-                                € {{ voce.valore_ore_periodo|floatformat:2 }}
+                                €&nbsp;{{ voce.valore_ore_periodo|floatformat:"2g" }}
                             </td>
 
 
                             <td class="table-money">
-                                € {{ voce.spese_periodo|floatformat:2 }}
+                                €&nbsp;{{ voce.spese_periodo|floatformat:"2g" }}
                             </td>
 
 
                             <td class="table-money">
 
                                 <strong>
-                                    € {{ voce.totale_periodo|floatformat:2 }}
+                                    €&nbsp;{{ voce.totale_periodo|floatformat:"2g" }}
                                 </strong>
 
                             </td>

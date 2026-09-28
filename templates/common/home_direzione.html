@@ -2,8 +2,8 @@
 {% block title %}Direzione Generale | LEFTRACK{% endblock %}
 {% block content %}
 <div class="page-header">
-  <div><div class="eyebrow">Direzione generale</div><h1>Executive overview</h1></div>
-  <div class="page-header-actions"><a class="button button-secondary" href="{% url 'planning:pianificazione-list' %}">Pianificazione</a><a class="button button-secondary" href="{% url 'operations:report-mensile' %}">Report</a><a class="button button-primary" href="{% url 'operations:dashboard-admin' %}">Executive Dashboard</a></div>
+  <div><div class="eyebrow">Direzione generale</div><h1>Panoramica direzionale</h1></div>
+  <div class="page-header-actions"><a class="button button-secondary" href="{% url 'planning:pianificazione-list' %}">Pianificazione</a><a class="button button-secondary" href="{% url 'operations:report-mensile' %}">Report</a><a class="button button-primary" href="{% url 'operations:dashboard-admin' %}">Dashboard direzionale</a></div>
 </div>
 <div class="metric-grid dashboard-kpi-grid">
   <article class="metric-card"><span>Consulenti attivi</span><strong>{{ consulenti_attivi }}</strong></article>
@@ -16,7 +16,7 @@
 <section class="panel data-panel">
   <div class="panel-heading"><div><div class="eyebrow">Portafoglio</div><h2>Commesse recenti</h2></div><a class="button button-secondary" href="{% url 'projects:commessa-list' %}">Vedi tutte</a></div>
   <div class="table-wrapper"><table class="data-table"><thead><tr><th>Commessa</th><th>Cliente</th><th>Periodo</th><th>Stato</th></tr></thead><tbody>
-  {% for commessa in ultime_commesse %}<tr><td class="table-primary"><strong><a href="{% url 'projects:commessa-teamwork' commessa.pk %}">{{ commessa.codice }}</a></strong></td><td>{{ commessa.cliente.ragione_sociale }}</td><td>{{ commessa.data_inizio|date:"d/m/Y" }}{% if commessa.data_fine_prevista %} → {{ commessa.data_fine_prevista|date:"d/m/Y" }}{% endif %}</td><td><span class="badge badge-{{ commessa.stato|lower }}">{{ commessa.get_workflow_stato_display }}</span></td></tr>{% empty %}<tr><td colspan="4" class="empty-state">Nessuna commessa presente.</td></tr>{% endfor %}
+  {% for commessa in ultime_commesse %}<tr><td class="table-primary"><strong><a href="{% url 'projects:commessa-teamwork' commessa.pk %}">{{ commessa.codice }}</a></strong></td><td>{{ commessa.cliente.ragione_sociale }}</td><td>{{ commessa.data_inizio|date:"d/m/Y" }}{% if commessa.data_fine_prevista %} → {{ commessa.data_fine_prevista|date:"d/m/Y" }}{% endif %}</td><td><span class="badge badge-wf badge-wf-{{ commessa.workflow_stato|lower }}">{{ commessa.get_workflow_stato_display }}</span></td></tr>{% empty %}<tr><td colspan="4" class="empty-state">Nessuna commessa presente.</td></tr>{% endfor %}
   </tbody></table></div>
 </section>
 {% endblock %}

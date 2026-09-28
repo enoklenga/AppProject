@@ -204,3 +204,29 @@ class SkillMatrixUserForm(forms.Form):
                     skill=skill,
                     defaults={"livello": livello},
                 )
+
+
+class UserProfileForm(forms.ModelForm):
+    """Dati che ogni utente può modificare autonomamente sul proprio profilo."""
+
+    class Meta:
+        model = User
+        fields = (
+            "first_name",
+            "last_name",
+            "telefono",
+            "foto_profilo",
+        )
+        labels = {
+            "first_name": "Nome",
+            "last_name": "Cognome",
+            "telefono": "Telefono",
+            "foto_profilo": "Foto profilo",
+        }
+        widgets = {
+            "foto_profilo": forms.ClearableFileInput(
+                attrs={
+                    "accept": "image/jpeg,image/png,image/webp",
+                }
+            )
+        }

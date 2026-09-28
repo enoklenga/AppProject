@@ -20,7 +20,6 @@ from .forms import (
 from .models import Task
 from .permissions import (
     can_comment_task,
-    can_create_task,
     can_delete_task,
     can_edit_task,
     can_update_task_status,

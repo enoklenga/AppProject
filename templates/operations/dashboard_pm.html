@@ -102,7 +102,7 @@
 
 
             <button
-                class="button button-primary"
+                class="button button-secondary"
                 type="submit">
 
                 <svg
@@ -113,7 +113,7 @@
 
                 </svg>
 
-                Aggiorna
+                Applica filtri
 
             </button>
 
@@ -413,7 +413,7 @@
 
                                     <td class="table-status">
 
-                                        <span class="badge">
+                                        <span class="badge badge-{{ voce.assegnazione.stato|lower }}">
                                             {{ voce.assegnazione.get_stato_display }}
                                         </span>
 
@@ -434,7 +434,7 @@
 
                                         {% if voce.superamento %}
 
-                                            <span class="badge badge-bloccata">
+                                            <span class="badge badge-danger">
                                                 Monte ore superato
                                             </span>
 

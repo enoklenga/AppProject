@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Il mio profilo | LEFTRACK{% endblock %}
+
+{% block content %}
+<div class="form-page profile-page">
+    <div class="page-header">
+        <div>
+            <div class="eyebrow">Account</div>
+            <h1>Il mio profilo</h1>
+            <p class="page-subtitle">Aggiorna i tuoi dati personali e la foto visualizzata in LEFTRACK.</p>
+        </div>
+    </div>
+
+    <section class="panel form-panel form-panel-modern profile-panel">
+        <div class="profile-preview-block">
+            <div class="profile-avatar-preview" aria-label="Foto profilo attuale">
+                {% if user.foto_profilo %}
+                    <img src="{{ user.foto_profilo.url }}" alt="Foto profilo di {{ user.get_full_name|default:user.email }}">
+                {% else %}
+                    <span>{{ user.first_name|default:user.email|slice:":1"|upper }}</span>
+                {% endif %}
+            </div>
+            <div>
+                <strong>{{ user.get_full_name|default:user.email }}</strong>
+                <small>{{ user.get_ruolo_display|default:user.ruolo }}</small>
+                <p>La foto viene mostrata nella barra laterale e nel menu utente.</p>
+            </div>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="modern-form">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="form-global-errors">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <div class="form-grid modern-form-grid">
+                {% for field in form %}
+                    <div class="field {% if field.errors %}field-has-error{% endif %}{% if field.name == 'foto_profilo' %} profile-photo-field{% endif %}">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}<div class="field-help">{{ field.help_text|safe }}</div>{% endif %}
+                        {% if field.errors %}<div class="field-errors">{{ field.errors }}</div>{% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="form-actions form-actions-modern">
+                <a class="button button-ghost" href="{% url 'home' %}">Annulla</a>
+                <button class="button button-primary" type="submit">
+                    <svg class="btn-icon" aria-hidden="true"><use href="#icon-check"></use></svg>
+                    Salva profilo
+                </button>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}

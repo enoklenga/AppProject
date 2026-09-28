@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from datetime import date
 from decimal import Decimal
 from io import BytesIO
 from typing import Any
@@ -10,7 +9,7 @@ from openpyxl.utils import get_column_letter
 
 from apps.common.export_security import spreadsheet_safe_row
 from apps.timesheets.models import RigaOre, SpesaTrasferta
-from .services import dashboard_admin, tariffa_vigente
+from .services import dashboard_admin, precarica_tariffe, tariffa_vigente
 
 
 @dataclass(frozen=True)
@@ -167,6 +166,7 @@ def crea_report_xlsx(filtri: FiltriReport) -> bytes:
     dati = dati_report(filtri)
     dashboard = dati["dashboard"]
     righe = dati["righe"]
+    precarica_tariffe(righe)
     spese = dati["spese"]
 
     workbook = Workbook()

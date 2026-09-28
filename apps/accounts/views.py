@@ -1,6 +1,7 @@
 import logging
 
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db.models import Prefetch, Q
 from django.db import transaction
@@ -21,11 +22,47 @@ from .forms import (
     ConsulenteUpdateForm,
     SkillForm,
     SkillMatrixUserForm,
+    UserProfileForm,
 )
 from .models import Skill, User, UserSkill
 from .services import send_account_activation_email, set_user_active
 
 logger = logging.getLogger(__name__)
+
+
+class UserProfileUpdateView(LoginRequiredMixin, UpdateView):
+    """Profilo personale: l'utente può aggiornare dati base e avatar, non ruolo/email."""
+
+    model = User
+    form_class = UserProfileForm
+    template_name = "accounts/profile_form.html"
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
+    def get_success_url(self):
+        return reverse("accounts:profile")
+
+    def form_valid(self, form):
+        previous_photo_name = ""
+        if self.object and self.object.pk:
+            previous_photo_name = (
+                User.objects.filter(pk=self.object.pk)
+                .values_list("foto_profilo", flat=True)
+                .first()
+                or ""
+            )
+
+        response = super().form_valid(form)
+
+        current_photo_name = self.object.foto_profilo.name if self.object.foto_profilo else ""
+        if previous_photo_name and previous_photo_name != current_photo_name:
+            storage = self.object._meta.get_field("foto_profilo").storage
+            if storage.exists(previous_photo_name):
+                storage.delete(previous_photo_name)
+
+        messages.success(self.request, "Profilo aggiornato correttamente.")
+        return response
 
 
 class ConsulenteListView(PeopleReadRequiredMixin, ListView):

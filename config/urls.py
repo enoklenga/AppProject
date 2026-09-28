@@ -5,6 +5,8 @@ from django.contrib.auth import views as auth_views
 from django.db import connection
 from django.http import JsonResponse
 from django.urls import include, path
+from django.conf import settings
+from django.conf.urls.static import static
 from django.views.generic import TemplateView
 
 from apps.accounts.auth_views import (
@@ -162,3 +164,7 @@ urlpatterns = [
     path("api/v1/", include("apps.api.urls")),
     
 ]
+
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

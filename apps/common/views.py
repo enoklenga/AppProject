@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q, Sum
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 from django.utils import timezone
 
 from apps.accounts.models import User

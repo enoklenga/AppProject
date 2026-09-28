@@ -1,4 +1,6 @@
 from django import forms
+
+from apps.common.widgets import DateInput
 from django.core.exceptions import ValidationError
 from django.db.models import Max, Min, Q, Sum
 
@@ -9,8 +11,6 @@ from .models import Assegnazione, Cliente, Commessa, TariffaAssegnazione
 from .workflow import commessa_permette_nuovo_lavoro, fase_permette_nuovo_lavoro
 
 
-class DateInput(forms.DateInput):
-    input_type = "date"
 
 
 class ClienteForm(forms.ModelForm):
@@ -47,8 +47,8 @@ class CommessaForm(forms.ModelForm):
         )
         labels = {
             "ore_budget": "Budget complessivo ore",
-            "data_inizio": "Data di inizio",
-            "data_fine_prevista": "Data di fine prevista",
+            "data_inizio": "Data inizio",
+            "data_fine_prevista": "Data fine prevista",
         }
         widgets = {
             "data_inizio": DateInput(),
@@ -240,8 +240,8 @@ class AssegnazioneForm(forms.ModelForm):
         labels = {
             "ore_previste": "Ore previste per il consulente",
             "ruolo_commessa": "Ruolo sulla commessa",
-            "data_inizio": "Data di inizio",
-            "data_fine": "Data di fine",
+            "data_inizio": "Data inizio",
+            "data_fine": "Data fine",
         }
         widgets = {
             "data_inizio": DateInput(),
@@ -453,7 +453,7 @@ class TariffaAssegnazioneForm(forms.ModelForm):
         )
         labels = {
             "assegnazione": "Assegnazione",
-            "tipo_attivita": "Tipo di attività",
+            "tipo_attivita": "Tipo attività",
             "tariffa_oraria": "Tariffa oraria",
             "valida_dal": "Valida dal",
         }

@@ -15,6 +15,17 @@ documenti_storage = FileSystemStorage(
 )
 
 
+def get_documenti_storage():
+    """Storage come callable: la migrazione registra solo il riferimento.
+
+    Passando direttamente l'istanza, Django congelava nella migrazione il
+    percorso assoluto di PRIVATE_MEDIA_ROOT della macchina che l'aveva
+    generata ('/app/private_media'): su qualsiasi altro ambiente
+    ``makemigrations --check`` rilevava una modifica fantasma.
+    """
+    return documenti_storage
+
+
 def percorso_documento(instance, filename):
     """
     Organizza i file caricati in una sottocartella per commessa, cosi'
@@ -53,7 +64,7 @@ class DocumentoCommessa(UUIDTimeStampedModel):
 
     file = models.FileField(
         upload_to=percorso_documento,
-        storage=documenti_storage,
+        storage=get_documenti_storage,
         max_length=500,
     )
 

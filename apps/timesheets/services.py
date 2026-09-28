@@ -336,6 +336,11 @@ def modifica_ore(
             "Il dato è stato modificato da un altro utente. Ricarica la pagina."
         )
 
+    # Difesa anche a livello di servizio/API: il form web già impedisce
+    # valori non positivi, ma la stessa regola deve valere per ogni canale.
+    if ore <= 0:
+        raise ValidationError({"ore": "Le ore devono essere maggiori di zero."})
+
     # Se la riga viene spostata tra mesi, blocchiamo entrambi i periodi
     # in ordine stabile prima di verificare/apportare la modifica.
     verifica_periodi_aperti(riga.data, giorno)

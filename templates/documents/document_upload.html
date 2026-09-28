@@ -63,7 +63,7 @@
 
                 <div class="field {% if form.commessa.errors %}field-has-error{% endif %}">
 
-                    {{ form.commessa.label_tag }}
+                    <label for="{{ form.commessa.id_for_label }}">{{ form.commessa.label }}</label>
                     {{ form.commessa }}
 
                     {% if form.commessa.errors %}
@@ -77,7 +77,7 @@
 
                 <div class="field {% if form.fase.errors %}field-has-error{% endif %}">
 
-                    {{ form.fase.label_tag }}
+                    <label for="{{ form.fase.id_for_label }}">{{ form.fase.label }}</label>
                     {{ form.fase }}
 
                     <div class="field-help">
@@ -95,7 +95,7 @@
 
                 <div class="field {% if form.categoria.errors %}field-has-error{% endif %}">
 
-                    {{ form.categoria.label_tag }}
+                    <label for="{{ form.categoria.id_for_label }}">{{ form.categoria.label }}</label>
                     {{ form.categoria }}
 
                     {% if form.categoria.errors %}
@@ -109,7 +109,7 @@
 
                 <div class="field field-full document-file-field {% if form.file.errors %}field-has-error{% endif %}">
 
-                    {{ form.file.label_tag }}
+                    <label for="{{ form.file.id_for_label }}">{{ form.file.label }}</label>
                     {{ form.file }}
 
                     <div class="field-help">
@@ -128,7 +128,7 @@
 
                 <div class="field field-full {% if form.descrizione.errors %}field-has-error{% endif %}">
 
-                    {{ form.descrizione.label_tag }}
+                    <label for="{{ form.descrizione.id_for_label }}">{{ form.descrizione.label }}</label>
                     {{ form.descrizione }}
 
                     {% if form.descrizione.errors %}
