@@ -1,0 +1,819 @@
+/* ========================================================================== 
+   LEFTRACK — UNIFIED DESIGN SYSTEM
+   Final presentation layer: typography, controls, actions, tables and rhythm.
+   Loaded after every authenticated stylesheet.
+   ========================================================================== */
+
+:root {
+    --ds-navy-950: #071d3d;
+    --ds-navy-900: #0b2852;
+    --ds-text: #29415f;
+    --ds-muted: #73859e;
+    --ds-primary: #1769e8;
+    --ds-primary-hover: #0f5ed9;
+    --ds-primary-soft: #edf4ff;
+    --ds-border: #dfe7f1;
+    --ds-border-strong: #c8d6e6;
+    --ds-surface: #ffffff;
+    --ds-surface-soft: #f8fafd;
+    --ds-danger: #b4232d;
+    --ds-danger-soft: #fff1f2;
+    --ds-danger-border: #f3c8cc;
+    --ds-warning: #8a5a00;
+    --ds-warning-soft: #fff8e8;
+    --ds-warning-border: #f0deb2;
+    --ds-success: #137a53;
+    --ds-success-soft: #eaf8f2;
+    --ds-success-border: #bde5d4;
+    --ds-radius-panel: 16px;
+    --ds-radius-control: 10px;
+    --ds-radius-action: 9px;
+    --ds-control-height: 40px;
+    --ds-action-height: 34px;
+    --ds-shadow: 0 1px 2px rgba(13,36,72,.025), 0 8px 24px rgba(13,36,72,.045);
+}
+
+/* --------------------------------------------------------------------------
+   TYPOGRAPHY — one hierarchy everywhere
+   -------------------------------------------------------------------------- */
+
+.app-authenticated {
+    color: var(--ds-text);
+    font-size: 13px;
+}
+
+.app-authenticated .page-header h1,
+.app-authenticated .dashboard-hero h1 {
+    margin: 0;
+    color: var(--ds-navy-900);
+    font-size: clamp(30px, 2.25vw, 34px);
+    font-weight: 760;
+    line-height: 1.08;
+    letter-spacing: -.035em;
+}
+
+.app-authenticated .panel-heading h2,
+.app-authenticated .chart-card-header h2,
+.app-authenticated .audit-panel-heading h2,
+.app-authenticated .form-panel-heading h2,
+.app-authenticated .dashboard-section-title,
+.app-authenticated .section-heading h2 {
+    margin: 0;
+    color: var(--ds-navy-900);
+    font-size: 19px;
+    font-weight: 720;
+    line-height: 1.2;
+    letter-spacing: -.022em;
+}
+
+.app-authenticated h3,
+.app-authenticated .card-title {
+    color: var(--ds-navy-900);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -.012em;
+}
+
+.app-authenticated .eyebrow,
+.app-authenticated .dashboard-kicker {
+    color: var(--ds-primary);
+    font-size: 10.5px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: .105em;
+    text-transform: uppercase;
+}
+
+.app-authenticated .page-header p,
+.app-authenticated .dashboard-hero p,
+.app-authenticated .panel-heading p,
+.app-authenticated .form-panel-heading p,
+.app-authenticated .table-meta,
+.app-authenticated .table-muted {
+    color: var(--ds-muted);
+}
+
+.app-authenticated .page-header p,
+.app-authenticated .dashboard-hero p {
+    margin-top: 7px;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.app-authenticated .panel-heading p,
+.app-authenticated .form-panel-heading p {
+    margin-top: 4px;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.app-authenticated .table-meta,
+.app-authenticated .table-muted,
+.app-authenticated small {
+    font-size: 11.5px;
+    line-height: 1.35;
+}
+
+/* --------------------------------------------------------------------------
+   PAGE & PANEL RHYTHM
+   -------------------------------------------------------------------------- */
+
+.app-authenticated .page-container {
+    padding-top: 28px;
+    padding-bottom: 40px;
+}
+
+.app-authenticated .page-header,
+.app-authenticated .dashboard-hero {
+    margin-bottom: 20px;
+}
+
+.app-authenticated .page-header-actions,
+.app-authenticated .header-actions,
+.app-authenticated .card-actions {
+    gap: 8px;
+}
+
+.app-authenticated .panel,
+.app-authenticated .data-panel,
+.app-authenticated .content-card,
+.app-authenticated .filter-bar,
+.app-authenticated .chart-card,
+.app-authenticated .form-panel,
+.app-authenticated .form-panel-modern {
+    border-color: var(--ds-border);
+    border-radius: var(--ds-radius-panel);
+    box-shadow: var(--ds-shadow);
+}
+
+.app-authenticated .panel-heading,
+.app-authenticated .chart-card-header,
+.app-authenticated .audit-panel-heading,
+.app-authenticated .form-panel-heading {
+    min-height: 62px;
+    padding: 15px 20px;
+}
+
+/* --------------------------------------------------------------------------
+   FORM CONTROLS
+   -------------------------------------------------------------------------- */
+
+.app-authenticated input:not([type="checkbox"]):not([type="radio"]),
+.app-authenticated select,
+.app-authenticated textarea {
+    min-height: var(--ds-control-height);
+    padding: 8px 11px;
+    color: var(--ds-text);
+    background: #fff;
+    border: 1px solid var(--ds-border-strong);
+    border-radius: var(--ds-radius-control);
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+.app-authenticated textarea {
+    min-height: 108px;
+}
+
+.app-authenticated input:focus,
+.app-authenticated select:focus,
+.app-authenticated textarea:focus {
+    border-color: var(--ds-primary);
+    box-shadow: 0 0 0 3px rgba(23,105,232,.12);
+}
+
+.app-authenticated .field label,
+.app-authenticated .filter-bar label,
+.app-authenticated .form-label {
+    color: #294363;
+    font-size: 11.5px;
+    font-weight: 720;
+    line-height: 1.3;
+}
+
+/* --------------------------------------------------------------------------
+   PAGE BUTTONS
+   -------------------------------------------------------------------------- */
+
+.app-authenticated .button {
+    min-height: var(--ds-control-height);
+    gap: 7px;
+    padding: 8px 14px;
+    border-radius: var(--ds-radius-control);
+    font-size: 12.5px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -.005em;
+    box-shadow: none;
+}
+
+.app-authenticated .button .btn-icon,
+.app-authenticated .button .button-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.app-authenticated .button-primary {
+    color: #fff;
+    background: var(--ds-primary);
+    border-color: var(--ds-primary);
+    box-shadow: 0 3px 8px rgba(23,105,232,.16);
+}
+
+.app-authenticated .button-primary:hover {
+    color: #fff;
+    background: var(--ds-primary-hover);
+    border-color: var(--ds-primary-hover);
+    box-shadow: 0 6px 16px rgba(23,105,232,.18);
+}
+
+.app-authenticated .button-secondary {
+    color: var(--ds-primary);
+    background: #fff;
+    border-color: #bed0e4;
+}
+
+.app-authenticated .button-secondary:hover {
+    color: var(--ds-primary-hover);
+    background: #f4f8ff;
+    border-color: #9eb9d7;
+}
+
+.app-authenticated .button-ghost {
+    color: #60738d;
+    background: transparent;
+    border-color: transparent;
+}
+
+.app-authenticated .button-ghost:hover {
+    color: var(--ds-navy-900);
+    background: #eef3f8;
+}
+
+.app-authenticated .button-danger {
+    color: #fff;
+    background: var(--ds-danger);
+    border-color: var(--ds-danger);
+}
+
+.app-authenticated .button-small {
+    min-height: var(--ds-action-height);
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   TABLES
+   -------------------------------------------------------------------------- */
+
+.app-authenticated .data-table,
+.app-authenticated .table {
+    font-size: 12.5px;
+}
+
+.app-authenticated .data-table thead th,
+.app-authenticated .table thead th {
+    color: #667b99;
+    font-size: 10.5px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: .055em;
+    text-transform: uppercase;
+}
+
+.app-authenticated .data-table tbody td,
+.app-authenticated .table tbody td {
+    color: var(--ds-text);
+    line-height: 1.4;
+}
+
+.app-authenticated .table-primary strong,
+.app-authenticated .data-table td > strong {
+    color: var(--ds-navy-900);
+    font-weight: 700;
+}
+
+/* --------------------------------------------------------------------------
+   ROW ACTION SYSTEM
+
+   Primary/navigational = soft blue text button
+   Edit                  = pencil icon only
+   Delete                = trash icon only, danger
+   State                 = text action with semantic tone
+   -------------------------------------------------------------------------- */
+
+.app-authenticated .row-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+}
+
+.app-authenticated .row-actions form {
+    display: inline-flex;
+    margin: 0;
+}
+
+.app-authenticated .row-action {
+    min-height: var(--ds-action-height);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 10px;
+    color: #405b78;
+    background: #fff;
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-action);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 680;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background .14s ease, border-color .14s ease, color .14s ease, box-shadow .14s ease, transform .14s ease;
+}
+
+.app-authenticated .row-action:hover {
+    color: var(--ds-navy-900);
+    background: #f7faff;
+    border-color: #c7d7e8;
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+
+.app-authenticated .row-action .btn-icon {
+    width: 15px;
+    height: 15px;
+    flex: 0 0 auto;
+}
+
+.app-authenticated .row-action-primary,
+.app-authenticated .approval-action-approve {
+    color: var(--ds-primary);
+    background: var(--ds-primary-soft);
+    border-color: #d5e4fb;
+}
+
+.app-authenticated .row-action-primary:hover,
+.app-authenticated .approval-action-approve:hover {
+    color: var(--ds-primary-hover);
+    background: #e4efff;
+    border-color: #bcd4f5;
+}
+
+/* Every edit action uses the same compact pencil treatment. */
+.app-authenticated .data-table .row-action:has(use[href="#icon-edit"]),
+.app-authenticated .table .row-action:has(use[href="#icon-edit"]),
+.app-authenticated .consultant-action-icon,
+.app-authenticated .commessa-action-icon,
+.app-authenticated .planning-action-icon:not(.row-action-danger) {
+    width: var(--ds-action-height);
+    min-width: var(--ds-action-height);
+    max-width: var(--ds-action-height);
+    height: var(--ds-action-height);
+    min-height: var(--ds-action-height);
+    padding: 0;
+    color: #46627f;
+    background: #f8fbff;
+    border-color: #d8e3ef;
+    border-radius: var(--ds-radius-action);
+    font-size: 0;
+}
+
+.app-authenticated .data-table .row-action:has(use[href="#icon-edit"]):hover,
+.app-authenticated .table .row-action:has(use[href="#icon-edit"]):hover,
+.app-authenticated .consultant-action-icon:hover,
+.app-authenticated .commessa-action-icon:hover,
+.app-authenticated .planning-action-icon:not(.row-action-danger):hover {
+    color: var(--ds-primary);
+    background: var(--ds-primary-soft);
+    border-color: #bfd5f4;
+}
+
+/* Every trash/delete action uses the same compact danger treatment. */
+.app-authenticated .data-table .row-action-danger:has(use[href="#icon-trash"]),
+.app-authenticated .table .row-action-danger:has(use[href="#icon-trash"]),
+.app-authenticated .document-action-icon,
+.app-authenticated .planning-action-icon.row-action-danger {
+    width: var(--ds-action-height);
+    min-width: var(--ds-action-height);
+    max-width: var(--ds-action-height);
+    height: var(--ds-action-height);
+    min-height: var(--ds-action-height);
+    padding: 0;
+    color: var(--ds-danger);
+    background: var(--ds-danger-soft);
+    border-color: var(--ds-danger-border);
+    border-radius: var(--ds-radius-action);
+    font-size: 0;
+}
+
+.app-authenticated .data-table .row-action-danger:has(use[href="#icon-trash"]):hover,
+.app-authenticated .table .row-action-danger:has(use[href="#icon-trash"]):hover,
+.app-authenticated .document-action-icon:hover,
+.app-authenticated .planning-action-icon.row-action-danger:hover {
+    color: #8f1821;
+    background: #ffe5e7;
+    border-color: #eeb2b8;
+}
+
+.app-authenticated .row-action-state {
+    color: var(--ds-warning);
+    background: var(--ds-warning-soft);
+    border-color: var(--ds-warning-border);
+}
+
+.app-authenticated .row-action-state:hover {
+    color: #714900;
+    background: #fff2cf;
+    border-color: #e5cc91;
+}
+
+.app-authenticated .row-action-state.is-success {
+    color: var(--ds-success);
+    background: var(--ds-success-soft);
+    border-color: var(--ds-success-border);
+}
+
+.app-authenticated .row-action-state.is-success:hover {
+    color: #0e6543;
+    background: #dcf3e9;
+    border-color: #9fd7c0;
+}
+
+.app-authenticated .approval-action-reject {
+    color: var(--ds-danger);
+    background: var(--ds-danger-soft);
+    border-color: var(--ds-danger-border);
+}
+
+/* --------------------------------------------------------------------------
+   BADGES
+   -------------------------------------------------------------------------- */
+
+.app-authenticated .badge {
+    min-height: 26px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 720;
+    line-height: 1.1;
+}
+
+/* --------------------------------------------------------------------------
+   KPI CARDS
+   -------------------------------------------------------------------------- */
+
+.app-authenticated .metric-card,
+.app-authenticated .dashboard-kpi {
+    min-height: 116px;
+    border-radius: 14px;
+}
+
+.app-authenticated .metric-card span,
+.app-authenticated .dashboard-kpi-label,
+.app-authenticated .overview-label {
+    color: var(--ds-muted);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.app-authenticated .metric-card strong,
+.app-authenticated .dashboard-kpi-value,
+.app-authenticated .overview-value {
+    color: var(--ds-navy-900);
+    font-size: clamp(27px, 2.25vw, 32px);
+    font-weight: 760;
+    line-height: 1.05;
+    letter-spacing: -.035em;
+}
+
+/* --------------------------------------------------------------------------
+   RESPONSIVE
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 900px) {
+    .app-authenticated .page-header h1,
+    .app-authenticated .dashboard-hero h1 {
+        font-size: 29px;
+    }
+
+    .app-authenticated .panel-heading h2,
+    .app-authenticated .chart-card-header h2,
+    .app-authenticated .form-panel-heading h2 {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 640px) {
+    .app-authenticated .page-header h1,
+    .app-authenticated .dashboard-hero h1 {
+        font-size: 27px;
+    }
+
+    .app-authenticated .button {
+        min-height: 38px;
+    }
+
+    .app-authenticated .row-actions {
+        flex-wrap: wrap;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   TABLE COLUMN ALIGNMENT — final global rule
+
+   Text/entity columns  -> left
+   Numeric/money        -> right
+   Actions              -> center (header and action group share the same center)
+   All cells            -> vertically centered
+   -------------------------------------------------------------------------- */
+
+.app-authenticated .data-table th,
+.app-authenticated .data-table td,
+.app-authenticated .table th,
+.app-authenticated .table td {
+    vertical-align: middle;
+}
+
+/* Quantitative columns use one shared visual axis. */
+.app-authenticated .data-table th.table-numeric,
+.app-authenticated .data-table td.table-numeric,
+.app-authenticated .table th.table-numeric,
+.app-authenticated .table td.table-numeric,
+.app-authenticated .data-table th.table-money,
+.app-authenticated .data-table td.table-money,
+.app-authenticated .table th.table-money,
+.app-authenticated .table td.table-money,
+.app-authenticated .data-table th.table-status,
+.app-authenticated .data-table td.table-status,
+.app-authenticated .table th.table-status,
+.app-authenticated .table td.table-status {
+    text-align: center !important;
+}
+
+/* Action column: header and controls share the same horizontal center. */
+.app-authenticated .data-table th.actions-column,
+.app-authenticated .table th.actions-column {
+    text-align: center !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    white-space: nowrap;
+}
+
+.app-authenticated .data-table td.table-actions,
+.app-authenticated .table td.table-actions {
+    text-align: center !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    white-space: nowrap;
+}
+
+.app-authenticated .data-table td.table-actions .row-actions,
+.app-authenticated .table td.table-actions .row-actions {
+    width: 100%;
+    justify-content: center !important;
+    align-items: center;
+    margin-inline: auto;
+}
+
+/* Keep action controls on one visual baseline even when rows become tall. */
+.app-authenticated .table-actions .row-action,
+.app-authenticated .table-actions .button,
+.app-authenticated .table-actions form {
+    align-self: center;
+}
+
+/* Keep the action group visually balanced inside long tables. */
+.app-authenticated .data-table th.actions-column,
+.app-authenticated .data-table td.table-actions,
+.app-authenticated .table th.actions-column,
+.app-authenticated .table td.table-actions {
+    min-width: 88px;
+}
+
+/* On narrow screens preserve the alignment; horizontal scrolling is preferable
+   to wrapping action controls into an irregular stack. */
+@media (max-width: 900px) {
+    .app-authenticated .data-table td.table-actions .row-actions,
+    .app-authenticated .table td.table-actions .row-actions {
+        flex-wrap: nowrap;
+    }
+}
+
+
+/* ==========================================================================
+   TABLE COLUMN AXIS — global alignment coherence
+
+   The goal is not to force every cell to the same alignment.
+   Instead, every header shares the same axis as the data beneath it:
+   - descriptive/text columns -> left
+   - quantitative/money/status/badge columns -> center
+   - actions -> center
+   ========================================================================== */
+
+/* Reset historical page-specific header alignment so columns start coherent. */
+.app-authenticated .data-table thead th,
+.app-authenticated .table thead th {
+    text-align: left !important;
+    vertical-align: middle;
+}
+
+.app-authenticated .data-table tbody td,
+.app-authenticated .table tbody td {
+    vertical-align: middle;
+}
+
+/* Explicit semantic columns always share one center axis. */
+.app-authenticated .data-table .table-numeric,
+.app-authenticated .table .table-numeric,
+.app-authenticated .data-table .table-money,
+.app-authenticated .table .table-money,
+.app-authenticated .data-table .table-status,
+.app-authenticated .table .table-status {
+    text-align: center !important;
+}
+
+/* Badge-only cells are status values: center the value itself. */
+.app-authenticated .data-table tbody td:has(> .badge),
+.app-authenticated .table tbody td:has(> .badge) {
+    text-align: center !important;
+}
+
+/* Actions remain centered as a group, regardless of one or many controls. */
+.app-authenticated .data-table th.actions-column,
+.app-authenticated .data-table td.table-actions,
+.app-authenticated .table th.actions-column,
+.app-authenticated .table td.table-actions {
+    text-align: center !important;
+}
+
+.app-authenticated .data-table td.table-actions .row-actions,
+.app-authenticated .table td.table-actions .row-actions {
+    width: 100%;
+    justify-content: center !important;
+    margin-inline: auto;
+}
+
+/* Column 1: infer header axis from the body content. */
+.app-authenticated .data-table:has(tbody td:nth-child(1).table-numeric) thead th:nth-child(1),
+.app-authenticated .data-table:has(tbody td:nth-child(1).table-money) thead th:nth-child(1),
+.app-authenticated .data-table:has(tbody td:nth-child(1).table-status) thead th:nth-child(1),
+.app-authenticated .data-table:has(tbody td:nth-child(1) > .badge) thead th:nth-child(1),
+.app-authenticated .table:has(tbody td:nth-child(1).table-numeric) thead th:nth-child(1),
+.app-authenticated .table:has(tbody td:nth-child(1).table-money) thead th:nth-child(1),
+.app-authenticated .table:has(tbody td:nth-child(1).table-status) thead th:nth-child(1),
+.app-authenticated .table:has(tbody td:nth-child(1) > .badge) thead th:nth-child(1) {
+    text-align: center !important;
+}
+
+/* Column 2: infer header axis from the body content. */
+.app-authenticated .data-table:has(tbody td:nth-child(2).table-numeric) thead th:nth-child(2),
+.app-authenticated .data-table:has(tbody td:nth-child(2).table-money) thead th:nth-child(2),
+.app-authenticated .data-table:has(tbody td:nth-child(2).table-status) thead th:nth-child(2),
+.app-authenticated .data-table:has(tbody td:nth-child(2) > .badge) thead th:nth-child(2),
+.app-authenticated .table:has(tbody td:nth-child(2).table-numeric) thead th:nth-child(2),
+.app-authenticated .table:has(tbody td:nth-child(2).table-money) thead th:nth-child(2),
+.app-authenticated .table:has(tbody td:nth-child(2).table-status) thead th:nth-child(2),
+.app-authenticated .table:has(tbody td:nth-child(2) > .badge) thead th:nth-child(2) {
+    text-align: center !important;
+}
+
+/* Column 3: infer header axis from the body content. */
+.app-authenticated .data-table:has(tbody td:nth-child(3).table-numeric) thead th:nth-child(3),
+.app-authenticated .data-table:has(tbody td:nth-child(3).table-money) thead th:nth-child(3),
+.app-authenticated .data-table:has(tbody td:nth-child(3).table-status) thead th:nth-child(3),
+.app-authenticated .data-table:has(tbody td:nth-child(3) > .badge) thead th:nth-child(3),
+.app-authenticated .table:has(tbody td:nth-child(3).table-numeric) thead th:nth-child(3),
+.app-authenticated .table:has(tbody td:nth-child(3).table-money) thead th:nth-child(3),
+.app-authenticated .table:has(tbody td:nth-child(3).table-status) thead th:nth-child(3),
+.app-authenticated .table:has(tbody td:nth-child(3) > .badge) thead th:nth-child(3) {
+    text-align: center !important;
+}
+
+/* Column 4: infer header axis from the body content. */
+.app-authenticated .data-table:has(tbody td:nth-child(4).table-numeric) thead th:nth-child(4),
+.app-authenticated .data-table:has(tbody td:nth-child(4).table-money) thead th:nth-child(4),
+.app-authenticated .data-table:has(tbody td:nth-child(4).table-status) thead th:nth-child(4),
+.app-authenticated .data-table:has(tbody td:nth-child(4) > .badge) thead th:nth-child(4),
+.app-authenticated .table:has(tbody td:nth-child(4).table-numeric) thead th:nth-child(4),
+.app-authenticated .table:has(tbody td:nth-child(4).table-money) thead th:nth-child(4),
+.app-authenticated .table:has(tbody td:nth-child(4).table-status) thead th:nth-child(4),
+.app-authenticated .table:has(tbody td:nth-child(4) > .badge) thead th:nth-child(4) {
+    text-align: center !important;
+}
+
+/* Column 5: infer header axis from the body content. */
+.app-authenticated .data-table:has(tbody td:nth-child(5).table-numeric) thead th:nth-child(5),
+.app-authenticated .data-table:has(tbody td:nth-child(5).table-money) thead th:nth-child(5),
+.app-authenticated .data-table:has(tbody td:nth-child(5).table-status) thead th:nth-child(5),
+.app-authenticated .data-table:has(tbody td:nth-child(5) > .badge) thead th:nth-child(5),
+.app-authenticated .table:has(tbody td:nth-child(5).table-numeric) thead th:nth-child(5),
+.app-authenticated .table:has(tbody td:nth-child(5).table-money) thead th:nth-child(5),
+.app-authenticated .table:has(tbody td:nth-child(5).table-status) thead th:nth-child(5),
+.app-authenticated .table:has(tbody td:nth-child(5) > .badge) thead th:nth-child(5) {
+    text-align: center !important;
+}
+
+/* Column 6: infer header axis from the body content. */
+.app-authenticated .data-table:has(tbody td:nth-child(6).table-numeric) thead th:nth-child(6),
+.app-authenticated .data-table:has(tbody td:nth-child(6).table-money) thead th:nth-child(6),
+.app-authenticated .data-table:has(tbody td:nth-child(6).table-status) thead th:nth-child(6),
+.app-authenticated .data-table:has(tbody td:nth-child(6) > .badge) thead th:nth-child(6),
+.app-authenticated .table:has(tbody td:nth-child(6).table-numeric) thead th:nth-child(6),
+.app-authenticated .table:has(tbody td:nth-child(6).table-money) thead th:nth-child(6),
+.app-authenticated .table:has(tbody td:nth-child(6).table-status) thead th:nth-child(6),
+.app-authenticated .table:has(tbody td:nth-child(6) > .badge) thead th:nth-child(6) {
+    text-align: center !important;
+}
+
+/* Column 7: infer header axis from the body content. */
+.app-authenticated .data-table:has(tbody td:nth-child(7).table-numeric) thead th:nth-child(7),
+.app-authenticated .data-table:has(tbody td:nth-child(7).table-money) thead th:nth-child(7),
+.app-authenticated .data-table:has(tbody td:nth-child(7).table-status) thead th:nth-child(7),
+.app-authenticated .data-table:has(tbody td:nth-child(7) > .badge) thead th:nth-child(7),
+.app-authenticated .table:has(tbody td:nth-child(7).table-numeric) thead th:nth-child(7),
+.app-authenticated .table:has(tbody td:nth-child(7).table-money) thead th:nth-child(7),
+.app-authenticated .table:has(tbody td:nth-child(7).table-status) thead th:nth-child(7),
+.app-authenticated .table:has(tbody td:nth-child(7) > .badge) thead th:nth-child(7) {
+    text-align: center !important;
+}
+
+/* Column 8: infer header axis from the body content. */
+.app-authenticated .data-table:has(tbody td:nth-child(8).table-numeric) thead th:nth-child(8),
+.app-authenticated .data-table:has(tbody td:nth-child(8).table-money) thead th:nth-child(8),
+.app-authenticated .data-table:has(tbody td:nth-child(8).table-status) thead th:nth-child(8),
+.app-authenticated .data-table:has(tbody td:nth-child(8) > .badge) thead th:nth-child(8),
+.app-authenticated .table:has(tbody td:nth-child(8).table-numeric) thead th:nth-child(8),
+.app-authenticated .table:has(tbody td:nth-child(8).table-money) thead th:nth-child(8),
+.app-authenticated .table:has(tbody td:nth-child(8).table-status) thead th:nth-child(8),
+.app-authenticated .table:has(tbody td:nth-child(8) > .badge) thead th:nth-child(8) {
+    text-align: center !important;
+}
+
+/* Column 9: infer header axis from the body content. */
+.app-authenticated .data-table:has(tbody td:nth-child(9).table-numeric) thead th:nth-child(9),
+.app-authenticated .data-table:has(tbody td:nth-child(9).table-money) thead th:nth-child(9),
+.app-authenticated .data-table:has(tbody td:nth-child(9).table-status) thead th:nth-child(9),
+.app-authenticated .data-table:has(tbody td:nth-child(9) > .badge) thead th:nth-child(9),
+.app-authenticated .table:has(tbody td:nth-child(9).table-numeric) thead th:nth-child(9),
+.app-authenticated .table:has(tbody td:nth-child(9).table-money) thead th:nth-child(9),
+.app-authenticated .table:has(tbody td:nth-child(9).table-status) thead th:nth-child(9),
+.app-authenticated .table:has(tbody td:nth-child(9) > .badge) thead th:nth-child(9) {
+    text-align: center !important;
+}
+
+/* Column 10: infer header axis from the body content. */
+.app-authenticated .data-table:has(tbody td:nth-child(10).table-numeric) thead th:nth-child(10),
+.app-authenticated .data-table:has(tbody td:nth-child(10).table-money) thead th:nth-child(10),
+.app-authenticated .data-table:has(tbody td:nth-child(10).table-status) thead th:nth-child(10),
+.app-authenticated .data-table:has(tbody td:nth-child(10) > .badge) thead th:nth-child(10),
+.app-authenticated .table:has(tbody td:nth-child(10).table-numeric) thead th:nth-child(10),
+.app-authenticated .table:has(tbody td:nth-child(10).table-money) thead th:nth-child(10),
+.app-authenticated .table:has(tbody td:nth-child(10).table-status) thead th:nth-child(10),
+.app-authenticated .table:has(tbody td:nth-child(10) > .badge) thead th:nth-child(10) {
+    text-align: center !important;
+}
+
+/* Column 11: infer header axis from the body content. */
+.app-authenticated .data-table:has(tbody td:nth-child(11).table-numeric) thead th:nth-child(11),
+.app-authenticated .data-table:has(tbody td:nth-child(11).table-money) thead th:nth-child(11),
+.app-authenticated .data-table:has(tbody td:nth-child(11).table-status) thead th:nth-child(11),
+.app-authenticated .data-table:has(tbody td:nth-child(11) > .badge) thead th:nth-child(11),
+.app-authenticated .table:has(tbody td:nth-child(11).table-numeric) thead th:nth-child(11),
+.app-authenticated .table:has(tbody td:nth-child(11).table-money) thead th:nth-child(11),
+.app-authenticated .table:has(tbody td:nth-child(11).table-status) thead th:nth-child(11),
+.app-authenticated .table:has(tbody td:nth-child(11) > .badge) thead th:nth-child(11) {
+    text-align: center !important;
+}
+
+/* Column 12: infer header axis from the body content. */
+.app-authenticated .data-table:has(tbody td:nth-child(12).table-numeric) thead th:nth-child(12),
+.app-authenticated .data-table:has(tbody td:nth-child(12).table-money) thead th:nth-child(12),
+.app-authenticated .data-table:has(tbody td:nth-child(12).table-status) thead th:nth-child(12),
+.app-authenticated .data-table:has(tbody td:nth-child(12) > .badge) thead th:nth-child(12),
+.app-authenticated .table:has(tbody td:nth-child(12).table-numeric) thead th:nth-child(12),
+.app-authenticated .table:has(tbody td:nth-child(12).table-money) thead th:nth-child(12),
+.app-authenticated .table:has(tbody td:nth-child(12).table-status) thead th:nth-child(12),
+.app-authenticated .table:has(tbody td:nth-child(12) > .badge) thead th:nth-child(12) {
+    text-align: center !important;
+}
+
+.app-authenticated .data-table thead th.actions-column,
+.app-authenticated .table thead th.actions-column {
+    text-align: center !important;
+}
+
+/* Keep descriptive entities and stacked text deliberately left aligned. */
+.app-authenticated .data-table td:has(> .table-stack),
+.app-authenticated .table td:has(> .table-stack),
+.app-authenticated .data-table td.table-primary,
+.app-authenticated .table td.table-primary {
+    text-align: left !important;
+}

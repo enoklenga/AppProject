@@ -1,0 +1,952 @@
+/* ========================================================================== 
+   LEFTRACK — UI POLISH LAYER
+   Final presentation layer loaded after page-specific styles.
+   It intentionally normalizes typography, rhythm, controls, cards, tables
+   and responsive behaviour without changing domain logic.
+   ========================================================================== */
+
+:root {
+    --ui-page-bg: #f4f7fb;
+    --ui-surface: #ffffff;
+    --ui-surface-soft: #f8fafd;
+    --ui-border: #dfe7f1;
+    --ui-border-strong: #cbd7e5;
+    --ui-heading: #0b2852;
+    --ui-text: #243c5b;
+    --ui-muted: #71849f;
+    --ui-primary: #1769e8;
+    --ui-primary-hover: #0f5ed6;
+    --ui-primary-soft: #eaf2ff;
+    --ui-success: #128660;
+    --ui-success-soft: #e8f7f1;
+    --ui-warning: #956300;
+    --ui-warning-soft: #fff4d8;
+    --ui-danger: #bd3547;
+    --ui-danger-soft: #fdecef;
+    --ui-info: #2368b8;
+    --ui-info-soft: #eaf3ff;
+
+    --ui-radius-sm: 9px;
+    --ui-radius-md: 13px;
+    --ui-radius-lg: 17px;
+    --ui-shadow-card: 0 1px 2px rgba(13, 36, 72, .025), 0 7px 22px rgba(13, 36, 72, .045);
+    --ui-shadow-hover: 0 10px 28px rgba(13, 36, 72, .09);
+}
+
+/* ---------- Base ---------- */
+
+html {
+    font-size: 16px;
+    background: var(--ui-page-bg);
+}
+
+body {
+    color: var(--ui-text);
+    background: var(--ui-page-bg);
+    font-family: var(--font-family-base);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+.app-main {
+    background: var(--ui-page-bg);
+}
+
+.page-container {
+    width: min(100%, 1500px);
+    padding-top: 30px;
+    padding-bottom: 42px;
+}
+
+/* ---------- Topbar: context, not a second page title ---------- */
+
+.app-topbar {
+    min-height: 68px;
+    background: rgba(255, 255, 255, .97);
+    border-bottom-color: var(--ui-border);
+}
+
+.topbar-context {
+    gap: 1px;
+}
+
+.topbar-context span {
+    color: #8292a9;
+    font-size: 9.5px;
+    font-weight: 750;
+    letter-spacing: .105em;
+}
+
+.topbar-context strong {
+    color: #183455;
+    font-size: 14px;
+    font-weight: 650;
+    letter-spacing: -.01em;
+}
+
+/* ---------- Page hierarchy ---------- */
+
+.page-header {
+    align-items: flex-end;
+    gap: 22px;
+    margin-bottom: 22px;
+}
+
+.page-header > div:first-child {
+    max-width: 900px;
+}
+
+.eyebrow {
+    color: var(--ui-primary);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .105em;
+    line-height: 1.2;
+}
+
+.page-header h1 {
+    margin: 5px 0 0;
+    color: var(--ui-heading);
+    font-size: clamp(28px, 2.45vw, 34px);
+    font-weight: 760;
+    line-height: 1.08;
+    letter-spacing: -.035em;
+}
+
+.page-header p {
+    max-width: 720px;
+    margin-top: 8px;
+    color: var(--ui-muted);
+    font-size: 13.5px;
+    line-height: 1.45;
+}
+
+.page-header-actions,
+.header-actions {
+    gap: 9px;
+}
+
+/* ---------- Cards & panels ---------- */
+
+.panel,
+.content-card,
+.empty-panel,
+.metric-card,
+.auth-card,
+.filter-bar,
+.dashboard-filter {
+    border-color: var(--ui-border);
+    background: var(--ui-surface);
+    box-shadow: var(--ui-shadow-card);
+}
+
+.panel,
+.content-card,
+.empty-panel,
+.filter-bar,
+.dashboard-filter {
+    border-radius: var(--ui-radius-lg);
+}
+
+.panel-heading {
+    min-height: 74px;
+    gap: 16px;
+    padding: 17px 20px;
+    border-bottom-color: var(--ui-border);
+}
+
+.panel-heading h2 {
+    color: var(--ui-heading);
+    font-size: 18px;
+    font-weight: 720;
+    letter-spacing: -.02em;
+}
+
+.panel-heading p {
+    max-width: 760px;
+    margin-top: 4px;
+    color: var(--ui-muted);
+    font-size: 12.5px;
+}
+
+/* ---------- Metric system ---------- */
+
+.metric-grid {
+    gap: 14px;
+    margin-bottom: 22px;
+}
+
+.metric-card {
+    min-height: 126px;
+    padding: 18px 19px;
+    border-radius: var(--ui-radius-md);
+}
+
+.metric-card::after {
+    opacity: .8;
+}
+
+.metric-label,
+.metric-card span {
+    color: var(--ui-muted);
+    font-size: 11.5px;
+    font-weight: 650;
+    line-height: 1.3;
+}
+
+.metric-card strong {
+    margin-top: 9px;
+    color: var(--ui-heading);
+    font-size: clamp(27px, 2.5vw, 32px);
+    font-weight: 760;
+    letter-spacing: -.035em;
+}
+
+.metric-card small {
+    margin-top: 4px;
+    color: var(--ui-text);
+    font-size: 11.5px;
+    line-height: 1.35;
+}
+
+/* ---------- Buttons ---------- */
+
+.button {
+    min-height: 38px;
+    gap: 7px;
+    padding: 7px 14px;
+    border-radius: 10px;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: -.005em;
+    box-shadow: none;
+}
+
+.button:hover {
+    transform: translateY(-1px);
+}
+
+.button-primary {
+    background: var(--ui-primary);
+    border-color: var(--ui-primary);
+    box-shadow: 0 2px 5px rgba(23, 105, 232, .16);
+}
+
+.button-primary:hover {
+    background: var(--ui-primary-hover);
+    border-color: var(--ui-primary-hover);
+    box-shadow: 0 5px 14px rgba(23, 105, 232, .18);
+}
+
+.button-secondary {
+    color: var(--ui-primary);
+    background: #fff;
+    border-color: #bfd0e4;
+}
+
+.button-secondary:hover {
+    color: var(--ui-primary-hover);
+    background: #f4f8ff;
+    border-color: #9eb9d7;
+}
+
+.button-ghost {
+    color: #566d88;
+    border-color: transparent;
+}
+
+.button-ghost:hover {
+    color: var(--ui-heading);
+    background: #eef3f8;
+    border-color: transparent;
+}
+
+.button-danger {
+    background: var(--ui-danger);
+    border-color: var(--ui-danger);
+}
+
+.button-small {
+    min-height: 32px;
+    padding: 5px 10px;
+    font-size: 11.5px;
+}
+
+/* ---------- Forms ---------- */
+
+input,
+select,
+textarea {
+    min-height: 40px;
+    padding: 8px 11px;
+    color: var(--ui-text);
+    background: #fff;
+    border-color: var(--ui-border-strong);
+    border-radius: 10px;
+    font-size: 13px;
+}
+
+textarea {
+    min-height: 108px;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #91a0b4;
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+    border-color: #aebfd3;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--ui-primary);
+    box-shadow: 0 0 0 3px rgba(23, 105, 232, .12);
+}
+
+.field {
+    gap: 6px;
+}
+
+.field label {
+    color: #294363;
+    font-size: 11.5px;
+    font-weight: 700;
+}
+
+.field-help,
+.field-hint {
+    color: var(--ui-muted);
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.form-panel {
+    padding: 22px;
+}
+
+.form-grid {
+    gap: 18px 20px;
+}
+
+.form-actions,
+.form-actions-modern {
+    gap: 9px;
+    padding-top: 18px;
+    border-top-color: var(--ui-border);
+}
+
+.form-panel-heading {
+    gap: 12px;
+}
+
+.form-panel-heading h2 {
+    color: var(--ui-heading);
+    font-size: 17px;
+    font-weight: 720;
+    letter-spacing: -.018em;
+}
+
+.form-panel-heading p {
+    color: var(--ui-muted);
+    font-size: 12px;
+}
+
+/* ---------- Filters ---------- */
+
+.filter-bar,
+.dashboard-filter {
+    gap: 11px;
+    margin-bottom: 18px;
+    padding: 13px;
+}
+
+.filter-bar .field,
+.dashboard-filter .field {
+    gap: 5px;
+}
+
+.filter-bar input,
+.filter-bar select,
+.dashboard-filter input,
+.dashboard-filter select {
+    min-height: 38px;
+}
+
+/* ---------- Badges / states ---------- */
+
+.badge {
+    min-height: 25px;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 750;
+    line-height: 1.1;
+    letter-spacing: 0;
+}
+
+.badge::before {
+    width: 6px;
+    height: 6px;
+}
+
+.badge-aperta,
+.badge-attiva,
+.badge-modificabile,
+.badge-completata {
+    color: var(--ui-success);
+    background: var(--ui-success-soft);
+    border-color: #c5e9dd;
+}
+
+.badge-chiusa,
+.badge-conclusa,
+.badge-bloccata,
+.badge-errore,
+.badge-danger {
+    color: var(--ui-danger);
+    background: var(--ui-danger-soft);
+    border-color: #f2c9cf;
+}
+
+.badge-warning,
+.badge-in-attesa,
+.badge-da-completare,
+.badge-pending,
+.badge-validazione,
+.badge-pronta {
+    color: var(--ui-warning);
+    background: var(--ui-warning-soft);
+    border-color: #f0dca8;
+}
+
+.badge-info {
+    color: var(--ui-info);
+    background: var(--ui-info-soft);
+    border-color: #ccdef4;
+}
+
+/* ---------- Tables ---------- */
+
+.table-wrapper {
+    border-radius: inherit;
+}
+
+table,
+.data-table {
+    color: var(--ui-text);
+    font-size: 12.75px;
+}
+
+th,
+td {
+    padding: 12px 14px;
+    border-bottom-color: #e7edf5;
+}
+
+thead,
+th {
+    background: #f7f9fc;
+}
+
+th {
+    height: 48px;
+    color: #6c7f99;
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: .065em;
+}
+
+tbody td {
+    min-height: 56px;
+}
+
+tbody tr:hover {
+    background: #f8fbff;
+}
+
+.table-primary {
+    color: var(--ui-heading);
+    font-weight: 700;
+}
+
+.table-meta,
+.table-muted,
+.table-stack span {
+    color: var(--ui-muted);
+    font-size: 11.25px;
+}
+
+.entity-copy strong,
+.table-stack strong {
+    color: var(--ui-heading);
+    font-weight: 700;
+}
+
+.entity-icon {
+    border-radius: 10px;
+}
+
+.table-actions {
+    padding-left: 10px;
+    padding-right: 16px;
+}
+
+.data-table .row-actions {
+    gap: 5px;
+}
+
+.row-action {
+    min-height: 30px;
+    padding: 5px 8px;
+    border-radius: 8px;
+    font-size: 11.5px;
+    font-weight: 650;
+}
+
+.row-action:hover {
+    background: #edf4ff;
+}
+
+.row-action-danger:hover {
+    color: var(--ui-danger);
+    background: var(--ui-danger-soft);
+}
+
+/* ---------- Notices / messages ---------- */
+
+.notice,
+.message {
+    border-radius: 12px;
+    font-size: 12.5px;
+}
+
+.notice-warning,
+.message-warning {
+    background: var(--ui-warning-soft);
+    border-color: #ecd69c;
+}
+
+.notice-danger,
+.message-error {
+    background: var(--ui-danger-soft);
+    border-color: #efc5cb;
+}
+
+.notice-success,
+.message-success {
+    background: var(--ui-success-soft);
+    border-color: #c5e8dc;
+}
+
+/* ---------- Teamwork ---------- */
+
+.teamwork-hero,
+.teamwork-status-panel,
+.teamwork-progress-panel {
+    border-radius: var(--ui-radius-lg);
+    border-color: var(--ui-border);
+    box-shadow: var(--ui-shadow-card);
+}
+
+.teamwork-progress-grid {
+    gap: 14px;
+    padding: 18px 20px 20px;
+}
+
+.teamwork-progress-grid .metric-card {
+    min-height: 132px;
+}
+
+.teamwork-card {
+    border-color: var(--ui-border);
+    border-radius: var(--ui-radius-md);
+    box-shadow: var(--ui-shadow-card);
+}
+
+.teamwork-card:hover {
+    border-color: #bfd0e4;
+    box-shadow: var(--ui-shadow-hover);
+}
+
+/* ---------- Planning ---------- */
+
+.planning-comparison-summary {
+    border-color: var(--ui-border);
+    background: #f8fafd;
+    border-radius: 10px;
+}
+
+.planning-view-switch {
+    border-radius: 10px;
+}
+
+.planning-view-button {
+    border-radius: 8px;
+}
+
+.planning-main-table .planning-action-icon {
+    color: #526b87;
+    background: #f7f9fc;
+    border: 1px solid var(--ui-border);
+}
+
+.planning-main-table .planning-action-icon:hover {
+    color: var(--ui-primary);
+    background: var(--ui-primary-soft);
+    border-color: #cbdcf2;
+}
+
+.planning-main-table .row-action-danger.planning-action-icon:hover {
+    color: var(--ui-danger);
+    background: var(--ui-danger-soft);
+    border-color: #efcbd0;
+}
+
+/* ---------- Footer ---------- */
+
+.app-footer {
+    color: #8493a9;
+    font-size: 10.5px;
+    border-top-color: var(--ui-border);
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 1100px) {
+    .page-container {
+        padding-top: 24px;
+    }
+
+    .page-header h1 {
+        font-size: 29px;
+    }
+
+    .metric-grid,
+    .metric-grid-five {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 720px) {
+    .page-container {
+        padding-top: 20px;
+        padding-bottom: 28px;
+    }
+
+    .page-header {
+        align-items: flex-start;
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+
+    .page-header h1 {
+        font-size: 26px;
+    }
+
+    .page-header p {
+        font-size: 12.5px;
+    }
+
+    .page-header-actions,
+    .header-actions {
+        width: 100%;
+    }
+
+    .page-header-actions .button,
+    .header-actions .button {
+        flex: 1 1 auto;
+    }
+
+    .metric-grid,
+    .metric-grid-five {
+        grid-template-columns: 1fr;
+    }
+
+    .metric-card {
+        min-height: 112px;
+    }
+
+    .form-panel {
+        padding: 17px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ---------- Sidebar ---------- */
+
+.app-sidebar {
+    background: linear-gradient(180deg, #08264f 0%, #071f41 100%);
+    border-right: 1px solid rgba(255,255,255,.05);
+}
+
+.sidebar-header {
+    min-height: 86px;
+    border-bottom-color: rgba(255,255,255,.08);
+}
+
+.nav-group-label {
+    color: #7f9fc8;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .14em;
+}
+
+.nav-link {
+    min-height: 42px;
+    margin: 2px 10px;
+    padding-inline: 14px;
+    border-radius: 10px;
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+.nav-link:hover {
+    background: rgba(255,255,255,.055);
+}
+
+.nav-link.is-active {
+    background: linear-gradient(90deg, rgba(37,132,255,.22), rgba(37,132,255,.10));
+    box-shadow: inset 0 0 0 1px rgba(84,158,255,.20);
+}
+
+.nav-link.is-active .nav-link-label {
+    color: #fff;
+    font-weight: 700;
+}
+
+.sidebar-user {
+    min-height: 72px;
+    border-top-color: rgba(255,255,255,.08);
+}
+
+.sidebar-user .user-copy strong,
+.sidebar-user .user-copy small {
+    max-width: 170px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ---------- Dense table action safety ---------- */
+
+.data-table .actions-column,
+.data-table .table-actions {
+    min-width: 112px;
+}
+
+.data-table .row-actions {
+    min-width: 0;
+    white-space: nowrap;
+}
+
+.data-table .row-actions > *,
+.data-table .row-actions form {
+    flex: 0 0 auto;
+}
+
+/* ---------- Form/card rhythm ---------- */
+
+.form-page {
+    gap: 16px;
+}
+
+.form-panel-modern {
+    border-radius: var(--ui-radius-lg);
+    overflow: hidden;
+}
+
+.form-panel-modern .form-panel-heading {
+    padding: 17px 20px;
+    border-bottom: 1px solid var(--ui-border);
+    background: #fbfcfe;
+}
+
+.form-panel-modern .modern-form {
+    padding: 20px;
+}
+
+.form-panel-modern .form-actions-modern {
+    margin: 20px -20px -20px;
+    padding: 14px 20px;
+    background: #fafbfd;
+    border-top: 1px solid var(--ui-border);
+}
+
+/* ---------- Small visual utilities ---------- */
+
+.back-link {
+    color: var(--ui-primary);
+    font-size: 12.5px;
+    font-weight: 650;
+}
+
+.back-link:hover {
+    color: var(--ui-primary-hover);
+}
+
+.breadcrumbs,
+.breadcrumb {
+    color: #8797ad;
+    font-size: 11.5px;
+}
+
+.readonly-label {
+    color: var(--ui-muted);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   UI POLISH 05 — density, filters, tables and action consistency
+   ========================================================================== */
+
+/* Headings without descriptive copy should not reserve unnecessary height. */
+.panel-heading {
+    min-height: 64px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+/* Commesse: five controls must remain on one row on desktop. */
+.commesse-filter {
+    grid-template-columns:
+        minmax(260px, 1.7fr)
+        minmax(170px, 1fr)
+        minmax(150px, .9fr)
+        minmax(190px, 1.05fr)
+        auto;
+}
+
+.commesse-table .actions-column {
+    min-width: 178px;
+}
+
+.commesse-table .row-actions {
+    gap: 4px;
+}
+
+.commessa-action-icon,
+.consultant-action-icon,
+.document-action-icon {
+    width: 31px;
+    min-width: 31px;
+    height: 31px;
+    min-height: 31px;
+    padding: 0;
+    flex: 0 0 31px;
+    border: 1px solid var(--ui-border);
+    border-radius: 999px;
+    background: #f8fafd;
+}
+
+.commessa-action-icon:hover,
+.consultant-action-icon:hover {
+    color: var(--ui-primary);
+    background: var(--ui-primary-soft);
+    border-color: #cadbf1;
+}
+
+.document-action-icon:hover {
+    color: var(--ui-danger);
+    background: var(--ui-danger-soft);
+    border-color: #efcbd0;
+}
+
+/* Documents: filters and actions use the same full-width rhythm as other lists. */
+.documents-filter {
+    max-width: none;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.documents-table .actions-column {
+    min-width: 128px;
+}
+
+.documents-table .row-actions {
+    gap: 5px;
+}
+
+.documents-table td:nth-child(5) {
+    overflow-wrap: anywhere;
+}
+
+/* Roles are categorical labels, not status badges: no status dot. */
+.role-badge::before,
+.badge-neutral::before {
+    display: none;
+}
+
+.role-badge {
+    min-height: 24px;
+    padding-inline: 9px;
+    white-space: nowrap;
+}
+
+.consultants-table .actions-column {
+    min-width: 205px;
+}
+
+/* The board has exactly three workflow columns. */
+.task-board {
+    grid-template-columns: repeat(3, minmax(250px, 1fr));
+}
+
+.task-management-kpi-grid .metric-card {
+    min-height: 108px;
+}
+
+/* Home cards become tighter now that redundant meta copy has been removed. */
+.admin-overview-grid .overview-card {
+    min-height: 132px;
+}
+
+/* Cleaner analysis sections. */
+.planning-detail-section .panel-heading {
+    min-height: 62px;
+}
+
+.planning-comparison-summary strong,
+.planning-detail-table td:last-child {
+    font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 1280px) {
+    .commesse-filter {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .commesse-filter > .button,
+    .commesse-filter > button {
+        justify-self: start;
+        width: auto;
+    }
+}
+
+@media (max-width: 900px) {
+    .task-board {
+        grid-template-columns: repeat(3, minmax(240px, 1fr));
+    }
+}
+
+@media (max-width: 680px) {
+    .commesse-filter,
+    .documents-filter {
+        grid-template-columns: 1fr;
+    }
+
+    .commesse-filter > .button,
+    .commesse-filter > button {
+        width: 100%;
+    }
+}

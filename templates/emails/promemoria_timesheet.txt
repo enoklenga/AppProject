@@ -1,0 +1,16 @@
+Gentile {{ consulente.get_full_name|default:consulente.email }},
+
+nel sistema LEFTRACK non risultano ancora ore registrate per il mese
+{{ mese|stringformat:"02d" }}/{{ anno }}.
+
+Ti chiediamo di verificare e completare la consuntivazione delle attività
+relative alle commesse e alle fasi assegnate.
+
+Fasi operative assegnate:
+{% for assegnazione in fasi %}- {{ assegnazione.commessa.codice }} – {{ assegnazione.fase.nome }}
+{% endfor %}
+
+Accesso al sistema:
+{{ login_url }}
+
+Questo messaggio è stato generato automaticamente da LEFTRACK.

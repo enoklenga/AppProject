@@ -1,0 +1,94 @@
+/* =========================================================
+   HUMAN-READABLE STRUCTURED DATA
+   Used by Importazioni and Registro audit.
+   ========================================================= */
+
+.structured-data {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+
+    display: grid;
+
+    border: 1px solid var(--lef-border);
+    border-radius: var(--radius-md);
+
+    overflow: hidden;
+
+    background: var(--lef-surface);
+}
+
+.structured-data-row {
+    min-width: 0;
+
+    display: grid;
+    grid-template-columns:
+        minmax(120px, 0.75fr)
+        minmax(0, 1.5fr);
+
+    gap: 14px;
+
+    padding: 9px 12px;
+
+    border-bottom: 1px solid var(--lef-border);
+}
+
+.structured-data-row:last-child {
+    border-bottom: 0;
+}
+
+.structured-data-row dt {
+    min-width: 0;
+
+    color: var(--lef-muted);
+
+    font-size: 11px;
+    font-weight: 700;
+
+    line-height: 1.4;
+}
+
+.structured-data-row dd {
+    min-width: 0;
+
+    margin: 0;
+
+    color: var(--lef-text);
+
+    font-size: 12px;
+    font-weight: 500;
+
+    line-height: 1.45;
+
+    overflow-wrap: anywhere;
+    word-break: break-word;
+
+    font-variant-numeric: tabular-nums;
+}
+
+.structured-data-empty {
+    color: var(--lef-muted);
+
+    font-size: 12px;
+    font-style: italic;
+}
+
+.import-data-cell {
+    min-width: 320px;
+    max-width: 520px;
+}
+
+.audit-values details .structured-data {
+    margin-top: 12px;
+}
+
+@media (max-width: 680px) {
+    .structured-data-row {
+        grid-template-columns: 1fr;
+        gap: 3px;
+    }
+
+    .import-data-cell {
+        min-width: 260px;
+    }
+}

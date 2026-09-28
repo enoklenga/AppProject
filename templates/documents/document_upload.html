@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Carica documento | LEFTRACK{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/documents.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="documents-page form-page">
+
+    <div class="page-header">
+
+        <div>
+            <div class="eyebrow">Documenti</div>
+
+            <h1>Carica documento</h1>
+
+        </div>
+
+    </div>
+
+
+    <section class="panel form-panel form-panel-modern">
+
+        <div class="form-panel-heading">
+
+            <span class="form-panel-icon" aria-hidden="true">
+                <svg>
+                    <use href="#icon-upload"></use>
+                </svg>
+            </span>
+
+            <div>
+                <h2>Dati del documento</h2>
+
+            </div>
+
+        </div>
+
+
+        <form
+            method="post"
+            enctype="multipart/form-data"
+            id="document-upload-form"
+            class="modern-form"
+            data-phases-url="{% url 'documents:document-phases' %}">
+
+            {% csrf_token %}
+
+
+            {% if form.non_field_errors %}
+                <div class="form-global-errors">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+
+            <div class="form-grid modern-form-grid">
+
+
+                <div class="field {% if form.commessa.errors %}field-has-error{% endif %}">
+
+                    {{ form.commessa.label_tag }}
+                    {{ form.commessa }}
+
+                    {% if form.commessa.errors %}
+                        <div class="field-errors">
+                            {{ form.commessa.errors }}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+
+                <div class="field {% if form.fase.errors %}field-has-error{% endif %}">
+
+                    {{ form.fase.label_tag }}
+                    {{ form.fase }}
+
+                    <div class="field-help">
+                        Facoltativa: lasciala vuota per un documento generale di commessa.
+                    </div>
+
+                    {% if form.fase.errors %}
+                        <div class="field-errors">
+                            {{ form.fase.errors }}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+
+                <div class="field {% if form.categoria.errors %}field-has-error{% endif %}">
+
+                    {{ form.categoria.label_tag }}
+                    {{ form.categoria }}
+
+                    {% if form.categoria.errors %}
+                        <div class="field-errors">
+                            {{ form.categoria.errors }}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+
+                <div class="field field-full document-file-field {% if form.file.errors %}field-has-error{% endif %}">
+
+                    {{ form.file.label_tag }}
+                    {{ form.file }}
+
+                    <div class="field-help">
+                        PDF, Word, Excel, PowerPoint, OpenDocument,
+                        immagini, testo e ZIP. Dimensione massima 20 MB.
+                    </div>
+
+                    {% if form.file.errors %}
+                        <div class="field-errors">
+                            {{ form.file.errors }}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+
+                <div class="field field-full {% if form.descrizione.errors %}field-has-error{% endif %}">
+
+                    {{ form.descrizione.label_tag }}
+                    {{ form.descrizione }}
+
+                    {% if form.descrizione.errors %}
+                        <div class="field-errors">
+                            {{ form.descrizione.errors }}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+
+                {% if user.is_admin_lef %}
+
+                    <div class="field field-full modern-checkbox-card {% if form.privato.errors %}field-has-error{% endif %}">
+
+                        <label
+                            class="modern-checkbox-label"
+                            for="{{ form.privato.id_for_label }}">
+
+                            {{ form.privato }}
+
+                            <span>
+                                <strong>{{ form.privato.label }}</strong>
+
+                                {% if form.privato.help_text %}
+                                    <small>{{ form.privato.help_text }}</small>
+                                {% endif %}
+                            </span>
+
+                        </label>
+
+                        {% if form.privato.errors %}
+                            <div class="field-errors">
+                                {{ form.privato.errors }}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="form-actions form-actions-modern">
+
+                <a
+                    class="button button-ghost"
+                    href="{% url 'documents:document-list' %}">
+
+                    Annulla
+
+                </a>
+
+                <button
+                    class="button button-primary"
+                    type="submit">
+
+                    <svg class="btn-icon" aria-hidden="true">
+                        <use href="#icon-upload"></use>
+                    </svg>
+
+                    Carica documento
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const form = document.getElementById("document-upload-form");
+    const commessaSelect = document.getElementById("id_commessa");
+    const faseSelect = document.getElementById("id_fase");
+
+
+    if (!form || !commessaSelect || !faseSelect) {
+        return;
+    }
+
+
+    const endpoint = form.dataset.phasesUrl;
+
+
+    function resetFasi() {
+
+        faseSelect.innerHTML =
+            '<option value="">Documento generale di commessa</option>';
+
+    }
+
+
+    async function caricaFasi(commessaId) {
+
+        resetFasi();
+
+
+        if (!commessaId) {
+
+            faseSelect.disabled = true;
+
+            return;
+
+        }
+
+
+        faseSelect.disabled = true;
+
+
+        try {
+
+            const params = new URLSearchParams({
+                commessa: commessaId,
+            });
+
+
+            const response = await fetch(
+                `${endpoint}?${params.toString()}`,
+                {
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                    },
+                }
+            );
+
+
+            if (!response.ok) {
+                throw new Error("Errore caricamento fasi");
+            }
+
+
+            const data = await response.json();
+
+
+            data.results.forEach((fase) => {
+
+                const option = document.createElement("option");
+
+                option.value = fase.id;
+                option.textContent = fase.label;
+
+                faseSelect.appendChild(option);
+
+            });
+
+
+        } catch (error) {
+
+            console.error(error);
+
+        } finally {
+
+            faseSelect.disabled = false;
+
+        }
+
+    }
+
+
+    commessaSelect.addEventListener("change", () => {
+
+        caricaFasi(commessaSelect.value);
+
+    });
+
+
+    /*
+     * Se il form arriva già da una specifica commessa,
+     * Django ha già popolato correttamente le fasi.
+     */
+    if (!commessaSelect.value) {
+
+        faseSelect.disabled = true;
+
+    }
+
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,12 @@
+{% if rows %}
+    <dl class="structured-data">
+        {% for label, value in rows %}
+            <div class="structured-data-row">
+                <dt>{{ label }}</dt>
+                <dd>{{ value }}</dd>
+            </div>
+        {% endfor %}
+    </dl>
+{% else %}
+    <span class="structured-data-empty">{{ empty_label }}</span>
+{% endif %}

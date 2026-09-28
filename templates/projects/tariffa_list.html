@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+
+{% block title %}Tariffe | LEFTRACK{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+
+        <div class="eyebrow">
+            Valorizzazione economica
+        </div>
+
+        <h1>
+            Tariffe
+        </h1>
+
+
+    </div>
+
+
+    <a
+        class="button button-primary"
+        href="{% url 'projects:tariffa-create' %}">
+
+        <svg
+            class="btn-icon"
+            aria-hidden="true">
+
+            <use href="#icon-plus"></use>
+
+        </svg>
+
+        Nuova tariffa
+
+    </a>
+
+</div>
+
+
+<!-- FILTRI -->
+
+<form
+    class="filter-bar list-filter-bar"
+    method="get">
+
+    <div class="field">
+
+        <label for="id_q">
+            Ricerca
+        </label>
+
+        <input
+            id="id_q"
+            type="search"
+            name="q"
+            value="{{ request.GET.q }}"
+            placeholder="Consulente, commessa o cliente">
+
+    </div>
+
+
+    <div class="field">
+
+        <label for="id_attivita">
+            Attività
+        </label>
+
+        <select
+            id="id_attivita"
+            name="attivita">
+
+            <option value="">
+                Tutte
+            </option>
+
+            {% for valore, etichetta in tipi_attivita %}
+
+                <option
+                    value="{{ valore }}"
+                    {% if request.GET.attivita == valore %}selected{% endif %}>
+
+                    {{ etichetta }}
+
+                </option>
+
+            {% endfor %}
+
+        </select>
+
+    </div>
+
+
+    <div class="field">
+
+        <label for="id_commessa">
+            Commessa
+        </label>
+
+        <select
+            id="id_commessa"
+            name="commessa">
+
+            <option value="">
+                Tutte
+            </option>
+
+            {% for commessa in commesse_filtro %}
+
+                <option
+                    value="{{ commessa.id }}"
+                    {% if request.GET.commessa == commessa.id|stringformat:"s" %}selected{% endif %}>
+
+                    {{ commessa.codice }}
+
+                </option>
+
+            {% endfor %}
+
+        </select>
+
+    </div>
+
+
+    <button
+        class="button button-secondary"
+        type="submit">
+
+        <svg
+            class="btn-icon"
+            aria-hidden="true">
+
+            <use href="#icon-filter"></use>
+
+        </svg>
+
+        Applica
+
+    </button>
+
+</form>
+
+
+<!-- TABELLA -->
+
+<section class="panel data-panel">
+
+    <div class="panel-heading">
+
+        <div>
+
+            <div class="eyebrow">
+                Storico
+            </div>
+
+            <h2>
+                Tariffe registrate
+            </h2>
+
+        </div>
+
+    </div>
+
+
+    <div class="table-wrapper">
+
+        <table class="data-table">
+
+            <thead>
+
+                <tr>
+                    <th scope="col">Commessa</th>
+                    <th scope="col">Fase</th>
+                    <th scope="col">Consulente</th>
+                    <th scope="col">Attività</th>
+                    <th scope="col">Tariffa</th>
+                    <th scope="col">Decorrenza</th>
+                    <th scope="col">Inserita da</th>
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for tariffa in tariffe %}
+
+                    <tr>
+
+                        <td>
+
+                            <div class="entity-cell">
+
+                                <span
+                                    class="entity-icon"
+                                    aria-hidden="true">
+
+                                    <svg>
+                                        <use href="#icon-briefcase"></use>
+                                    </svg>
+
+                                </span>
+
+
+                                <div class="entity-copy">
+
+                                    <strong>
+                                        {{ tariffa.assegnazione.commessa.codice }}
+                                    </strong>
+
+                                    <span>
+                                        {{ tariffa.assegnazione.commessa.cliente }}
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="table-stack">
+
+                                <strong>
+                                    {% if tariffa.assegnazione.fase.sistema %}
+                                        Predefinita
+                                    {% else %}
+                                        {{ tariffa.assegnazione.fase.nome }}
+                                    {% endif %}
+                                </strong>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="table-stack">
+
+                                <strong>
+                                    {{ tariffa.assegnazione.consulente }}
+                                </strong>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="badge">
+                                {{ tariffa.get_tipo_attivita_display }}
+                            </span>
+
+                        </td>
+
+
+                        <td class="table-numeric">
+
+                            <strong>
+                                € {{ tariffa.tariffa_oraria|floatformat:2 }}
+                            </strong>
+
+                            <span class="table-unit">
+                                / h
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="period-cell">
+
+                                <strong>
+                                    {{ tariffa.valida_dal|date:"d/m/Y" }}
+                                </strong>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="table-stack">
+
+                                <span>
+                                    {{ tariffa.creata_da }}
+                                </span>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                {% empty %}
+
+                    <tr>
+
+                        <td
+                            colspan="7"
+                            class="empty-state">
+
+                            <div class="table-empty-content">
+
+                                <strong>
+                                    Nessuna tariffa registrata
+                                </strong>
+
+                                <span>
+                                    Le nuove tariffe compariranno qui
+                                    mantenendo lo storico delle decorrenze.
+                                </span>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+{% include "common/pagination.html" %}
+
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Team e capacità | LEFTRACK{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="eyebrow">Responsabile consulenza</div>
+    <h1>Team e capacità</h1>
+    <p>Vista sul pool consulenza · {{ mese_selezionato|slice:"5:7" }}/{{ mese_selezionato|slice:":4" }}</p>
+  </div>
+  <div class="page-header-actions">
+    <a class="button button-secondary" href="{% url 'accounts:skill-matrix' %}">Skill Matrix</a>
+    <a class="button button-primary" href="{% url 'planning:pianificazione-list' %}">Pianificazione</a>
+  </div>
+</div>
+
+<div class="metric-grid dashboard-kpi-grid">
+  <article class="metric-card"><span>Risorse attive</span><strong>{{ risorse_attive }}</strong></article>
+  <article class="metric-card"><span>Assegnazioni attive</span><strong>{{ assegnazioni_attive }}</strong></article>
+  <article class="metric-card"><span>Commesse presidiate</span><strong>{{ commesse_presidiate }}</strong></article>
+  <article class="metric-card"><span>Ore pianificate</span><strong>{{ ore_pianificate }} h</strong></article>
+  <article class="metric-card"><span>Ore consuntivate</span><strong>{{ ore_consuntivate }} h</strong></article>
+</div>
+
+<section class="panel data-panel">
+  <div class="panel-heading">
+    <div><div class="eyebrow">Capacità</div><h2>Carico del pool consulenza</h2></div>
+    <a class="button button-secondary" href="{% url 'accounts:consulente-list' %}">Persone</a>
+  </div>
+  <div class="table-wrapper">
+    <table class="data-table">
+      <thead><tr><th>Risorsa</th><th>Ruolo</th><th>Assegnazioni</th><th>Ore pianificate</th><th>Ore consuntivate</th></tr></thead>
+      <tbody>
+        {% for voce in carichi %}
+          <tr>
+            <td class="table-primary"><strong>{{ voce.risorsa }}</strong><div class="table-muted">{{ voce.risorsa.email }}</div></td>
+            <td>{{ voce.risorsa.get_ruolo_display }}</td>
+            <td>{{ voce.assegnazioni_attive }}</td>
+            <td>{{ voce.ore_pianificate }} h</td>
+            <td>{{ voce.ore_consuntivate }} h</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5" class="empty-state">Nessuna risorsa attiva.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

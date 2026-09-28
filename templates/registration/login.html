@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Accedi | LEFTRACK{% endblock %}
+{% block body_class %}page-login{% endblock %}
+
+{% block content %}
+<section class="login-scene" aria-label="Accesso LEFTRACK">
+
+    <!-- HERO VISUALE: decorativo, il form resta HTML reale -->
+    <aside class="login-hero" aria-hidden="true">
+        <div class="login-hero-image"></div>
+        <div class="login-hero-shade"></div>
+    </aside>
+
+    <!-- LOGIN REALE -->
+    <main class="login-panel">
+        <div class="login-card">
+
+            <a class="login-brand" href="{% url 'login' %}" aria-label="LEFTRACK">
+                <span class="login-brand-mark">
+                    <img src="{% static 'images/branding/leftrack-mark.png' %}" alt="">
+                </span>
+                <span class="login-brand-copy">
+                    <strong>LEF<span>TRACK</span></strong>
+                    <small>Workspace operativo</small>
+                </span>
+            </a>
+
+            <header class="login-heading">
+                <div class="login-eyebrow">
+                    <span aria-hidden="true"></span>
+                    Area riservata
+                </div>
+                <h1>Bentornato<span>.</span></h1>
+                <p>
+                    Accedi al tuo spazio operativo per gestire attività,
+                    ore, spese e avanzamento delle commesse.
+                </p>
+            </header>
+
+            <form method="post" class="login-form" novalidate data-ux-form>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="login-error" role="alert" tabindex="-1">
+                        <span class="login-error-icon" aria-hidden="true">!</span>
+                        <div>
+                            <strong>Accesso non riuscito</strong>
+                            {{ form.non_field_errors }}
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="login-field{% if form.username.errors %} has-error{% endif %}">
+                    <label for="{{ form.username.id_for_label }}">Email</label>
+                    <div class="login-input">
+                        <svg aria-hidden="true"><use href="#icon-mail"></use></svg>
+                        {{ form.username }}
+                    </div>
+                    {% if form.username.errors %}
+                        <div class="field-errors" role="alert">{{ form.username.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="login-field{% if form.password.errors %} has-error{% endif %}">
+                    <div class="login-field-head">
+                        <label for="{{ form.password.id_for_label }}">Password</label>
+                        <a href="{% url 'password_reset' %}">Password dimenticata?</a>
+                    </div>
+
+                    <div class="login-input">
+                        <svg aria-hidden="true"><use href="#icon-lock"></use></svg>
+                        {{ form.password }}
+                        <button
+                            type="button"
+                            class="login-password-toggle"
+                            data-password-toggle
+                            aria-pressed="false"
+                            aria-label="Mostra password">
+                            <svg aria-hidden="true"><use href="#icon-eye"></use></svg>
+                        </button>
+                    </div>
+
+                    {% if form.password.errors %}
+                        <div class="field-errors" role="alert">{{ form.password.errors }}</div>
+                    {% endif %}
+                </div>
+
+                {% if next %}
+                    <input type="hidden" name="next" value="{{ next }}">
+                {% endif %}
+
+                <button class="login-submit" type="submit">
+                    <span>Accedi</span>
+                    <svg aria-hidden="true"><use href="#icon-arrow-right"></use></svg>
+                </button>
+            </form>
+
+            <div class="login-security">
+                <span class="login-security-icon" aria-hidden="true">
+                    <svg><use href="#icon-lock"></use></svg>
+                </span>
+                <span>
+                    <strong>Accesso protetto</strong>
+                    <small>I tuoi dati sono al sicuro con LEFTRACK.</small>
+                </span>
+            </div>
+
+        </div>
+    </main>
+
+</section>
+{% endblock %}

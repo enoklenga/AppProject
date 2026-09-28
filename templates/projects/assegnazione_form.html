@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if object %}
+        Modifica assegnazione
+    {% else %}
+        Nuova assegnazione
+    {% endif %}
+    | LEFTRACK
+{% endblock %}
+
+{% block content %}
+
+<div class="form-page">
+
+    <div class="page-header">
+
+        <div>
+            <div class="eyebrow">Assegnazioni</div>
+
+            <h1>
+                {% if object %}
+                    Modifica assegnazione
+                {% else %}
+                    Nuova assegnazione
+                {% endif %}
+            </h1>
+
+        </div>
+
+    </div>
+
+
+    <section class="panel form-panel form-panel-modern">
+
+        <div class="form-panel-heading">
+
+            <span class="form-panel-icon" aria-hidden="true">
+                <svg>
+                    <use href="#icon-link"></use>
+                </svg>
+            </span>
+
+            <div>
+                <h2>Dati assegnazione</h2>
+
+            </div>
+
+        </div>
+
+
+        <form method="post" class="modern-form">
+
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="form-global-errors">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+
+            <div class="form-grid modern-form-grid">
+
+                {% for field in form %}
+
+                    <div class="
+                        field
+                        {% if field.errors %}
+                            field-has-error
+                        {% endif %}
+                    ">
+
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                        </label>
+
+                        {{ field }}
+
+                        {% if field.help_text %}
+                            <div class="field-help">
+                                {{ field.help_text }}
+                            </div>
+                        {% endif %}
+
+                        {% if field.errors %}
+                            <div class="field-errors">
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+
+            <div class="form-actions form-actions-modern">
+
+                <a
+                    class="button button-ghost"
+                    href="{% url 'projects:assegnazione-list' %}">
+
+                    Annulla
+
+                </a>
+
+                <button
+                    class="button button-primary"
+                    type="submit">
+
+                    <svg class="btn-icon" aria-hidden="true">
+                        <use href="#icon-check"></use>
+                    </svg>
+
+                    {% if object %}
+                        Salva modifiche
+                    {% else %}
+                        Crea assegnazione
+                    {% endif %}
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const commessaSelect = document.getElementById("id_commessa");
+    const faseSelect = document.getElementById("id_fase");
+
+    if (!commessaSelect || !faseSelect) {
+        return;
+    }
+
+    const endpoint = "{% url 'projects:fasi-per-commessa' %}";
+
+
+    async function caricaFasi(commessaId, faseSelezionata = null) {
+
+        faseSelect.innerHTML = "";
+
+        const placeholder = document.createElement("option");
+
+        placeholder.value = "";
+        placeholder.textContent = "---------";
+
+        faseSelect.appendChild(placeholder);
+
+
+        if (!commessaId) {
+
+            faseSelect.disabled = true;
+
+            return;
+        }
+
+
+        faseSelect.disabled = true;
+
+
+        try {
+
+            const response = await fetch(
+                `${endpoint}?commessa=${encodeURIComponent(commessaId)}`,
+                {
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                }
+            );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    `Errore HTTP ${response.status}`
+                );
+
+            }
+
+
+            const data = await response.json();
+
+
+            data.fasi.forEach(function (fase) {
+
+                const option = document.createElement("option");
+
+                option.value = fase.id;
+                option.textContent = fase.nome;
+
+
+                if (
+                    faseSelezionata &&
+                    String(fase.id) === String(faseSelezionata)
+                ) {
+
+                    option.selected = true;
+
+                }
+
+
+                faseSelect.appendChild(option);
+
+            });
+
+
+            faseSelect.disabled = false;
+
+
+        } catch (error) {
+
+            console.error(
+                "Errore durante il caricamento delle fasi:",
+                error
+            );
+
+
+            faseSelect.disabled = false;
+
+
+            const errorOption = document.createElement("option");
+
+            errorOption.value = "";
+            errorOption.textContent = "Errore nel caricamento delle fasi";
+
+
+            faseSelect.innerHTML = "";
+
+            faseSelect.appendChild(errorOption);
+
+        }
+
+    }
+
+
+    commessaSelect.addEventListener("change", function () {
+
+        caricaFasi(
+            this.value
+        );
+
+    });
+
+
+    if (!commessaSelect.value) {
+
+        faseSelect.innerHTML =
+            '<option value="">---------</option>';
+
+        faseSelect.disabled = true;
+
+    } else {
+
+        faseSelect.disabled = false;
+
+    }
+
+});
+</script>
+
+{% endblock %}

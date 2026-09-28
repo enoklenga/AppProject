@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Home | LEFTRACK{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-page dashboard-admin-page">
+
+    <section class="dashboard-hero">
+
+        <div class="dashboard-hero-copy">
+            <span class="dashboard-kicker">Panoramica operativa</span>
+
+            <h1>Gestione LEFTRACK</h1>
+        </div>
+
+        <div class="dashboard-hero-actions">
+
+            <a
+                class="button button-primary"
+                href="{% url 'projects:commessa-create' %}">
+
+                <svg class="btn-icon" aria-hidden="true">
+                    <use href="#icon-plus"></use>
+                </svg>
+
+                Nuova commessa
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <section
+        class="admin-overview-grid"
+        aria-label="Indicatori amministrativi">
+
+
+        <a
+            class="overview-card"
+            data-tone="blue"
+            href="{% url 'accounts:consulente-list' %}">
+
+            <div class="overview-card-top">
+
+                <span class="overview-icon">
+                    <svg aria-hidden="true">
+                        <use href="#icon-users"></use>
+                    </svg>
+                </span>
+
+                <svg class="overview-arrow" aria-hidden="true">
+                    <use href="#icon-arrow-right"></use>
+                </svg>
+
+            </div>
+
+            <div class="overview-card-content">
+
+                <span class="overview-label">
+                    Consulenti attivi
+                </span>
+
+                <strong class="overview-value">
+                    {{ consulenti_attivi }}
+                </strong>
+
+
+            </div>
+
+        </a>
+
+
+        <a
+            class="overview-card"
+            data-tone="blue"
+            href="{% url 'projects:cliente-list' %}">
+
+            <div class="overview-card-top">
+
+                <span class="overview-icon">
+                    <svg aria-hidden="true">
+                        <use href="#icon-briefcase"></use>
+                    </svg>
+                </span>
+
+                <svg class="overview-arrow" aria-hidden="true">
+                    <use href="#icon-arrow-right"></use>
+                </svg>
+
+            </div>
+
+            <div class="overview-card-content">
+
+                <span class="overview-label">
+                    Clienti attivi
+                </span>
+
+                <strong class="overview-value">
+                    {{ clienti_attivi }}
+                </strong>
+
+
+            </div>
+
+        </a>
+
+
+        <a
+            class="overview-card"
+            data-tone="amber"
+            href="{% url 'projects:commessa-list' %}">
+
+            <div class="overview-card-top">
+
+                <span class="overview-icon">
+                    <svg aria-hidden="true">
+                        <use href="#icon-folder"></use>
+                    </svg>
+                </span>
+
+                <svg class="overview-arrow" aria-hidden="true">
+                    <use href="#icon-arrow-right"></use>
+                </svg>
+
+            </div>
+
+            <div class="overview-card-content">
+
+                <span class="overview-label">
+                    Commesse aperte
+                </span>
+
+                <strong class="overview-value">
+                    {{ commesse_aperte }}
+                </strong>
+
+
+            </div>
+
+        </a>
+
+
+        <a
+            class="overview-card"
+            data-tone="green"
+            href="{% url 'projects:assegnazione-list' %}">
+
+            <div class="overview-card-top">
+
+                <span class="overview-icon">
+                    <svg aria-hidden="true">
+                        <use href="#icon-link"></use>
+                    </svg>
+                </span>
+
+                <svg class="overview-arrow" aria-hidden="true">
+                    <use href="#icon-arrow-right"></use>
+                </svg>
+
+            </div>
+
+            <div class="overview-card-content">
+
+                <span class="overview-label">
+                    Assegnazioni attive
+                </span>
+
+                <strong class="overview-value">
+                    {{ assegnazioni_attive }}
+                </strong>
+
+
+            </div>
+
+        </a>
+
+    </section>
+
+
+    <section class="panel dashboard-list-panel">
+
+        <div class="panel-heading">
+
+            <div>
+
+                <span class="dashboard-kicker">
+                    Ultime attività
+                </span>
+
+                <h2>
+                    Commesse recenti
+                </h2>
+
+            </div>
+
+            <a
+                class="button button-secondary"
+                href="{% url 'projects:commessa-list' %}">
+
+                Vedi tutte
+
+                <svg class="btn-icon" aria-hidden="true">
+                    <use href="#icon-arrow-right"></use>
+                </svg>
+
+            </a>
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th scope="col">Codice</th>
+                        <th scope="col">Cliente</th>
+                        <th scope="col">Stato</th>
+                        <th scope="col">Consulenti</th>
+                        <th scope="col">Ore assegnate</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for commessa in ultime_commesse %}
+
+                        <tr>
+
+                            <td>
+
+                                <a
+                                    class="dashboard-table-link"
+                                    href="{% url 'projects:commessa-update' commessa.pk %}">
+
+                                    {{ commessa.codice }}
+
+                                </a>
+
+                            </td>
+
+                            <td>
+                                {{ commessa.cliente.ragione_sociale }}
+                            </td>
+
+                            <td>
+
+                                <span class="badge badge-{{ commessa.stato|lower }}">
+                                    {{ commessa.get_stato_display }}
+                                </span>
+
+                            </td>
+
+                            <td>
+                                {{ commessa.numero_assegnazioni }}
+                            </td>
+
+                            <td>
+                                {{ commessa.ore_assegnate|default:0 }} h
+                            </td>
+
+                        </tr>
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td colspan="5" class="empty-state">
+                                Non sono ancora presenti commesse.
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}

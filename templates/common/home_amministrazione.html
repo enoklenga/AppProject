@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Controllo amministrativo | LEFTRACK{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="eyebrow">Amministrazione</div>
+    <h1>Controllo amministrativo</h1>
+    <p>{{ mese_selezionato|slice:"5:7" }}/{{ mese_selezionato|slice:":4" }}</p>
+  </div>
+  <div class="page-header-actions">
+    <a class="button button-secondary" href="{% url 'projects:tariffa-list' %}">Tariffe</a>
+    <a class="button button-primary" href="{% url 'operations:periodo-detail' %}?mese={{ mese_selezionato }}">Chiusura mese</a>
+  </div>
+</div>
+
+<div class="metric-grid dashboard-kpi-grid">
+  <article class="metric-card"><span>Ore registrate</span><strong>{{ riepilogo.totale_ore }}</strong></article>
+  <article class="metric-card"><span>Spese</span><strong>€ {{ riepilogo.totale_spese|floatformat:2 }}</strong></article>
+  <article class="metric-card"><span>Da verificare</span><strong>{{ da_approvare }}</strong></article>
+  <article class="metric-card"><span>Senza tariffa</span><strong>{{ senza_tariffa }}</strong></article>
+  <article class="metric-card"><span>Periodo</span><strong>{% if periodo_chiuso %}Chiuso{% else %}Aperto{% endif %}</strong></article>
+</div>
+
+<section class="admin-overview-grid" aria-label="Operatività amministrativa">
+  <a class="overview-card" data-tone="blue" href="{% url 'timesheets:ore-list' %}?mese={{ mese_selezionato }}">
+    <div class="overview-card-top"><span class="overview-icon"><svg aria-hidden="true"><use href="#icon-clock"></use></svg></span><svg class="overview-arrow" aria-hidden="true"><use href="#icon-arrow-right"></use></svg></div>
+    <div class="overview-card-content"><span class="overview-label">Ore</span><strong class="overview-value">{{ riepilogo.totale_ore }}</strong></div>
+  </a>
+  <a class="overview-card" data-tone="blue" href="{% url 'timesheets:spesa-list' %}?mese={{ mese_selezionato }}">
+    <div class="overview-card-top"><span class="overview-icon"><svg aria-hidden="true"><use href="#icon-receipt"></use></svg></span><svg class="overview-arrow" aria-hidden="true"><use href="#icon-arrow-right"></use></svg></div>
+    <div class="overview-card-content"><span class="overview-label">Spese</span><strong class="overview-value">€ {{ riepilogo.totale_spese|floatformat:2 }}</strong></div>
+  </a>
+  <a class="overview-card" data-tone="amber" href="{% url 'projects:tariffa-list' %}">
+    <div class="overview-card-top"><span class="overview-icon"><svg aria-hidden="true"><use href="#icon-link"></use></svg></span><svg class="overview-arrow" aria-hidden="true"><use href="#icon-arrow-right"></use></svg></div>
+    <div class="overview-card-content"><span class="overview-label">Tariffe mancanti</span><strong class="overview-value">{{ senza_tariffa }}</strong></div>
+  </a>
+  <a class="overview-card" data-tone="green" href="{% url 'operations:report-mensile' %}?mese={{ mese_selezionato }}">
+    <div class="overview-card-top"><span class="overview-icon"><svg aria-hidden="true"><use href="#icon-file-text"></use></svg></span><svg class="overview-arrow" aria-hidden="true"><use href="#icon-arrow-right"></use></svg></div>
+    <div class="overview-card-content"><span class="overview-label">Report mensile</span><strong class="overview-value">Apri</strong></div>
+  </a>
+</section>
+{% endblock %}

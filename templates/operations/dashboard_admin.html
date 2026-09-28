@@ -1,0 +1,719 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dashboard | LEFTRACK{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-page dashboard-admin-page">
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <div class="page-header">
+
+        <div>
+            <div class="eyebrow">Controllo</div>
+
+            <h1>Dashboard</h1>
+
+        </div>
+
+
+        {% if puo_gestire_controllo %}
+        <div class="page-header-actions">
+
+            <a
+                class="button button-secondary"
+                href="{% url 'operations:periodo-detail' %}?mese={{ mese_selezionato }}">
+
+                <svg class="btn-icon" aria-hidden="true">
+                    <use href="#icon-calendar-lock"></use>
+                </svg>
+
+                Controlla chiusura
+            </a>
+
+        </div>
+        {% endif %}
+
+    </div>
+
+
+    <!-- =====================================================
+         FILTRI
+         ===================================================== -->
+
+    <div class="dashboard-toolbar">
+
+        <form
+            class="filter-bar dashboard-filter dashboard-admin-filter"
+            method="get">
+
+            <div class="field">
+
+                <label for="id_mese">
+                    Mese
+                </label>
+
+                <input
+                    id="id_mese"
+                    type="month"
+                    name="mese"
+                    value="{{ mese_selezionato }}">
+
+            </div>
+
+
+            <div class="field">
+
+                <label for="id_cliente">
+                    Cliente
+                </label>
+
+                <select
+                    id="id_cliente"
+                    name="cliente">
+
+                    <option value="">
+                        Tutti
+                    </option>
+
+                    {% for cliente in clienti_filtro %}
+
+                        <option
+                            value="{{ cliente.id }}"
+                            {% if request.GET.cliente == cliente.id|stringformat:"s" %}selected{% endif %}>
+
+                            {{ cliente.ragione_sociale }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <div class="field">
+
+                <label for="id_commessa">
+                    Commessa
+                </label>
+
+                <select
+                    id="id_commessa"
+                    name="commessa">
+
+                    <option value="">
+                        Tutte
+                    </option>
+
+                    {% for commessa in commesse_filtro %}
+
+                        <option
+                            value="{{ commessa.id }}"
+                            {% if request.GET.commessa == commessa.id|stringformat:"s" %}selected{% endif %}>
+
+                            {{ commessa.codice }} – {{ commessa.cliente }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <div class="field">
+
+                <label for="id_consulente">
+                    Consulente
+                </label>
+
+                <select
+                    id="id_consulente"
+                    name="consulente">
+
+                    <option value="">
+                        Tutti
+                    </option>
+
+                    {% for consulente in consulenti_filtro %}
+
+                        <option
+                            value="{{ consulente.id }}"
+                            {% if request.GET.consulente == consulente.id|stringformat:"s" %}selected{% endif %}>
+
+                            {{ consulente }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <button
+                class="button button-primary"
+                type="submit">
+
+                <svg class="btn-icon" aria-hidden="true">
+                    <use href="#icon-filter"></use>
+                </svg>
+
+                Applica filtri
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <!-- =====================================================
+         KPI
+         ===================================================== -->
+
+    <section
+        class="kpi-grid dashboard-admin-kpi-grid"
+        aria-label="Indicatori principali">
+
+        <article class="kpi-card">
+
+            <span class="kpi-label">
+                Ore del periodo
+            </span>
+
+            <strong class="kpi-value">
+                {{ dashboard.totale_ore }}
+            </strong>
+
+            <span class="kpi-meta">
+                Ore consuntivate nel mese
+            </span>
+
+        </article>
+
+
+        <article
+            class="kpi-card"
+            data-tone="neutral">
+
+            <span class="kpi-label">
+                Valore ore
+            </span>
+
+            <strong class="kpi-value">
+                € {{ dashboard.totale_valore_ore|floatformat:2 }}
+            </strong>
+
+            <span class="kpi-meta">
+                Ore tariffate
+            </span>
+
+        </article>
+
+
+        <article
+            class="kpi-card"
+            data-tone="neutral">
+
+            <span class="kpi-label">
+                Spese
+            </span>
+
+            <strong class="kpi-value">
+                € {{ dashboard.totale_spese|floatformat:2 }}
+            </strong>
+
+            <span class="kpi-meta">
+                Spese del periodo
+            </span>
+
+        </article>
+
+
+        <article
+            class="kpi-card dashboard-admin-total"
+            data-tone="info"
+            data-featured="true">
+
+            <span class="kpi-label">
+                Totale valorizzato
+            </span>
+
+            <strong class="kpi-value">
+                € {{ dashboard.totale_fatturabile|floatformat:2 }}
+            </strong>
+
+            <span class="kpi-meta">
+                Ore + spese
+            </span>
+
+        </article>
+
+
+        {% if puo_gestire_controllo %}
+        <a class="kpi-card dashboard-admin-anomaly"
+           data-tone="{% if dashboard.numero_righe_senza_tariffa %}danger{% else %}success{% endif %}"
+           href="{% url 'operations:periodo-detail' %}?mese={{ mese_selezionato }}">
+        {% else %}
+        <article class="kpi-card dashboard-admin-anomaly"
+                 data-tone="{% if dashboard.numero_righe_senza_tariffa %}danger{% else %}success{% endif %}">
+        {% endif %}
+
+            <span class="kpi-label">
+                Righe senza tariffa
+            </span>
+
+            <strong class="kpi-value">
+                {{ dashboard.numero_righe_senza_tariffa }}
+            </strong>
+
+            <span class="kpi-meta">
+
+                {% if dashboard.numero_righe_senza_tariffa %}
+                    Richiedono verifica
+                {% else %}
+                    Nessuna anomalia
+                {% endif %}
+
+            </span>
+
+        {% if puo_gestire_controllo %}</a>{% else %}</article>{% endif %}
+
+    </section>
+
+
+    <!-- =====================================================
+         DATI GRAFICI
+         ===================================================== -->
+
+    {{ visuals.ore_giornaliere|json_script:"chart-admin-daily-data" }}
+    {{ visuals.ore_per_cliente|json_script:"chart-admin-client-data" }}
+    {{ visuals.ore_per_consulente|json_script:"chart-admin-consultant-data" }}
+    {{ visuals.avanzamento_commesse|json_script:"chart-admin-project-data" }}
+
+
+    <!-- =====================================================
+         GRAFICI PRINCIPALI
+         ===================================================== -->
+
+    <div class="chart-grid dashboard-admin-chart-grid">
+
+        <section class="chart-card">
+
+            <div class="chart-card-header">
+
+                <div>
+                    <div class="eyebrow">Andamento</div>
+
+                    <h2>
+                        Ore nel mese
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="dashboard-chart"
+                data-dashboard-chart
+                data-chart-type="line"
+                data-source="chart-admin-daily-data"
+                aria-label="Grafico andamento ore nel mese">
+            </div>
+
+        </section>
+
+
+        <section class="chart-card">
+
+            <div class="chart-card-header">
+
+                <div>
+                    <div class="eyebrow">Clienti</div>
+
+                    <h2>
+                        Ore per cliente
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="dashboard-chart"
+                data-dashboard-chart
+                data-chart-type="bar"
+                data-source="chart-admin-client-data"
+                aria-label="Grafico ore per cliente">
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <!-- =====================================================
+         GRAFICI SECONDARI
+         ===================================================== -->
+
+    <div class="chart-grid chart-grid-equal dashboard-admin-chart-grid">
+
+        <section class="chart-card">
+
+            <div class="chart-card-header">
+
+                <div>
+                    <div class="eyebrow">Risorse</div>
+
+                    <h2>
+                        Carico per consulente
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="dashboard-chart"
+                data-dashboard-chart
+                data-chart-type="bar"
+                data-source="chart-admin-consultant-data"
+                aria-label="Grafico carico per consulente">
+            </div>
+
+        </section>
+
+
+        <section class="chart-card">
+
+            <div class="chart-card-header">
+
+                <div>
+                    <div class="eyebrow">Commesse</div>
+
+                    <h2>
+                        Sintesi avanzamento
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="dashboard-chart"
+                data-dashboard-chart
+                data-chart-type="bar"
+                data-source="chart-admin-project-data"
+                aria-label="Grafico avanzamento commesse">
+            </div>
+
+
+            <div
+                class="chart-legend"
+                aria-hidden="true">
+
+                <span class="legend-item">
+
+                    <span class="legend-dot"></span>
+
+                    Previste
+
+                </span>
+
+                <span class="legend-item">
+
+                    <span class="legend-dot"></span>
+
+                    Consuntivate
+
+                </span>
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <!-- =====================================================
+         DETTAGLIO COMMESSE
+         ===================================================== -->
+
+    <section class="panel data-panel dashboard-admin-section">
+
+        <div class="panel-heading">
+
+            <div>
+
+                <div class="eyebrow">
+                    Commesse
+                </div>
+
+                <h2>
+                    Dettaglio economico e operativo
+                </h2>
+
+
+            </div>
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+            <table class="data-table dashboard-project-table">
+
+                <caption class="sr-only">
+                    Avanzamento economico e operativo delle commesse
+                </caption>
+
+                <thead>
+
+                    <tr>
+                        <th scope="col">Commessa</th>
+                        <th scope="col">Ore previste</th>
+                        <th scope="col">Consuntivate</th>
+                        <th scope="col">Residue</th>
+                        <th scope="col">Ore mese</th>
+                        <th scope="col">Valore mese</th>
+                        <th scope="col">Spese mese</th>
+                        <th scope="col">Totale mese</th>
+                        <th scope="col">Anomalie</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for voce in dashboard.avanzamento_commesse %}
+
+                        <tr class="{% if voce.superamento %}row-warning{% endif %}">
+
+                            <td>
+
+                                <div class="table-stack">
+
+                                    <strong>
+                                        {{ voce.commessa.codice }}
+                                    </strong>
+
+                                    <span>
+                                        {{ voce.commessa.cliente }}
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+
+                            <td class="table-numeric">
+                                {{ voce.ore_previste }}
+                            </td>
+
+
+                            <td class="table-numeric">
+                                {{ voce.ore_consuntivate }}
+                            </td>
+
+
+                            <td class="{% if not voce.superamento %}table-numeric{% else %}table-status{% endif %}">
+
+                                {% if voce.superamento %}
+
+                                    <span class="badge badge-bloccata">
+                                        Monte ore superato
+                                    </span>
+
+                                {% else %}
+
+                                    {{ voce.ore_residue }}
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td class="table-numeric">
+                                {{ voce.ore_periodo }}
+                            </td>
+
+
+                            <td class="table-money">
+                                € {{ voce.valore_ore_periodo|floatformat:2 }}
+                            </td>
+
+
+                            <td class="table-money">
+                                € {{ voce.spese_periodo|floatformat:2 }}
+                            </td>
+
+
+                            <td class="table-money">
+
+                                <strong>
+                                    € {{ voce.totale_periodo|floatformat:2 }}
+                                </strong>
+
+                            </td>
+
+
+                            <td class="table-status">
+
+                                {% if voce.righe_senza_tariffa %}
+
+                                    <span class="badge badge-bloccata">
+                                        {{ voce.righe_senza_tariffa }} senza tariffa
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge badge-success">
+                                        OK
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td
+                                colspan="9"
+                                class="empty-state">
+
+                                <div class="table-empty-content">
+
+                                    <strong>
+                                        Nessuna commessa trovata
+                                    </strong>
+
+                                    <span>
+                                        Nessuna commessa corrisponde
+                                        ai filtri selezionati.
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         AGGREGAZIONI
+         ===================================================== -->
+
+    <div class="dashboard-columns dashboard-admin-summary-grid">
+
+        <section class="panel dashboard-summary-panel">
+
+            <div class="panel-heading">
+
+                <div>
+                    <div class="eyebrow">Analisi</div>
+                    <h2>Per cliente</h2>
+                </div>
+
+            </div>
+
+            {% include "operations/partials/aggregato_table.html" with aggregati=dashboard.per_cliente %}
+
+        </section>
+
+
+        <section class="panel dashboard-summary-panel">
+
+            <div class="panel-heading">
+
+                <div>
+                    <div class="eyebrow">Analisi</div>
+                    <h2>Per consulente</h2>
+                </div>
+
+            </div>
+
+            {% include "operations/partials/aggregato_table.html" with aggregati=dashboard.per_consulente %}
+
+        </section>
+
+    </div>
+
+
+    <section class="panel dashboard-summary-panel">
+
+        <div class="panel-heading">
+
+            <div>
+                <div class="eyebrow">Analisi</div>
+
+                <h2>
+                    Per fase
+                </h2>
+
+            </div>
+
+        </div>
+
+        {% include "operations/partials/aggregato_table.html" with aggregati=dashboard.per_fase %}
+
+    </section>
+
+
+    <section class="panel dashboard-summary-panel">
+
+        <div class="panel-heading">
+
+            <div>
+                <div class="eyebrow">Analisi</div>
+
+                <h2>
+                    Per commessa
+                </h2>
+            </div>
+
+        </div>
+
+        {% include "operations/partials/aggregato_table.html" with aggregati=dashboard.per_commessa %}
+
+    </section>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_script %}
+<script defer src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,518 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ task.titolo }} | LEFTRACK{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/tasks.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="tasks-page task-detail-page">
+
+    <!-- HEADER -->
+
+    <div class="page-header task-detail-header">
+
+        <div>
+
+            <div class="eyebrow">
+                {{ task.commessa.codice }}
+            </div>
+
+            <h1>
+                {{ task.titolo }}
+            </h1>
+
+            <p class="task-detail-context">
+                {{ task.commessa.cliente.ragione_sociale }}
+                <span aria-hidden="true">·</span>
+                Fase:
+                <strong>
+                    {% if task.fase.sistema %}
+                        Predefinita
+                    {% else %}
+                        {{ task.fase.nome }}
+                    {% endif %}
+                </strong>
+            </p>
+
+        </div>
+
+
+        <div class="task-detail-header-actions">
+
+            <a
+                class="button button-ghost"
+                href="{% url 'projects:commessa-teamwork' task.commessa_id %}">
+
+                <svg
+                    class="btn-icon"
+                    aria-hidden="true">
+
+                    <use href="#icon-layers"></use>
+
+                </svg>
+
+                Teamwork
+
+            </a>
+
+
+            {% if can_edit %}
+
+                <a
+                    class="button button-secondary"
+                    href="{% url 'tasks:task-update' task.pk %}">
+
+                    <svg
+                        class="btn-icon"
+                        aria-hidden="true">
+
+                        <use href="#icon-edit"></use>
+
+                    </svg>
+
+                    Modifica
+
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- SUMMARY -->
+
+    <div class="task-detail-summary">
+
+        <div class="task-summary-item">
+
+            <span>Stato</span>
+
+            {% if task.stato == "COMPLETATA" %}
+
+                <strong>
+                    <span class="task-status task-status-completed">
+                        Completata
+                    </span>
+                </strong>
+
+            {% elif task.stato == "IN_CORSO" %}
+
+                <strong>
+                    <span class="task-status task-status-progress">
+                        In corso
+                    </span>
+                </strong>
+
+            {% else %}
+
+                <strong>
+                    <span class="task-status task-status-open">
+                        Da fare
+                    </span>
+                </strong>
+
+            {% endif %}
+
+        </div>
+
+
+        <div class="task-summary-item">
+
+            <span>Priorità</span>
+
+            <strong>
+                <span class="task-priority task-priority-{{ task.priorita|lower }}">
+                    {{ task.get_priorita_display }}
+                </span>
+            </strong>
+
+        </div>
+
+
+        <div class="task-summary-item">
+
+            <span>Assegnato a</span>
+
+            <strong>
+                {{ task.assegnato_a }}
+            </strong>
+
+        </div>
+
+
+        <div class="task-summary-item">
+
+            <span>Scadenza</span>
+
+            <strong class="{% if task.scaduta %}task-detail-overdue{% endif %}">
+
+                {% if task.data_scadenza %}
+                    {{ task.data_scadenza|date:"d/m/Y" }}
+                {% else %}
+                    —
+                {% endif %}
+
+            </strong>
+
+            {% if task.scaduta %}
+                <small>Scaduta</small>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <div class="task-detail-grid">
+
+        <!-- DETTAGLIO -->
+
+        <section class="panel task-detail-main">
+
+            <div class="panel-heading">
+
+                <div>
+
+                    <div class="eyebrow">
+                        Informazioni
+                    </div>
+
+                    <h2>
+                        Dettaglio attività
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="task-info-grid">
+
+                <div class="task-info-assignee">
+
+                    <span>Assegnato a</span>
+
+                    <strong>
+                        {{ task.assegnato_a }}
+                    </strong>
+
+                </div>
+
+
+                <div class="task-info-status">
+
+                    <span>Stato</span>
+
+                    <strong>
+                        {{ task.get_stato_display }}
+                    </strong>
+
+                </div>
+
+
+                <div class="task-info-deadline">
+
+                    <span>Scadenza</span>
+
+                    <strong class="{% if task.scaduta %}task-detail-overdue{% endif %}">
+
+                        {% if task.data_scadenza %}
+                            {{ task.data_scadenza|date:"d/m/Y" }}
+                        {% else %}
+                            —
+                        {% endif %}
+
+                    </strong>
+
+                </div>
+
+
+                <div class="task-info-priority">
+
+                    <span>Priorità</span>
+
+                    <strong>
+                        {{ task.get_priorita_display }}
+                    </strong>
+
+                </div>
+
+
+                <div class="task-info-start">
+
+                    <span>Data inizio</span>
+
+                    <strong>
+
+                        {% if task.data_inizio %}
+                            {{ task.data_inizio|date:"d/m/Y" }}
+                        {% else %}
+                            —
+                        {% endif %}
+
+                    </strong>
+
+                </div>
+
+
+                <div class="task-info-creator">
+
+                    <span>Creato da</span>
+
+                    <strong>
+                        {{ task.creato_da }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="task-description">
+
+                <h3>Descrizione</h3>
+
+                {% if task.descrizione %}
+
+                    <p>
+                        {{ task.descrizione|linebreaksbr }}
+                    </p>
+
+                {% else %}
+
+                    <p class="table-muted">
+                        Nessuna descrizione inserita.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+
+        <!-- STATUS -->
+
+        {% if can_update_status %}
+
+            <aside class="panel task-status-panel">
+
+                <div class="panel-heading">
+
+                    <div>
+
+                        <div class="eyebrow">
+                            Avanzamento
+                        </div>
+
+                        <h2>Aggiorna stato</h2>
+
+                    </div>
+
+                </div>
+
+
+                <form
+                    method="post"
+                    action="{% url 'tasks:task-status-update' task.pk %}">
+
+                    {% csrf_token %}
+
+
+                    <div class="field">
+
+                        {{ status_form.stato.label_tag }}
+
+                        {{ status_form.stato }}
+
+                        {% if status_form.stato.errors %}
+
+                            <div class="field-errors">
+                                {{ status_form.stato.errors }}
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <button
+                        class="button button-primary"
+                        type="submit">
+
+                        <svg
+                            class="btn-icon"
+                            aria-hidden="true">
+
+                            <use href="#icon-check"></use>
+
+                        </svg>
+
+                        Salva stato
+
+                    </button>
+
+                </form>
+
+            </aside>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- COMMENTI -->
+
+    <section class="panel task-comments-panel">
+
+        <div class="panel-heading">
+
+            <div>
+
+                <div class="eyebrow">
+                    Collaborazione
+                </div>
+
+                <h2>Commenti</h2>
+
+
+            </div>
+
+        </div>
+
+
+        <div class="task-comments">
+
+            {% for commento in task.commenti.all %}
+
+                <article class="task-comment">
+
+                    <div class="task-comment-avatar" aria-hidden="true">
+                        {{ commento.autore|stringformat:"s"|slice:":1"|upper }}
+                    </div>
+
+
+                    <div class="task-comment-body">
+
+                        <div class="task-comment-heading">
+
+                            <strong>
+                                {{ commento.autore }}
+                            </strong>
+
+                            <time>
+                                {{ commento.created_at|date:"d/m/Y H:i" }}
+                            </time>
+
+                        </div>
+
+
+                        <p>
+                            {{ commento.testo|linebreaksbr }}
+                        </p>
+
+                    </div>
+
+                </article>
+
+
+            {% empty %}
+
+                <div class="task-comments-empty">
+
+                    <strong>
+                        Nessun commento
+                    </strong>
+
+                    <span>
+                        Non sono ancora presenti aggiornamenti su questa attività.
+                    </span>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+
+        {% if can_comment %}
+
+            <form
+                method="post"
+                class="task-comment-form"
+                action="{% url 'tasks:task-comment-create' task.pk %}">
+
+                {% csrf_token %}
+
+
+                <div class="field">
+
+                    {{ comment_form.testo.label_tag }}
+
+                    {{ comment_form.testo }}
+
+                    {% if comment_form.testo.errors %}
+
+                        <div class="field-errors">
+                            {{ comment_form.testo.errors }}
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+
+                <button
+                    class="button button-primary"
+                    type="submit">
+
+                    Aggiungi commento
+
+                </button>
+
+            </form>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- DELETE -->
+
+    {% if can_delete %}
+
+        <div class="task-danger-zone">
+
+            <span class="task-danger-note">
+                L'eliminazione rimuove definitivamente l'attività.
+            </span>
+
+            <a
+                class="row-action row-action-danger"
+                href="{% url 'tasks:task-delete' task.pk %}">
+
+                <svg
+                    class="btn-icon"
+                    aria-hidden="true">
+
+                    <use href="#icon-trash"></use>
+
+                </svg>
+
+                Elimina attività
+
+            </a>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,316 @@
+/* Responsive behavior
+   Breakpoints are based on available layout space, not device models. */
+
+/* Large laptop / narrow desktop */
+@media (max-width: 1180px) {
+    .metric-grid-five,
+    .dashboard-filter,
+    .kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dashboard-columns,
+    .chart-grid,
+    .chart-grid-equal {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Collapse the fixed sidebar into a modal drawer. */
+@media (max-width: 1080px) {
+    .app-layout {
+        display: block;
+    }
+
+    .app-main {
+        min-height: 100vh;
+    }
+
+    .app-sidebar {
+        width: min(320px, 88vw);
+        max-width: 100%;
+        box-shadow: var(--shadow-md);
+        transform: translateX(-105%);
+        transition: transform 0.20s ease;
+    }
+
+    .app-layout.is-sidebar-open .app-sidebar {
+        transform: translateX(0);
+    }
+
+    .app-layout.is-sidebar-open .sidebar-backdrop {
+        display: block;
+    }
+
+    body.has-open-navigation {
+        overflow: hidden;
+    }
+
+    .sidebar-close,
+    .sidebar-toggle {
+        display: inline-flex;
+    }
+
+    .app-topbar {
+        padding: 0 20px;
+    }
+
+    .page-container {
+        padding: 22px 20px 34px;
+    }
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+    .metric-grid,
+    .kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .filter-bar,
+    .filter-bar-wide,
+    .dashboard-filter,
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-bar .button,
+    .dashboard-filter .button {
+        width: 100%;
+    }
+
+    .field-full {
+        grid-column: auto;
+    }
+
+    .card-grid,
+    .quick-links {
+        grid-template-columns: 1fr;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .header-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dashboard-toolbar {
+        align-items: stretch;
+    }
+
+    .chart-card-header {
+        padding-inline: var(--space-4);
+    }
+
+    .dashboard-chart {
+        min-height: 240px;
+        padding-inline: var(--space-4);
+    }
+}
+
+@media (max-width: 800px) {
+    .audit-heading,
+    .audit-values {
+        display: block;
+    }
+
+    .audit-meta {
+        margin-top: 8px;
+        text-align: left;
+    }
+
+    .audit-values details + details {
+        margin-top: 10px;
+    }
+
+    .panel-heading,
+    .dashboard-section-title {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    /* Data tables keep their semantic table layout and scroll horizontally. */
+    .table-wrapper {
+        max-width: calc(100vw - 40px);
+        overscroll-behavior-x: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+        min-width: 680px;
+    }
+}
+
+/* Large phone */
+@media (max-width: 680px) {
+    .navigation-row {
+        display: block;
+    }
+
+    .back-link {
+        margin-top: 10px;
+    }
+
+    .topbar-user > div:first-child {
+        display: none;
+    }
+
+    .footer-separator,
+    .footer-note {
+        display: none;
+    }
+
+    .topbar-context span {
+        display: none;
+    }
+
+    .bar-row {
+        grid-template-columns: minmax(90px, 120px) minmax(0, 1fr) auto;
+    }
+
+    .grouped-series-row {
+        grid-template-columns: 78px minmax(0, 1fr) 48px;
+    }
+}
+
+/* Phone */
+@media (max-width: 560px) {
+    .app-topbar {
+        min-height: 64px;
+        padding: 0 12px;
+        gap: 10px;
+    }
+
+    .topbar-context strong {
+        max-width: 46vw;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .page-container {
+        padding: 16px 12px 28px;
+    }
+
+    .metric-grid,
+    .metric-grid-five,
+    .dashboard-filter,
+    .kpi-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .page-header h1 {
+        font-size: clamp(1.65rem, 8vw, 2rem);
+    }
+
+    .page-header p {
+        max-width: none;
+    }
+
+    .header-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .header-actions .button,
+    .page-header > .button {
+        width: 100%;
+    }
+
+    .form-panel,
+    .auth-card,
+    .panel,
+    .kpi-card,
+    .chart-card-header {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .auth-card {
+        width: 100%;
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .form-actions .button {
+        width: 100%;
+    }
+
+    .row-actions {
+        white-space: normal;
+    }
+
+    th,
+    td {
+        padding: 11px 12px;
+    }
+
+    .guest-header {
+        padding: 12px 14px;
+    }
+
+    .guest-main {
+        padding: 20px 12px 34px;
+    }
+
+    .dashboard-chart {
+        min-height: 220px;
+        padding-inline: 12px;
+    }
+
+    .bar-row {
+        grid-template-columns: 1fr auto;
+        gap: 6px 10px;
+    }
+
+    .bar-track {
+        grid-column: 1 / -1;
+    }
+
+    .grouped-series-row {
+        grid-template-columns: 1fr auto;
+    }
+
+    .grouped-series-row .bar-track {
+        grid-column: 1 / -1;
+        grid-row: 2;
+    }
+
+    .progress-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+/* Very narrow viewport: do not allow horizontal page overflow. */
+@media (max-width: 380px) {
+    .brand-copy small,
+    .topbar-user {
+        display: none;
+    }
+
+    .app-sidebar {
+        width: 94vw;
+    }
+
+    .page-container {
+        padding-inline: 10px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}

@@ -1,0 +1,782 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Attività | LEFTRACK{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/tasks.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="tasks-page task-management-page">
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <div class="page-header">
+
+        <div>
+
+            <div class="eyebrow">
+                Operatività
+            </div>
+
+            <h1>
+                Attività
+            </h1>
+
+
+        </div>
+
+
+        <div class="page-header-actions">
+
+            <a
+                class="button button-secondary"
+                href="{% url 'tasks:my-task-list' %}">
+
+                Le mie attività
+
+            </a>
+
+
+            {% if puo_gestire_task %}
+                <a
+                    class="button button-primary"
+                    href="{% url 'tasks:task-create' %}{% if commessa_selezionata %}?commessa={{ commessa_selezionata }}{% endif %}">
+
+                    <svg
+                        class="btn-icon"
+                        aria-hidden="true">
+
+                        <use href="#icon-plus"></use>
+
+                    </svg>
+
+                    Nuova attività
+
+                </a>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         KPI
+         ===================================================== -->
+
+    <div class="metric-grid task-management-kpi-grid">
+
+        <article class="metric-card">
+
+            <span>Totali</span>
+
+            <strong>
+                {{ totale }}
+            </strong>
+
+        </article>
+
+
+        <article class="metric-card">
+
+            <span>Da fare</span>
+
+            <strong>
+                {{ da_fare }}
+            </strong>
+
+        </article>
+
+
+        <article class="metric-card">
+
+            <span>In corso</span>
+
+            <strong>
+                {{ in_corso }}
+            </strong>
+
+        </article>
+
+
+        <article class="metric-card {% if scadute %}task-management-kpi-alert{% endif %}">
+
+            <span>Scadute</span>
+
+            <strong>
+                {{ scadute }}
+            </strong>
+
+        </article>
+
+
+        <article class="metric-card">
+
+            <span>Completate</span>
+
+            <strong>
+                {{ completate }}
+            </strong>
+
+        </article>
+
+    </div>
+
+
+    <!-- =====================================================
+         FILTRI
+         ===================================================== -->
+
+    <form
+        method="get"
+        class="filter-bar list-filter-bar task-management-filter">
+
+        <input
+            type="hidden"
+            name="vista"
+            value="{{ vista }}">
+
+
+        <div class="field task-search-field">
+
+            <label for="task_q">
+                Ricerca
+            </label>
+
+            <input
+                id="task_q"
+                type="search"
+                name="q"
+                value="{{ ricerca }}"
+                placeholder="Titolo attività">
+
+        </div>
+
+
+        <div class="field">
+
+            <label for="task_commessa">
+                Commessa
+            </label>
+
+            <select
+                id="task_commessa"
+                name="commessa">
+
+                <option value="">
+                    Tutte
+                </option>
+
+                {% for commessa in commesse %}
+
+                    <option
+                        value="{{ commessa.pk }}"
+                        {% if commessa_selezionata == commessa.pk|stringformat:"s" %}selected{% endif %}>
+
+                        {{ commessa.codice }}
+
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <div class="field">
+
+            <label for="task_fase">
+                Fase
+            </label>
+
+            <select
+                id="task_fase"
+                name="fase">
+
+                <option value="">
+                    Tutte
+                </option>
+
+                {% for fase in fasi %}
+
+                    <option
+                        value="{{ fase.pk }}"
+                        {% if fase_selezionata == fase.pk|stringformat:"s" %}selected{% endif %}>
+
+                        {{ fase.commessa.codice }} ·
+                        {% if fase.sistema %}
+                            Predefinita
+                        {% else %}
+                            {{ fase.nome }}
+                        {% endif %}
+
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <div class="field">
+
+            <label for="task_assegnato">
+                Assegnato a
+            </label>
+
+            <select
+                id="task_assegnato"
+                name="assegnato_a">
+
+                <option value="">
+                    Tutti
+                </option>
+
+                {% for utente in assegnatari %}
+
+                    <option
+                        value="{{ utente.pk }}"
+                        {% if assegnatario_selezionato == utente.pk|stringformat:"s" %}selected{% endif %}>
+
+                        {{ utente.get_full_name|default:utente.email }}
+
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <div class="field">
+
+            <label for="task_stato">
+                Stato
+            </label>
+
+            <select
+                id="task_stato"
+                name="stato">
+
+                <option value="">
+                    Tutti
+                </option>
+
+                {% for value, label in stati %}
+
+                    <option
+                        value="{{ value }}"
+                        {% if stato_selezionato == value %}selected{% endif %}>
+
+                        {{ label }}
+
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <div class="field">
+
+            <label for="task_priorita">
+                Priorità
+            </label>
+
+            <select
+                id="task_priorita"
+                name="priorita">
+
+                <option value="">
+                    Tutte
+                </option>
+
+                {% for value, label in priorita %}
+
+                    <option
+                        value="{{ value }}"
+                        {% if priorita_selezionata == value %}selected{% endif %}>
+
+                        {{ label }}
+
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <button
+            class="button button-secondary"
+            type="submit">
+
+            <svg
+                class="btn-icon"
+                aria-hidden="true">
+
+                <use href="#icon-filter"></use>
+
+            </svg>
+
+            Applica filtri
+
+        </button>
+
+    </form>
+
+
+    <!-- =====================================================
+         TOOLBAR VISTA
+         ===================================================== -->
+
+    <div class="task-view-toolbar">
+
+        <div>
+
+            <span class="task-result-count">
+                {{ totale }} attività complessive
+            </span>
+
+        </div>
+
+
+        <div class="task-view-switch">
+
+            <a
+                class="task-view-button{% if vista == 'lista' %} is-active{% endif %}"
+                href="{{ lista_url }}">
+
+                Lista
+
+            </a>
+
+
+            <a
+                class="task-view-button{% if vista == 'board' %} is-active{% endif %}"
+                href="{{ board_url }}">
+
+                Bacheca
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         LISTA
+         ===================================================== -->
+
+    {% if vista == "lista" %}
+
+        <section class="panel data-panel task-management-results">
+
+            <div class="panel-heading">
+
+                <div>
+
+                    <div class="eyebrow">
+                        Attività
+                    </div>
+
+                    <h2>
+                        Elenco attività
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="table-wrapper">
+
+                <table class="data-table task-management-table">
+
+                    <thead>
+
+                        <tr>
+                            <th scope="col">Attività</th>
+                            <th scope="col">Commessa</th>
+                            <th scope="col">Fase</th>
+                            <th scope="col">Assegnato a</th>
+                            <th scope="col">Priorità</th>
+                            <th scope="col">Scadenza</th>
+                            <th scope="col">Stato</th>
+                            {% if puo_gestire_task %}
+                                <th scope="col" class="actions-column">Azioni</th>
+                            {% endif %}
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for task in tasks %}
+
+                            <tr{% if task.scaduta %} class="task-row-overdue"{% endif %}>
+
+                                <!-- ATTIVITÀ -->
+
+                                <td>
+
+                                    <div class="entity-cell">
+
+                                        <div class="entity-copy">
+
+                                        <strong>
+                                            <a href="{% url 'tasks:task-detail' task.pk %}">
+                                                {{ task.titolo }}
+                                            </a>
+                                        </strong>
+
+                                            {% if task.descrizione %}
+
+                                                <span>
+                                                    {{ task.descrizione|truncatechars:90 }}
+                                                </span>
+
+                                            {% endif %}
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- COMMESSA -->
+
+                                <td class="table-primary">
+
+                                    {{ task.commessa.codice }}
+
+                                </td>
+
+
+                                <!-- FASE -->
+
+                                <td>
+
+                                    <div class="table-stack">
+
+                                        <strong>
+
+                                            {% if task.fase.sistema %}
+                                                Predefinita
+                                            {% else %}
+                                                {{ task.fase.nome }}
+                                            {% endif %}
+
+                                        </strong>
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- ASSEGNATO A -->
+
+                                <td>
+
+                                    <div class="table-stack">
+
+                                        <strong>
+                                            {{ task.assegnato_a.get_full_name|default:task.assegnato_a.email }}
+                                        </strong>
+
+                                        {% if task.assegnato_a.get_full_name %}
+
+                                            <span>
+                                                {{ task.assegnato_a.email }}
+                                            </span>
+
+                                        {% endif %}
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- PRIORITÀ -->
+
+                                <td>
+
+                                    <span class="task-priority task-priority-{{ task.priorita|lower }}">
+
+                                        {{ task.get_priorita_display }}
+
+                                    </span>
+
+                                </td>
+
+
+                                <!-- SCADENZA -->
+
+                                <td>
+
+                                    <div class="table-stack">
+
+                                        <strong>
+
+                                            {% if task.data_scadenza %}
+                                                {{ task.data_scadenza|date:"d/m/Y" }}
+                                            {% else %}
+                                                —
+                                            {% endif %}
+
+                                        </strong>
+
+
+                                        {% if task.scaduta %}
+
+                                            <span class="task-overdue-text">
+                                                Scaduta
+                                            </span>
+
+                                        {% endif %}
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- STATO -->
+
+                                <td class="table-status">
+
+                                    <span class="badge badge-{{ task.stato|lower }}">
+
+                                        {{ task.get_stato_display }}
+
+                                    </span>
+
+                                </td>
+
+
+                                <!-- AZIONI -->
+
+                                {% if puo_gestire_task %}
+                                <td class="table-actions">
+
+                                    <div class="row-actions">
+
+                                        <a class="row-action" href="{% url 'tasks:task-update' task.pk %}" aria-label="Modifica attività" title="Modifica"><svg class="btn-icon" aria-hidden="true"><use href="#icon-edit"></use></svg><span class="a11y-only">Modifica</span></a>
+
+                                    </div>
+
+                                </td>
+                                {% endif %}
+
+                            </tr>
+
+
+                        {% empty %}
+
+                            <tr>
+
+                                <td
+                                    colspan="{% if puo_gestire_task %}8{% else %}7{% endif %}"
+                                    class="empty-state">
+
+                                    <div class="table-empty-content">
+
+                                        <strong>
+                                            Nessuna attività trovata
+                                        </strong>
+
+                                        <span>
+                                            Non risultano attività corrispondenti
+                                            ai filtri selezionati.
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+    <!-- =====================================================
+         BOARD
+         ===================================================== -->
+
+    {% else %}
+
+        <section class="task-board">
+
+            {% for colonna in colonne_board %}
+
+                <div class="task-board-column">
+
+                    <div class="task-board-column-header">
+
+                        <div>
+
+                            <span>
+                                {{ colonna.etichetta }}
+                            </span>
+
+                            <strong>
+                                {{ colonna.task|length }}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="task-board-column-body">
+
+                        {% for task in colonna.task %}
+
+                            <article
+                                class="task-board-card{% if task.scaduta %} is-overdue{% endif %}">
+
+                                <div class="task-board-card-top">
+
+                                    <span class="task-project">
+                                        {{ task.commessa.codice }}
+                                    </span>
+
+
+                                    <span class="task-priority task-priority-{{ task.priorita|lower }}">
+
+                                        {{ task.get_priorita_display }}
+
+                                    </span>
+
+                                </div>
+
+
+                                <h3>
+
+                                    <a href="{% url 'tasks:task-detail' task.pk %}">
+                                        {{ task.titolo }}
+                                    </a>
+
+                                </h3>
+
+
+                                <div class="task-board-phase">
+
+                                    {% if task.fase.sistema %}
+                                        Predefinita
+                                    {% else %}
+                                        {{ task.fase.nome }}
+                                    {% endif %}
+
+                                </div>
+
+
+                                <div class="task-board-meta">
+
+                                    <div>
+
+                                        <span>
+                                            Assegnato a
+                                        </span>
+
+                                        <strong>
+                                            {{ task.assegnato_a.get_full_name|default:task.assegnato_a.email }}
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div>
+
+                                        <span>
+                                            Scadenza
+                                        </span>
+
+                                        <strong>
+
+                                            {% if task.data_scadenza %}
+                                                {{ task.data_scadenza|date:"d/m/Y" }}
+                                            {% else %}
+                                                —
+                                            {% endif %}
+
+                                        </strong>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="task-board-actions">
+
+                                    {% if task.scaduta %}
+
+                                        <span class="task-overdue-label">
+                                            Scaduta
+                                        </span>
+
+                                    {% endif %}
+
+
+                                    {% if puo_gestire_task %}
+                                    <div class="row-actions">
+                                            <a
+                                                class="row-action"
+                                                href="{% url 'tasks:task-update' task.pk %}"
+                                                aria-label="Modifica attività"
+                                                title="Modifica">
+
+                                                <svg class="btn-icon" aria-hidden="true"><use href="#icon-edit"></use></svg>
+                                                <span class="a11y-only">Modifica</span>
+
+                                            </a>
+                                    </div>
+                                    {% endif %}
+
+                                </div>
+
+                            </article>
+
+
+                        {% empty %}
+
+                            <div class="task-board-empty">
+                                Nessuna attività
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </section>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

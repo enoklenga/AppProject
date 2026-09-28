@@ -1,0 +1,3162 @@
+/* =========================================================
+   LEF Timesheet — Dashboard & Data Visualization
+   ========================================================= */
+
+
+/* =========================================================
+   PAGE
+   ========================================================= */
+
+.dashboard-page {
+    display: grid;
+    gap: 24px;
+}
+
+
+/* =========================================================
+   TOOLBAR
+   ========================================================= */
+
+.dashboard-toolbar {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    flex-wrap: wrap;
+}
+
+.dashboard-toolbar .filter-bar {
+    flex: 1 1 760px;
+
+    margin: 0;
+}
+
+
+/* =========================================================
+   KPI GRID
+   ========================================================= */
+
+.kpi-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(5, minmax(0, 1fr));
+
+    gap: 14px;
+}
+
+
+/* =========================================================
+   KPI CARD
+   ========================================================= */
+
+.kpi-card {
+    position: relative;
+
+    min-width: 0;
+    min-height: 126px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    padding:
+        18px
+        18px
+        17px;
+
+    color:
+        var(--lef-text);
+
+    background:
+        var(--lef-surface);
+
+    border:
+        1px solid
+        var(--lef-border);
+
+    border-radius:
+        var(--radius-lg);
+
+    box-shadow:
+        var(--shadow-sm);
+
+    overflow: hidden;
+
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease,
+        transform 0.15s ease;
+}
+
+
+/* Accent line */
+
+.kpi-card::before {
+    content: "";
+
+    position: absolute;
+
+    inset:
+        0
+        auto
+        0
+        0;
+
+    width: 4px;
+
+    background:
+        #c9d5de;
+}
+
+
+/* Lieve velatura di colore sullo sfondo, coerente con l'accent line:
+   rende leggibile lo stato a colpo d'occhio senza appesantire la card. */
+
+.kpi-card::after {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--kpi-tone-soft, transparent) 0%,
+            transparent 55%
+        );
+
+    opacity: 0.55;
+
+    pointer-events: none;
+}
+
+.kpi-card > * {
+    position: relative;
+}
+
+
+/* =========================================================
+   KPI STATES
+   ========================================================= */
+
+.kpi-card[data-tone="success"] {
+    --kpi-tone-soft: var(--lef-success-soft);
+}
+
+.kpi-card[data-tone="success"]::before {
+    background:
+        var(--lef-success);
+}
+
+.kpi-card[data-tone="warning"] {
+    --kpi-tone-soft: var(--lef-warning-soft);
+}
+
+.kpi-card[data-tone="warning"]::before {
+    background:
+        #c18a00;
+}
+
+.kpi-card[data-tone="danger"] {
+    --kpi-tone-soft: var(--lef-danger-soft);
+}
+
+.kpi-card[data-tone="danger"]::before {
+    background:
+        var(--lef-danger);
+}
+
+.kpi-card[data-tone="neutral"]::before {
+    background:
+        #c9d5de;
+}
+
+.kpi-card[data-tone="info"] {
+    --kpi-tone-soft: var(--lef-info-soft);
+}
+
+.kpi-card[data-tone="info"]::before {
+    background:
+        var(--lef-blue-600);
+}
+
+
+/* =========================================================
+   KPI LINKS
+   ========================================================= */
+
+a.kpi-card {
+    color:
+        inherit;
+}
+
+a.kpi-card:hover {
+    border-color:
+        #aebfcb;
+
+    box-shadow:
+        var(--shadow-md);
+
+    text-decoration: none;
+
+    transform:
+        translateY(-1px);
+}
+
+.kpi-card[data-featured="true"] {
+    box-shadow:
+        var(--shadow-md);
+}
+
+
+/* =========================================================
+   KPI TYPOGRAPHY
+   ========================================================= */
+
+.kpi-label {
+    display: block;
+
+    margin-bottom: 9px;
+
+    color:
+        var(--lef-muted);
+
+    font-size: 11px;
+    font-weight: 750;
+
+    text-transform: uppercase;
+
+    letter-spacing:
+        0.045em;
+}
+
+.kpi-value {
+    display: block;
+
+    color:
+        var(--lef-navy-900);
+
+    font-size:
+        clamp(1.55rem, 2.1vw, 2rem);
+
+    font-weight: 780;
+
+    line-height: 1.05;
+
+    letter-spacing:
+        -0.035em;
+
+    font-variant-numeric:
+        tabular-nums;
+}
+
+.kpi-meta {
+    display: block;
+
+    margin-top: 10px;
+
+    color:
+        var(--lef-muted);
+
+    font-size: 11px;
+
+    line-height: 1.35;
+}
+
+
+/* =========================================================
+   KPI — STRONGER TOTAL
+   Optional: add data-featured="true" to the main KPI
+   ========================================================= */
+
+.kpi-card[data-featured="true"] {
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff 0%,
+            #f8fbfd 100%
+        );
+
+    border-color:
+        #b9cad5;
+}
+
+.kpi-card[data-featured="true"]::before {
+    width: 4px;
+
+    background:
+        var(--lef-blue-600);
+}
+
+.kpi-card[data-featured="true"] .kpi-value {
+    color:
+        var(--lef-blue-700);
+}
+
+
+/* =========================================================
+   CHART GRID
+   ========================================================= */
+
+.chart-grid {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1.45fr)
+        minmax(320px, 1fr);
+
+    gap: 18px;
+}
+
+.chart-grid-equal {
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+}
+
+
+/* Full-width chart */
+
+.chart-grid-full {
+    grid-template-columns:
+        1fr;
+}
+
+
+/* =========================================================
+   CHART CARD
+   ========================================================= */
+
+.chart-card {
+    min-width: 0;
+
+    background:
+        var(--lef-surface);
+
+    border:
+        1px solid
+        var(--lef-border);
+
+    border-radius:
+        var(--radius-lg);
+
+    box-shadow:
+        var(--shadow-sm);
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   CHART HEADER
+   ========================================================= */
+
+.chart-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    padding:
+        19px
+        20px
+        0;
+}
+
+.chart-card-header h2 {
+    margin: 0;
+
+    color:
+        var(--lef-navy-900);
+
+    font-size: 17px;
+    font-weight: 750;
+
+    line-height: 1.3;
+}
+
+.chart-card-header p {
+    margin:
+        4px
+        0
+        0;
+
+    color:
+        var(--lef-muted);
+
+    font-size: 12px;
+
+    line-height: 1.45;
+}
+
+
+/* =========================================================
+   CHART BODY
+   ========================================================= */
+
+.dashboard-chart {
+    min-height: 280px;
+
+    padding:
+        18px
+        20px
+        20px;
+}
+
+.dashboard-chart.is-empty {
+    display: grid;
+
+    place-items: center;
+
+    min-height: 230px;
+
+    color:
+        var(--lef-muted);
+
+    text-align: center;
+}
+
+
+/* =========================================================
+   SVG CHART
+   ========================================================= */
+
+.chart-svg {
+    display: block;
+
+    width: 100%;
+    height: auto;
+
+    min-height: 240px;
+
+    overflow: visible;
+}
+
+.chart-grid-line {
+    stroke:
+        #e8eef3;
+
+    stroke-width: 1;
+}
+
+.chart-axis-label {
+    fill:
+        var(--lef-muted);
+
+    font-size: 10px;
+}
+
+.chart-line {
+    fill: none;
+
+    stroke:
+        var(--lef-blue-600);
+
+    stroke-width: 2.5;
+
+    stroke-linecap:
+        round;
+
+    stroke-linejoin:
+        round;
+}
+
+.chart-area {
+    fill:
+        color-mix(
+            in srgb,
+            var(--lef-blue-600) 10%,
+            transparent
+        );
+}
+
+.chart-point {
+    fill:
+        var(--lef-surface);
+
+    stroke:
+        var(--lef-blue-600);
+
+    stroke-width: 2;
+}
+
+
+/* =========================================================
+   BAR CHART
+   ========================================================= */
+
+.bar-chart {
+    display: grid;
+
+    gap: 13px;
+}
+
+.bar-row {
+    display: grid;
+
+    grid-template-columns:
+        minmax(110px, 180px)
+        minmax(0, 1fr)
+        auto;
+
+    gap: 12px;
+
+    align-items: center;
+}
+
+.bar-label {
+    min-width: 0;
+
+    overflow: hidden;
+
+    color:
+        var(--lef-text);
+
+    font-size: 12px;
+    font-weight: 600;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+}
+
+.bar-track {
+    position: relative;
+
+    height: 10px;
+
+    overflow: hidden;
+
+    background:
+        #edf2f6;
+
+    border-radius:
+        var(--radius-pill);
+}
+
+.bar-fill {
+    min-width: 2px;
+    height: 100%;
+
+    background:
+        var(--lef-blue-600);
+
+    border-radius:
+        inherit;
+}
+
+.bar-value {
+    color:
+        var(--lef-muted);
+
+    font-size: 12px;
+
+    font-variant-numeric:
+        tabular-nums;
+}
+
+
+/* =========================================================
+   GROUPED BAR CHART
+   ========================================================= */
+
+.grouped-bars {
+    display: grid;
+
+    gap: 17px;
+}
+
+.grouped-row {
+    display: grid;
+
+    gap: 8px;
+}
+
+.grouped-label {
+    color:
+        var(--lef-text);
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.grouped-series {
+    display: grid;
+
+    gap: 6px;
+}
+
+.grouped-series-row {
+    display: grid;
+
+    grid-template-columns:
+        92px
+        minmax(0, 1fr)
+        56px;
+
+    align-items: center;
+
+    gap: 8px;
+}
+
+.grouped-series-name,
+.grouped-series-value {
+    color:
+        var(--lef-muted);
+
+    font-size: 11px;
+}
+
+.grouped-series-value {
+    text-align: right;
+
+    font-variant-numeric:
+        tabular-nums;
+}
+
+.grouped-series-row:nth-child(2) .bar-fill {
+    background:
+        var(--lef-success);
+}
+
+.grouped-series-row:nth-child(3) .bar-fill {
+    background:
+        #b7791f;
+}
+
+
+/* =========================================================
+   CHART LEGEND
+   ========================================================= */
+
+.chart-legend {
+    display: flex;
+
+    gap: 16px;
+
+    flex-wrap: wrap;
+
+    padding:
+        0
+        20px
+        17px;
+
+    color:
+        var(--lef-muted);
+
+    font-size: 11px;
+}
+
+.legend-item {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 7px;
+}
+
+.legend-dot {
+    width: 8px;
+    height: 8px;
+
+    background:
+        var(--lef-blue-600);
+
+    border-radius:
+        50%;
+}
+
+.legend-item:nth-child(2) .legend-dot {
+    background:
+        var(--lef-success);
+}
+
+.legend-item:nth-child(3) .legend-dot {
+    background:
+        #b7791f;
+}
+
+
+/* =========================================================
+   PROGRESS
+   ========================================================= */
+
+.progress-list {
+    display: grid;
+
+    gap: 16px;
+}
+
+.progress-item {
+    display: grid;
+
+    gap: 8px;
+}
+
+.progress-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+
+    gap: 12px;
+}
+
+.progress-heading strong {
+    color:
+        var(--lef-text);
+
+    font-size: 12px;
+}
+
+.progress-heading span {
+    color:
+        var(--lef-muted);
+
+    font-size: 11px;
+}
+
+.progress-track {
+    height: 8px;
+
+    overflow: hidden;
+
+    background:
+        #edf2f6;
+
+    border-radius:
+        var(--radius-pill);
+}
+
+.progress-value {
+    height: 100%;
+
+    background:
+        var(--lef-blue-600);
+
+    border-radius:
+        inherit;
+}
+
+.progress-item.is-over .progress-value {
+    background:
+        var(--lef-danger);
+}
+
+
+/* =========================================================
+   DASHBOARD SECTION TITLE
+   ========================================================= */
+
+.dashboard-section-title {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    margin-bottom: 12px;
+}
+
+.dashboard-section-title h2 {
+    margin: 0;
+
+    color:
+        var(--lef-navy-900);
+}
+
+
+/* =========================================================
+   DASHBOARD TABLE
+   ========================================================= */
+
+.dashboard-page .panel table {
+    font-size: 13px;
+}
+
+.dashboard-page .panel thead th {
+    position: sticky;
+
+    z-index: 2;
+
+    top: 0;
+}
+
+.dashboard-page .table-money strong {
+    color:
+        var(--lef-navy-900);
+}
+
+
+/* More discreet warning row */
+
+.dashboard-page tr.row-warning {
+    background:
+        #fffaf0;
+}
+
+.dashboard-page tr.row-warning:hover {
+    background:
+        #fff6df;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.dashboard-page .empty-state {
+    padding:
+        38px
+        24px;
+}
+
+
+/* =========================================================
+   FOCUS
+   ========================================================= */
+
+.dashboard-chart:focus-visible,
+.chart-card:focus-within {
+    outline:
+        2px solid
+        transparent;
+
+    outline-offset:
+        2px;
+}
+
+a.kpi-card:focus-visible {
+    outline: none;
+
+    box-shadow:
+        var(--focus-ring);
+}
+
+
+/* =========================================================
+   STRUCTURAL SAFETY
+   ========================================================= */
+
+.kpi-card,
+.chart-card,
+.panel {
+    max-width: 100%;
+}
+
+.chart-svg text {
+    font-family:
+        var(--font-family-base);
+}
+
+
+/* =========================================================
+   RESPONSIVE — DESKTOP SMALL
+   ========================================================= */
+
+@media (max-width: 1180px) {
+
+    .kpi-grid {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+    }
+
+    .chart-grid,
+    .chart-grid-equal,
+    .chart-grid-full {
+        grid-template-columns:
+            1fr;
+    }
+}
+
+
+/* =========================================================
+   RESPONSIVE — TABLET
+   ========================================================= */
+
+@media (max-width: 760px) {
+
+    .kpi-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .dashboard-chart {
+        min-height: 240px;
+
+        padding-inline: 16px;
+    }
+
+    .chart-card-header {
+        padding-inline: 16px;
+    }
+
+    .bar-row {
+        grid-template-columns:
+            100px
+            minmax(0, 1fr)
+            42px;
+    }
+}
+
+
+/* =========================================================
+   RESPONSIVE — MOBILE
+   ========================================================= */
+
+@media (max-width: 560px) {
+
+    .kpi-value {
+        font-size:
+            clamp(1.45rem, 8vw, 1.85rem);
+    }
+
+    .chart-legend {
+        padding-inline: 16px;
+    }
+}
+
+
+/* =========================================================
+   RESPONSIVE — SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+    .kpi-grid {
+        grid-template-columns:
+            1fr;
+    }
+
+    .bar-row {
+        grid-template-columns:
+            1fr
+            auto;
+    }
+
+    .bar-track {
+        grid-column:
+            1 / -1;
+    }
+}
+
+.panel > .progress-list {
+    padding: 0 24px 24px;
+    box-sizing: border-box;
+}
+
+.progress-list .progress-item:first-child {
+    margin-top: 0;
+}
+
+/* ==========================================================================
+   LEFTRACK DASHBOARD 2.0
+   ========================================================================== */
+
+
+/* =========================================================
+   PAGE
+   ========================================================= */
+
+.dashboard-page {
+    gap: 20px;
+}
+
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.dashboard-hero {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+
+    gap: 24px;
+
+    padding:
+        4px
+        2px
+        2px;
+}
+
+
+.dashboard-hero-copy {
+    min-width: 0;
+}
+
+
+.dashboard-kicker {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color:
+        var(--lef-blue-700);
+
+    font-size: 10px;
+    font-weight: 800;
+
+    line-height: 1.2;
+
+    letter-spacing: .13em;
+
+    text-transform: uppercase;
+}
+
+
+.dashboard-hero h1 {
+    margin: 0;
+
+    color:
+        var(--lef-navy-900);
+
+    font-size:
+        clamp(27px, 2.2vw, 34px);
+
+    font-weight: 800;
+
+    line-height: 1.08;
+
+    letter-spacing:
+        -.04em;
+}
+
+
+.dashboard-hero p {
+    max-width: 620px;
+
+    margin:
+        7px
+        0
+        0;
+
+    color:
+        var(--lef-muted);
+
+    font-size: 13px;
+
+    line-height: 1.5;
+}
+
+
+.dashboard-hero-actions {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    flex-wrap: wrap;
+
+    flex: 0 0 auto;
+}
+
+
+/* =========================================================
+   ADMIN OVERVIEW
+   ========================================================= */
+
+.admin-overview-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 14px;
+}
+
+
+.overview-card {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    min-height: 150px;
+
+    padding: 17px;
+
+    color:
+        inherit;
+
+    background:
+        var(--lef-surface);
+
+    border:
+        1px solid var(--lef-border);
+
+    border-radius:
+        16px;
+
+    box-shadow:
+        var(--shadow-sm);
+
+    transition:
+        transform .16s ease,
+        border-color .16s ease,
+        box-shadow .16s ease;
+}
+
+
+.overview-card:hover {
+    text-decoration: none;
+
+    transform:
+        translateY(-2px);
+
+    border-color:
+        #cbd9ea;
+
+    box-shadow:
+        0 10px 30px rgba(15,38,72,.08);
+}
+
+
+.overview-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+}
+
+
+.overview-icon {
+    width: 38px;
+    height: 38px;
+
+    display: grid;
+
+    place-items: center;
+
+    border-radius:
+        11px;
+
+    background:
+        #edf4ff;
+
+    color:
+        var(--lef-blue-700);
+}
+
+
+.overview-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+
+.overview-arrow {
+    width: 16px;
+    height: 16px;
+
+    color:
+        #9aabc0;
+
+    transition:
+        transform .16s ease,
+        color .16s ease;
+}
+
+
+.overview-card:hover .overview-arrow {
+    color:
+        var(--lef-blue-700);
+
+    transform:
+        translateX(2px);
+}
+
+
+.overview-card[data-tone="green"] .overview-icon {
+    color:
+        var(--lef-success);
+
+    background:
+        var(--lef-success-soft);
+}
+
+
+.overview-card[data-tone="amber"] .overview-icon {
+    color:
+        #b27600;
+
+    background:
+        var(--lef-warning-soft);
+}
+
+
+.overview-card-content {
+    display: flex;
+    flex-direction: column;
+}
+
+
+.overview-label {
+    color:
+        var(--lef-muted);
+
+    font-size: 12px;
+    font-weight: 650;
+}
+
+
+.overview-value {
+    margin-top: 3px;
+
+    color:
+        var(--lef-navy-900);
+
+    font-size:
+        30px;
+
+    font-weight: 800;
+
+    line-height: 1;
+
+    letter-spacing:
+        -.045em;
+}
+
+
+.overview-meta {
+    margin-top: 7px;
+
+    color:
+        #8a9aaf;
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   ADMIN LIST PANEL
+   ========================================================= */
+
+.dashboard-list-panel {
+    overflow: hidden;
+}
+
+
+.dashboard-list-panel .panel-heading {
+    padding:
+        19px
+        20px;
+}
+
+
+.dashboard-list-panel .panel-heading h2 {
+    margin-top: 2px;
+}
+
+
+.dashboard-list-panel .panel-heading p {
+    margin:
+        4px
+        0
+        0;
+
+    font-size: 12px;
+}
+
+
+.dashboard-table-link {
+    color:
+        var(--lef-blue-700);
+
+    font-weight: 750;
+}
+
+
+/* =========================================================
+   PERIOD SELECTOR
+   ========================================================= */
+
+.dashboard-period-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    padding:
+        12px
+        14px;
+
+    background:
+        var(--lef-surface);
+
+    border:
+        1px solid var(--lef-border);
+
+    border-radius:
+        15px;
+
+    box-shadow:
+        var(--shadow-sm);
+}
+
+
+.dashboard-period-field {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+}
+
+
+.dashboard-period-icon {
+    width: 38px;
+    height: 38px;
+
+    flex: 0 0 auto;
+
+    display: grid;
+
+    place-items: center;
+
+    color:
+        var(--lef-blue-700);
+
+    background:
+        var(--lef-accent-soft);
+
+    border-radius:
+        11px;
+}
+
+
+.dashboard-period-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+
+.dashboard-period-control {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+}
+
+
+.dashboard-period-control label {
+    color:
+        var(--lef-muted);
+
+    font-size: 11px;
+    font-weight: 750;
+
+    text-transform: uppercase;
+
+    letter-spacing:
+        .055em;
+}
+
+
+.dashboard-period-control input {
+    width: auto;
+    min-width: 180px;
+    height: 40px;
+
+    padding:
+        0
+        11px;
+
+    color:
+        var(--lef-navy-900);
+
+    background:
+        #f8faff;
+
+    border:
+        1px solid #dce5f0;
+
+    border-radius:
+        10px;
+
+    font-weight: 650;
+}
+
+
+/* =========================================================
+   KPI STRIP
+   ========================================================= */
+
+.dashboard-kpi-strip {
+    display: grid;
+
+    grid-template-columns:
+        repeat(5, minmax(0, 1fr));
+
+    gap: 12px;
+}
+
+
+.dashboard-kpi {
+    position: relative;
+
+    min-width: 0;
+    min-height: 102px;
+
+    display: flex;
+    flex-direction: column;
+
+    padding:
+        15px
+        16px;
+
+    background:
+        var(--lef-surface);
+
+    border:
+        1px solid var(--lef-border);
+
+    border-radius:
+        14px;
+
+    box-shadow:
+        var(--shadow-sm);
+
+    overflow: hidden;
+}
+
+
+.dashboard-kpi::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    right: 0;
+    left: 0;
+
+    height: 3px;
+
+    background:
+        #d8e2ee;
+}
+
+
+.dashboard-kpi[data-tone="success"]::before {
+    background:
+        var(--lef-success);
+}
+
+
+.dashboard-kpi[data-tone="warning"]::before {
+    background:
+        #c18a00;
+}
+
+
+.dashboard-kpi-label {
+    color:
+        #7589a3;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    text-transform: uppercase;
+
+    letter-spacing:
+        .065em;
+}
+
+
+.dashboard-kpi-value {
+    margin-top: 7px;
+
+    color:
+        var(--lef-navy-900);
+
+    font-size:
+        clamp(22px, 2vw, 28px);
+
+    font-weight: 800;
+
+    line-height: 1;
+
+    letter-spacing:
+        -.035em;
+}
+
+
+.dashboard-kpi-state {
+    margin-top: 9px;
+
+    color:
+        var(--lef-navy-900);
+
+    font-size: 18px;
+
+    font-weight: 800;
+
+    line-height: 1;
+}
+
+
+.dashboard-kpi-meta {
+    margin-top: auto;
+    padding-top: 8px;
+
+    color:
+        var(--lef-muted);
+
+    font-size: 10.5px;
+
+    line-height: 1.3;
+}
+
+
+/* =========================================================
+   CHARTS
+   ========================================================= */
+
+.dashboard-chart-grid {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1.45fr)
+        minmax(320px, 1fr);
+
+    gap: 14px;
+}
+
+
+.dashboard-chart-card {
+    border-radius:
+        16px;
+}
+
+
+.dashboard-chart-card .chart-card-header {
+    padding:
+        17px
+        18px
+        0;
+}
+
+
+.dashboard-chart-card .chart-card-header h2 {
+    margin-top: 1px;
+
+    font-size: 17px;
+}
+
+
+.dashboard-chart {
+    min-height: 220px;
+
+    padding:
+        15px
+        18px
+        18px;
+}
+
+
+/* Grande differenza rispetto alla UI precedente:
+   niente enormi riquadri vuoti */
+
+.dashboard-chart.is-empty {
+    min-height: 150px;
+
+    padding:
+        24px;
+
+    color:
+        #8191a7;
+
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   PROJECTS
+   ========================================================= */
+
+.dashboard-projects-panel {
+    overflow: hidden;
+}
+
+
+.dashboard-projects-panel .panel-heading {
+    padding:
+        19px
+        20px
+        15px;
+}
+
+
+.dashboard-project-list {
+    display: grid;
+
+    gap: 11px;
+
+    padding:
+        0
+        20px
+        20px;
+}
+
+
+.dashboard-project-card {
+    display: grid;
+
+    gap: 12px;
+
+    padding:
+        16px;
+
+    background:
+        #fbfcfe;
+
+    border:
+        1px solid #e0e8f1;
+
+    border-radius:
+        13px;
+}
+
+
+.dashboard-project-card.is-over {
+    border-color:
+        #efc7cc;
+
+    background:
+        #fffafa;
+}
+
+
+.dashboard-project-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 18px;
+}
+
+
+.dashboard-project-code {
+    color:
+        var(--lef-navy-900);
+
+    font-size: 13px;
+    font-weight: 800;
+}
+
+
+.dashboard-project-meta {
+    display: flex;
+    align-items: center;
+
+    gap: 6px;
+
+    margin-top: 4px;
+
+    color:
+        var(--lef-muted);
+
+    font-size: 11px;
+
+    flex-wrap: wrap;
+}
+
+
+.dashboard-meta-separator {
+    color:
+        #b2c0d0;
+}
+
+
+.dashboard-role-badge {
+    flex: 0 0 auto;
+
+    padding:
+        5px
+        8px;
+
+    color:
+        #506984;
+
+    background:
+        #eef3f8;
+
+    border-radius:
+        var(--radius-pill);
+
+    font-size: 10px;
+    font-weight: 700;
+}
+
+
+.dashboard-project-progress-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    color:
+        var(--lef-muted);
+
+    font-size: 10.5px;
+}
+
+
+.dashboard-project-progress-heading strong {
+    color:
+        var(--lef-text);
+}
+
+
+.dashboard-project-card .progress-track {
+    height: 7px;
+}
+
+
+.dashboard-project-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 14px;
+}
+
+
+.dashboard-project-stats {
+    display: flex;
+    align-items: center;
+
+    gap: 16px;
+
+    color:
+        var(--lef-muted);
+
+    font-size: 11px;
+
+    flex-wrap: wrap;
+}
+
+
+.dashboard-project-stats strong {
+    color:
+        var(--lef-text);
+}
+
+
+.dashboard-project-link {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 6px;
+
+    flex: 0 0 auto;
+
+    color:
+        var(--lef-blue-700);
+
+    font-size: 11px;
+    font-weight: 750;
+}
+
+
+.dashboard-project-link:hover {
+    text-decoration: none;
+}
+
+
+.dashboard-project-link .btn-icon {
+    transition:
+        transform .15s ease;
+}
+
+
+.dashboard-project-link:hover .btn-icon {
+    transform:
+        translateX(2px);
+}
+
+
+/* =========================================================
+   QUICK LINKS
+   ========================================================= */
+
+.dashboard-quick-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 12px;
+}
+
+
+.dashboard-quick-card {
+    min-width: 0;
+
+    display: grid;
+
+    grid-template-columns:
+        42px
+        minmax(0, 1fr)
+        auto;
+
+    align-items: center;
+
+    gap: 14px;
+
+    padding:
+        16px;
+
+    color:
+        inherit;
+
+    background:
+        var(--lef-surface);
+
+    border:
+        1px solid var(--lef-border);
+
+    border-radius:
+        14px;
+
+    box-shadow:
+        var(--shadow-sm);
+
+    transition:
+        transform .16s ease,
+        border-color .16s ease;
+}
+
+
+.dashboard-quick-card:hover {
+    text-decoration: none;
+
+    transform:
+        translateY(-1px);
+
+    border-color:
+        #cbd9e8;
+}
+
+
+.dashboard-quick-icon {
+    width: 42px;
+    height: 42px;
+
+    display: grid;
+
+    place-items: center;
+
+    color:
+        var(--lef-blue-700);
+
+    background:
+        var(--lef-accent-soft);
+
+    border-radius:
+        12px;
+}
+
+
+.dashboard-quick-icon svg {
+    width: 19px;
+    height: 19px;
+}
+
+
+.dashboard-quick-card h2 {
+    margin:
+        1px
+        0
+        3px;
+
+    color:
+        var(--lef-navy-900);
+
+    font-size: 15px;
+}
+
+
+.dashboard-quick-card p {
+    margin: 0;
+
+    color:
+        var(--lef-muted);
+
+    font-size: 11px;
+}
+
+
+.dashboard-quick-arrow {
+    width: 17px;
+    height: 17px;
+
+    color:
+        #9cacbf;
+}
+
+
+/* =========================================================
+   EMPTY
+   ========================================================= */
+
+.dashboard-empty-state {
+    padding:
+        28px
+        20px;
+
+    text-align: center;
+
+    color:
+        var(--lef-muted);
+
+    background:
+        #fafbfd;
+
+    border:
+        1px dashed #d8e2ee;
+
+    border-radius:
+        12px;
+}
+
+
+.dashboard-empty-state strong {
+    display: block;
+
+    color:
+        var(--lef-text);
+
+    font-size: 13px;
+}
+
+
+.dashboard-empty-state p {
+    margin:
+        5px
+        0
+        0;
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1180px) {
+
+    .admin-overview-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .dashboard-kpi-strip {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+    }
+
+    .dashboard-chart-grid {
+        grid-template-columns:
+            1fr;
+    }
+
+}
+
+
+@media (max-width: 760px) {
+
+    .dashboard-hero {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .dashboard-hero-actions {
+        width: 100%;
+    }
+
+    .dashboard-period-bar {
+        align-items: stretch;
+
+        flex-direction: column;
+    }
+
+    .dashboard-period-field {
+        align-items: flex-start;
+    }
+
+    .dashboard-period-control {
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 5px;
+
+        flex: 1;
+    }
+
+    .dashboard-period-control input {
+        width: 100%;
+    }
+
+    .dashboard-kpi-strip {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .dashboard-project-header,
+    .dashboard-project-footer {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .dashboard-quick-grid {
+        grid-template-columns:
+            1fr;
+    }
+
+}
+
+
+@media (max-width: 520px) {
+
+    .admin-overview-grid,
+    .dashboard-kpi-strip {
+        grid-template-columns:
+            1fr;
+    }
+
+}
+
+/* ==========================================================================
+   LEFTRACK DASHBOARD 2.0
+   ========================================================================== */
+
+.dashboard-page {
+    gap: 20px;
+}
+
+
+/* HERO */
+
+.dashboard-hero {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 4px 2px 2px;
+}
+
+.dashboard-hero-copy {
+    min-width: 0;
+}
+
+.dashboard-kicker {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--lef-blue-700);
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+}
+
+.dashboard-hero h1 {
+    margin: 0;
+    color: var(--lef-navy-900);
+    font-size: clamp(27px, 2.2vw, 34px);
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -.04em;
+}
+
+.dashboard-hero p {
+    max-width: 620px;
+    margin: 7px 0 0;
+    color: var(--lef-muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.dashboard-hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+
+/* ADMIN KPI */
+
+.admin-overview-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.overview-card {
+    min-width: 0;
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 17px;
+    color: inherit;
+    background: var(--lef-surface);
+    border: 1px solid var(--lef-border);
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
+    transition:
+        transform .16s ease,
+        border-color .16s ease,
+        box-shadow .16s ease;
+}
+
+.overview-card:hover {
+    text-decoration: none;
+    transform: translateY(-2px);
+    border-color: #cbd9ea;
+    box-shadow: 0 10px 30px rgba(15,38,72,.08);
+}
+
+.overview-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.overview-icon {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    color: var(--lef-blue-700);
+    background: #edf4ff;
+    border-radius: 11px;
+}
+
+.overview-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.overview-arrow {
+    width: 16px;
+    height: 16px;
+    color: #9aabc0;
+}
+
+.overview-card[data-tone="green"] .overview-icon {
+    color: var(--lef-success);
+    background: var(--lef-success-soft);
+}
+
+.overview-card[data-tone="amber"] .overview-icon {
+    color: #b27600;
+    background: var(--lef-warning-soft);
+}
+
+.overview-card-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.overview-label {
+    color: var(--lef-muted);
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.overview-value {
+    margin-top: 3px;
+    color: var(--lef-navy-900);
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -.045em;
+}
+
+.overview-meta {
+    margin-top: 7px;
+    color: #8a9aaf;
+    font-size: 11px;
+}
+
+.dashboard-list-panel {
+    overflow: hidden;
+}
+
+.dashboard-list-panel .panel-heading {
+    padding: 19px 20px;
+}
+
+.dashboard-table-link {
+    color: var(--lef-blue-700);
+    font-weight: 750;
+}
+
+
+/* PERIOD */
+
+.dashboard-period-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 14px;
+    background: var(--lef-surface);
+    border: 1px solid var(--lef-border);
+    border-radius: 15px;
+    box-shadow: var(--shadow-sm);
+}
+
+.dashboard-period-field {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dashboard-period-icon {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    color: var(--lef-blue-700);
+    background: var(--lef-accent-soft);
+    border-radius: 11px;
+}
+
+.dashboard-period-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.dashboard-period-control {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dashboard-period-control label {
+    color: var(--lef-muted);
+    font-size: 11px;
+    font-weight: 750;
+    text-transform: uppercase;
+    letter-spacing: .055em;
+}
+
+.dashboard-period-control input {
+    width: auto;
+    min-width: 180px;
+    height: 40px;
+    padding: 0 11px;
+    color: var(--lef-navy-900);
+    background: #f8faff;
+    border: 1px solid #dce5f0;
+    border-radius: 10px;
+    font-weight: 650;
+}
+
+
+/* CONSULTANT KPI */
+
+.dashboard-kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.dashboard-kpi {
+    position: relative;
+    min-width: 0;
+    min-height: 102px;
+    display: flex;
+    flex-direction: column;
+    padding: 15px 16px;
+    background: var(--lef-surface);
+    border: 1px solid var(--lef-border);
+    border-radius: 14px;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.dashboard-kpi::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 3px;
+    background: #d8e2ee;
+}
+
+.dashboard-kpi[data-tone="success"]::before {
+    background: var(--lef-success);
+}
+
+.dashboard-kpi[data-tone="warning"]::before {
+    background: #c18a00;
+}
+
+.dashboard-kpi-label {
+    color: #7589a3;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .065em;
+}
+
+.dashboard-kpi-value {
+    margin-top: 7px;
+    color: var(--lef-navy-900);
+    font-size: clamp(22px, 2vw, 28px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -.035em;
+}
+
+.dashboard-kpi-state {
+    margin-top: 9px;
+    color: var(--lef-navy-900);
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.dashboard-kpi-meta {
+    margin-top: auto;
+    padding-top: 8px;
+    color: var(--lef-muted);
+    font-size: 10.5px;
+}
+
+
+/* CHARTS */
+
+.dashboard-chart-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(320px, 1fr);
+    gap: 14px;
+}
+
+.dashboard-chart-card {
+    border-radius: 16px;
+}
+
+.dashboard-chart-card .chart-card-header {
+    padding: 17px 18px 0;
+}
+
+.dashboard-chart {
+    min-height: 220px;
+    padding: 15px 18px 18px;
+}
+
+.dashboard-chart.is-empty {
+    min-height: 150px;
+    padding: 24px;
+    color: #8191a7;
+    font-size: 13px;
+}
+
+
+/* PROJECTS */
+
+.dashboard-projects-panel {
+    overflow: hidden;
+}
+
+.dashboard-projects-panel .panel-heading {
+    padding: 19px 20px 15px;
+}
+
+.dashboard-project-list {
+    display: grid;
+    gap: 11px;
+    padding: 0 20px 20px;
+}
+
+.dashboard-project-card {
+    display: grid;
+    gap: 12px;
+    padding: 16px;
+    background: #fbfcfe;
+    border: 1px solid #e0e8f1;
+    border-radius: 13px;
+}
+
+.dashboard-project-card.is-over {
+    border-color: #efc7cc;
+    background: #fffafa;
+}
+
+.dashboard-project-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+.dashboard-project-code {
+    color: var(--lef-navy-900);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.dashboard-project-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    color: var(--lef-muted);
+    font-size: 11px;
+    flex-wrap: wrap;
+}
+
+.dashboard-role-badge {
+    padding: 5px 8px;
+    color: #506984;
+    background: #eef3f8;
+    border-radius: var(--radius-pill);
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.dashboard-project-progress-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--lef-muted);
+    font-size: 10.5px;
+}
+
+.dashboard-project-card .progress-track {
+    height: 7px;
+}
+
+.dashboard-project-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.dashboard-project-stats {
+    display: flex;
+    gap: 16px;
+    color: var(--lef-muted);
+    font-size: 11px;
+    flex-wrap: wrap;
+}
+
+.dashboard-project-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--lef-blue-700);
+    font-size: 11px;
+    font-weight: 750;
+}
+
+
+/* QUICK LINKS */
+
+.dashboard-quick-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.dashboard-quick-card {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    color: inherit;
+    background: var(--lef-surface);
+    border: 1px solid var(--lef-border);
+    border-radius: 14px;
+    box-shadow: var(--shadow-sm);
+}
+
+.dashboard-quick-card:hover {
+    text-decoration: none;
+    border-color: #cbd9e8;
+}
+
+.dashboard-quick-icon {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    color: var(--lef-blue-700);
+    background: var(--lef-accent-soft);
+    border-radius: 12px;
+}
+
+.dashboard-quick-icon svg {
+    width: 19px;
+    height: 19px;
+}
+
+.dashboard-quick-card h2 {
+    margin: 1px 0 3px;
+    color: var(--lef-navy-900);
+    font-size: 15px;
+}
+
+.dashboard-quick-card p {
+    margin: 0;
+    color: var(--lef-muted);
+    font-size: 11px;
+}
+
+.dashboard-quick-arrow {
+    width: 17px;
+    height: 17px;
+    color: #9cacbf;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 1180px) {
+    .admin-overview-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dashboard-kpi-strip {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .dashboard-chart-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 760px) {
+    .dashboard-hero {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .dashboard-period-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dashboard-kpi-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dashboard-project-header,
+    .dashboard-project-footer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .dashboard-quick-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+    .admin-overview-grid,
+    .dashboard-kpi-strip {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Empty charts: compact state */
+
+.dashboard-chart.is-empty {
+    min-height: 120px;
+    padding: 18px 24px;
+}
+
+.dashboard-chart-card:has(.dashboard-chart.is-empty) {
+    min-height: 190px;
+}
+
+.dashboard-kpi-period .dashboard-kpi-state {
+    display: inline-flex;
+    align-items: center;
+
+    width: fit-content;
+
+    margin-top: 10px;
+
+    padding: 6px 9px;
+
+    color: #087657;
+    background: var(--lef-success-soft);
+
+    border-radius: var(--radius-pill);
+
+    font-size: 12px;
+    font-weight: 800;
+
+    letter-spacing: .02em;
+}
+
+.dashboard-kpi-period[data-tone="warning"] .dashboard-kpi-state {
+    color: #8a6200;
+    background: var(--lef-warning-soft);
+}
+
+/* ==========================================================================
+   LEFTRACK DASHBOARD ADMIN 3.0
+   ========================================================================== */
+
+.dashboard-admin-page {
+    gap: 20px;
+}
+
+
+/* HEADER */
+
+.dashboard-admin-page .page-header {
+    margin-bottom: 0;
+}
+
+
+/* FILTER */
+
+.dashboard-admin-filter {
+    width: 100%;
+    margin: 0;
+
+    grid-template-columns:
+        minmax(190px, .9fr)
+        minmax(180px, 1fr)
+        minmax(210px, 1fr)
+        minmax(180px, 1fr)
+        auto;
+
+    align-items: end;
+}
+
+.dashboard-admin-filter .field {
+    min-width: 0;
+}
+
+.dashboard-admin-filter .button {
+    min-height: 42px;
+}
+
+
+/* KPI */
+
+.dashboard-admin-kpi-grid {
+    grid-template-columns:
+        repeat(5, minmax(0, 1fr));
+
+    gap: 10px;
+}
+
+.dashboard-admin-kpi-grid .kpi-card {
+    min-height: 108px;
+
+    padding: 17px 18px;
+
+    border-radius: 14px;
+}
+
+.dashboard-admin-kpi-grid .kpi-label {
+    font-size: 9.5px;
+}
+
+.dashboard-admin-kpi-grid .kpi-value {
+    margin-top: 5px;
+
+    font-size: clamp(24px, 2vw, 30px);
+
+    line-height: 1;
+}
+
+.dashboard-admin-kpi-grid .kpi-meta {
+    margin-top: 8px;
+
+    font-size: 9.5px;
+}
+
+.dashboard-admin-total {
+    background:
+        linear-gradient(
+            135deg,
+            #ffffff 0%,
+            #f3f8ff 100%
+        );
+}
+
+.dashboard-admin-anomaly {
+    text-decoration: none;
+}
+
+.dashboard-admin-anomaly:hover {
+    text-decoration: none;
+
+    border-color: #d0dcea;
+}
+
+
+/* CHARTS */
+
+.dashboard-admin-chart-grid {
+    gap: 14px;
+}
+
+.dashboard-admin-chart-grid .chart-card {
+    min-width: 0;
+
+    overflow: hidden;
+
+    border-radius: 16px;
+}
+
+.dashboard-admin-chart-grid .chart-card-header {
+    padding: 18px 20px 0;
+}
+
+.dashboard-admin-chart-grid .chart-card-header .eyebrow {
+    margin-bottom: 3px;
+}
+
+.dashboard-admin-chart-grid .chart-card-header h2 {
+    margin: 0;
+
+    font-size: 15px;
+}
+
+.dashboard-admin-chart-grid .chart-card-header p {
+    margin-top: 4px;
+
+    font-size: 10px;
+}
+
+.dashboard-admin-chart-grid .dashboard-chart {
+    min-height: 275px;
+}
+
+
+/* COMMESSE */
+
+.dashboard-admin-section {
+    overflow: hidden;
+
+    border-radius: 16px;
+}
+
+.dashboard-admin-section .panel-heading,
+.dashboard-summary-panel .panel-heading {
+    background: #fafbfd;
+}
+
+.dashboard-project-table {
+    min-width: 1100px;
+
+    font-size: 11px;
+}
+
+.dashboard-project-table th:first-child {
+    width: 18%;
+}
+
+.dashboard-project-table .table-money {
+    white-space: nowrap;
+}
+
+.dashboard-project-table tr.row-warning {
+    background: #fffaf3;
+}
+
+.dashboard-project-table tr.row-warning:hover {
+    background: #fff7e8;
+}
+
+
+/* SUMMARY */
+
+.dashboard-admin-summary-grid {
+    gap: 14px;
+}
+
+.dashboard-summary-panel {
+    overflow: hidden;
+
+    border-radius: 16px;
+}
+
+.dashboard-summary-panel .panel-heading {
+    padding-top: 17px;
+    padding-bottom: 15px;
+}
+
+.dashboard-summary-panel .panel-heading h2 {
+    margin-top: 3px;
+}
+
+.dashboard-summary-panel .table-wrapper {
+    margin: 0;
+}
+
+.dashboard-summary-panel table {
+    width: 100%;
+
+    font-size: 11px;
+}
+
+
+/* EMPTY STATE */
+
+.dashboard-admin-page .table-empty-content::before {
+    display: none;
+    content: none;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 1250px) {
+
+    .dashboard-admin-filter {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .dashboard-admin-kpi-grid {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 900px) {
+
+    .dashboard-admin-kpi-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .dashboard-admin-summary-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 680px) {
+
+    .dashboard-admin-filter,
+    .dashboard-admin-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-admin-filter .button {
+        width: 100%;
+    }
+}
+
+/* ==========================================================================
+   LEFTRACK DASHBOARD ADMIN 3.1 - COMPACT
+   ========================================================================== */
+
+.dashboard-admin-kpi-grid {
+    gap: 12px;
+}
+
+.dashboard-admin-kpi-grid .kpi-card {
+    min-height: 96px !important;
+    padding: 15px 17px !important;
+}
+
+.dashboard-admin-kpi-grid .kpi-label {
+    font-size: 9px;
+    letter-spacing: .04em;
+}
+
+.dashboard-admin-kpi-grid .kpi-value {
+    margin-top: 6px;
+    font-size: 26px;
+}
+
+.dashboard-admin-kpi-grid .kpi-meta {
+    margin-top: 7px;
+    font-size: 9px;
+}
+
+
+/* filtro leggermente più compatto */
+
+.dashboard-admin-page .dashboard-toolbar {
+    margin-bottom: 0;
+}
+
+.dashboard-admin-filter {
+    padding: 14px 16px;
+}
+
+
+/* grafici più coerenti con gli altri pannelli */
+
+.dashboard-admin-chart-grid .chart-card {
+    border-radius: 16px;
+}
+
+.dashboard-admin-chart-grid .chart-card-header {
+    padding: 18px 20px 5px;
+}
+
+.dashboard-admin-chart-grid .dashboard-chart {
+    min-height: 255px;
+}
+
+
+/* riduce lo spazio verticale complessivo */
+
+.dashboard-admin-page {
+    gap: 16px;
+}
+
+/* ==========================================================================
+   HOME CONSULENTE - TEAMWORK ACTION
+   ========================================================================== */
+
+.dashboard-project-teamwork {
+    min-height: 32px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+
+    padding: 6px 10px;
+
+    white-space: nowrap;
+}
+
+.dashboard-project-teamwork .btn-icon {
+    width: 13px;
+    height: 13px;
+}
+
+/* ==========================================================================
+   LEFTRACK DASHBOARD PM 3.0
+   ========================================================================== */
+
+.dashboard-pm-page {
+    gap: 18px;
+}
+
+
+/* FILTER */
+
+.dashboard-pm-filter {
+    grid-template-columns:
+        minmax(220px, .8fr)
+        minmax(360px, 1.5fr)
+        auto;
+
+    align-items: end;
+}
+
+.dashboard-pm-filter .button {
+    min-height: 42px;
+}
+
+
+/* PROJECT */
+
+.dashboard-pm-project {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 18px;
+
+    padding: 16px 18px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #ffffff 0%,
+            #f5f9ff 100%
+        );
+
+    border: 1px solid #d8e5f4;
+    border-radius: 13px;
+
+    box-shadow: var(--shadow-sm);
+}
+
+.dashboard-pm-project h2 {
+    margin: 3px 0 0;
+
+    color: var(--lef-navy-900);
+
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.dashboard-pm-project p {
+    margin: 3px 0 0;
+
+    color: var(--lef-muted);
+
+    font-size: 10px;
+}
+
+
+/* KPI */
+
+.dashboard-pm-kpi-grid {
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 10px;
+}
+
+.dashboard-pm-kpi-grid .kpi-card {
+    min-height: 100px;
+
+    padding: 16px 18px;
+
+    border-radius: 14px;
+}
+
+.dashboard-pm-kpi-grid .kpi-value {
+    margin-top: 6px;
+
+    font-size: 27px;
+}
+
+.dashboard-pm-kpi-grid .kpi-meta {
+    margin-top: 7px;
+
+    font-size: 9px;
+}
+
+
+/* CHARTS */
+
+.dashboard-pm-chart-grid {
+    gap: 14px;
+}
+
+.dashboard-pm-chart-grid .chart-card {
+    overflow: hidden;
+
+    border-radius: 16px;
+}
+
+.dashboard-pm-chart-grid .chart-card-header {
+    padding: 18px 20px 4px;
+}
+
+.dashboard-pm-chart-grid .chart-card-header .eyebrow {
+    margin-bottom: 3px;
+}
+
+.dashboard-pm-chart-grid .chart-card-header h2 {
+    margin: 0;
+
+    font-size: 15px;
+}
+
+.dashboard-pm-chart-grid .chart-card-header p {
+    margin-top: 4px;
+
+    font-size: 10px;
+}
+
+.dashboard-pm-chart-grid .dashboard-chart {
+    min-height: 255px;
+}
+
+
+/* SECTIONS */
+
+.dashboard-pm-section {
+    overflow: hidden;
+
+    border-radius: 16px;
+}
+
+.dashboard-pm-section .panel-heading {
+    background: #fafbfd;
+}
+
+.dashboard-pm-team-table {
+    min-width: 1000px;
+
+    font-size: 11px;
+}
+
+.dashboard-pm-hours-table {
+    min-width: 760px;
+
+    font-size: 11px;
+}
+
+.dashboard-pm-section tr.row-warning {
+    background: #fffaf3;
+}
+
+
+/* EMPTY */
+
+.dashboard-pm-empty {
+    min-height: 180px;
+
+    display: grid;
+    place-items: center;
+
+    padding: 30px;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 1050px) {
+
+    .dashboard-pm-filter {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .dashboard-pm-kpi-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 680px) {
+
+    .dashboard-pm-filter,
+    .dashboard-pm-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-pm-project {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .dashboard-pm-project .row-action {
+        width: 100%;
+        justify-content: center;
+    }
+}

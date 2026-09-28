@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+
+{% block title %}Clienti | LEFTRACK{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <div class="eyebrow">Gestione</div>
+
+        <h1>Clienti</h1>
+
+    </div>
+
+    {% if puo_modificare %}
+        <a
+            class="button button-primary"
+            href="{% url 'projects:cliente-create' %}">
+
+            <svg class="btn-icon" aria-hidden="true">
+                <use href="#icon-plus"></use>
+            </svg>
+
+            Nuovo cliente
+
+        </a>
+    {% endif %}
+
+</div>
+
+
+<form
+    class="filter-bar list-filter-bar"
+    method="get">
+
+    <input
+        type="search"
+        name="q"
+        value="{{ request.GET.q }}"
+        placeholder="Cerca ragione sociale, P.IVA o referente"
+        aria-label="Cerca cliente">
+
+
+    <select
+        name="stato"
+        aria-label="Filtra per stato">
+
+        <option value="">
+            Tutti gli stati
+        </option>
+
+        <option
+            value="attivi"
+            {% if request.GET.stato == 'attivi' %}selected{% endif %}>
+
+            Attivi
+
+        </option>
+
+        <option
+            value="disattivati"
+            {% if request.GET.stato == 'disattivati' %}selected{% endif %}>
+
+            Disattivati
+
+        </option>
+
+    </select>
+
+
+    <button
+        class="button button-secondary"
+        type="submit">
+
+        <svg class="btn-icon" aria-hidden="true">
+            <use href="#icon-filter"></use>
+        </svg>
+
+        Filtra
+
+    </button>
+
+</form>
+
+
+<section class="panel data-panel">
+
+    <div class="table-wrapper">
+
+        <table class="data-table clients-table">
+
+            <thead>
+
+                <tr>
+
+                    <th scope="col">
+                        Cliente
+                    </th>
+
+                    <th scope="col">
+                        Partita IVA
+                    </th>
+
+                    <th scope="col">
+                        Referente
+                    </th>
+
+                    <th
+                        scope="col"
+                        class="table-numeric">
+
+                        Commesse
+
+                    </th>
+
+                    <th scope="col">
+                        Stato
+                    </th>
+
+                    {% if puo_modificare %}
+                        <th
+                            scope="col"
+                            class="actions-column">
+
+                            Azioni
+
+                        </th>
+                    {% endif %}
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for cliente in clienti %}
+
+                    <tr>
+
+
+                        <!-- CLIENTE -->
+
+                        <td class="table-primary">
+
+                            <div class="entity-cell">
+
+                                <span
+                                    class="entity-icon"
+                                    aria-hidden="true">
+
+                                    <svg>
+                                        <use href="#icon-briefcase"></use>
+                                    </svg>
+
+                                </span>
+
+
+                                <div class="entity-copy">
+
+                                    <strong>
+                                        {{ cliente.ragione_sociale }}
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- PARTITA IVA -->
+
+                        <td>
+
+                            {% if cliente.partita_iva %}
+
+                                {{ cliente.partita_iva }}
+
+                            {% else %}
+
+                                <span class="table-muted">
+                                    —
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- REFERENTE -->
+
+                        <td>
+
+                            {% if cliente.referente %}
+
+                                {{ cliente.referente }}
+
+                            {% else %}
+
+                                <span class="table-muted">
+                                    —
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- COMMESSE -->
+
+                        <td class="table-numeric">
+
+                            <strong>
+                                {{ cliente.numero_commesse }}
+                            </strong>
+
+                        </td>
+
+
+                        <!-- STATO -->
+
+                        <td class="table-status">
+
+                            {% if cliente.attivo %}
+
+                                <span class="badge badge-attiva">
+                                    Attivo
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge badge-chiusa">
+                                    Disattivato
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- AZIONI -->
+
+                        {% if puo_modificare %}
+                        <td class="table-actions">
+
+                            <div class="row-actions">
+
+                                <a
+                                    class="row-action"
+                                    href="{% url 'projects:cliente-update' cliente.pk %}">
+
+                                    <svg
+                                        class="btn-icon"
+                                        aria-hidden="true">
+
+                                        <use href="#icon-edit"></use>
+
+                                    </svg>
+
+                                    Modifica
+
+                                </a>
+
+
+                                <form
+                                    method="post"
+                                    action="{% url 'projects:cliente-toggle-active' cliente.pk %}">
+
+                                    {% csrf_token %}
+
+                                    <button
+                                        class="
+                                            row-action
+                                            row-action-state
+                                            {% if not cliente.attivo %}is-success{% endif %}
+                                        "
+                                        type="submit">
+
+                                        {% if cliente.attivo %}
+
+                                            Disattiva
+
+                                        {% else %}
+
+                                            Riattiva
+
+                                        {% endif %}
+
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+                        </td>
+                        {% endif %}
+
+                    </tr>
+
+
+                {% empty %}
+
+                    <tr>
+
+                        <td
+                            colspan="{% if puo_modificare %}6{% else %}5{% endif %}"
+                            class="empty-state">
+
+                            <div class="table-empty-content">
+
+                                <strong>
+                                    Nessun cliente trovato
+                                </strong>
+
+                                <span>
+                                    Modifica i filtri oppure crea un nuovo cliente.
+                                </span>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+{% include "common/pagination.html" %}
+
+{% endblock %}

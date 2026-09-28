@@ -1,0 +1,733 @@
+/* =========================================================
+   LEF TIMESHEET — NOTIFICATIONS
+   ========================================================= */
+
+.notifications-page {
+    display: grid;
+    gap: 24px;
+}
+
+
+/* =========================================================
+   BELL — la definizione visiva unica è più sotto, in
+   "NOTIFICATION BELL" (questo file ne conteneva tre versioni
+   sovrapposte e in conflitto; qui restano solo le regole del
+   dropdown <details>, che non si ripetono altrove).
+   ========================================================= */
+
+.notification-dropdown {
+    position: relative;
+}
+
+.notification-dropdown > summary {
+    list-style: none;
+}
+
+.notification-dropdown > summary::-webkit-details-marker {
+    display: none;
+}
+
+
+/* =========================================================
+   BELL DROPDOWN
+   ========================================================= */
+
+.notification-menu {
+    position: absolute;
+
+    z-index: 1000;
+
+    top: calc(100% + 10px);
+    right: 0;
+
+    width: 390px;
+    max-width: calc(100vw - 32px);
+
+    overflow: hidden;
+
+    border: 1px solid var(--lef-border);
+    border-radius: 12px;
+
+    background: var(--lef-surface);
+
+    box-shadow:
+        0 18px 45px
+        rgba(15, 35, 65, 0.16);
+}
+
+.notification-menu-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    padding: 16px 18px;
+
+    border-bottom: 1px solid var(--lef-border);
+}
+
+.notification-menu-header > div {
+    display: grid;
+    gap: 2px;
+}
+
+.notification-menu-header strong {
+    color: var(--lef-navy-900);
+
+    font-size: 13px;
+}
+
+.notification-menu-header span {
+    color: var(--lef-muted);
+
+    font-size: 10px;
+}
+
+.notification-menu-header a {
+    color: var(--lef-blue-700);
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.notification-menu-list {
+    max-height: 410px;
+    overflow-y: auto;
+}
+
+.notification-menu-item {
+    display: grid;
+
+    grid-template-columns:
+        8px minmax(0, 1fr);
+
+    gap: 10px;
+
+    padding: 14px 18px;
+
+    border-bottom: 1px solid var(--lef-border);
+
+    text-decoration: none;
+}
+
+.notification-menu-item:hover {
+    background: var(--lef-background-soft);
+}
+
+.notification-menu-item.is-unread {
+    background: #f7faff;
+}
+
+.notification-dot {
+    width: 6px;
+    height: 6px;
+
+    margin-top: 5px;
+
+    border-radius: 50%;
+
+    background: transparent;
+}
+
+.notification-menu-item.is-unread
+.notification-dot {
+    background: var(--lef-blue-600);
+}
+
+.notification-menu-content {
+    display: grid;
+    gap: 4px;
+
+    min-width: 0;
+}
+
+.notification-menu-content strong {
+    color: var(--lef-navy-900);
+
+    font-size: 11px;
+}
+
+.notification-menu-content > span {
+    color: var(--lef-muted);
+
+    font-size: 10px;
+    line-height: 1.45;
+}
+
+.notification-menu-content time {
+    color: var(--lef-muted);
+
+    font-size: 9px;
+}
+
+.notification-menu-empty {
+    padding: 24px 18px;
+
+    color: var(--lef-muted);
+
+    font-size: 11px;
+    text-align: center;
+}
+
+.notification-menu-footer {
+    padding: 10px 18px;
+
+    border-top: 1px solid var(--lef-border);
+}
+
+.notification-mark-all {
+    width: 100%;
+
+    padding: 7px;
+
+    border: 0;
+
+    background: transparent;
+
+    color: var(--lef-blue-700);
+
+    font-size: 10px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   FILTERS
+   ========================================================= */
+
+.notification-filters {
+    align-items: end;
+}
+
+.notification-checkbox {
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    min-height: 38px;
+
+    color: var(--lef-muted);
+
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.notification-checkbox input {
+    width: auto;
+}
+
+.notification-filter-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+
+/* =========================================================
+   NOTIFICATION LIST
+   ========================================================= */
+
+.notification-list {
+    display: grid;
+}
+
+.notification-row {
+    display: grid;
+
+    grid-template-columns:
+        12px minmax(0, 1fr) auto;
+
+    gap: 14px;
+
+    padding: 20px 24px;
+
+    border-bottom: 1px solid var(--lef-border);
+}
+
+.notification-row:last-child {
+    border-bottom: 0;
+}
+
+.notification-row.is-unread {
+    background: #f8fbff;
+}
+
+.notification-row-marker {
+    padding-top: 5px;
+}
+
+.notification-unread-dot {
+    display: block;
+
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: var(--lef-blue-600);
+}
+
+.notification-row-main {
+    min-width: 0;
+}
+
+.notification-row-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 20px;
+}
+
+.notification-row-heading > div {
+    display: grid;
+    gap: 5px;
+}
+
+.notification-row-heading h3 {
+    margin: 0;
+
+    color: var(--lef-navy-900);
+
+    font-size: 13px;
+}
+
+.notification-row-heading time {
+    flex-shrink: 0;
+
+    color: var(--lef-muted);
+
+    font-size: 10px;
+}
+
+.notification-type {
+    color: var(--lef-muted);
+
+    font-size: 9px;
+    font-weight: 750;
+
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.notification-row-main > p {
+    margin: 8px 0 0;
+
+    color: var(--lef-muted);
+
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.notification-task-reference {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 5px;
+
+    margin-top: 10px;
+
+    color: var(--lef-muted);
+
+    font-size: 10px;
+}
+
+.notification-task-reference strong {
+    color: var(--lef-navy-900);
+}
+
+.notification-row-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+
+    gap: 8px;
+}
+
+.notification-row-actions form {
+    margin: 0;
+}
+
+.notification-text-action {
+    padding: 0;
+
+    border: 0;
+
+    background: transparent;
+
+    color: var(--lef-muted);
+
+    font-size: 9px;
+
+    cursor: pointer;
+}
+
+.notification-text-action:hover {
+    color: var(--lef-blue-700);
+}
+
+.notification-empty {
+    padding: 42px 24px;
+
+    text-align: center;
+}
+
+.notification-empty strong {
+    color: var(--lef-navy-900);
+}
+
+.notification-empty p {
+    margin-bottom: 0;
+
+    color: var(--lef-muted);
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 760px) {
+
+    .notification-row {
+        grid-template-columns:
+            10px minmax(0, 1fr);
+    }
+
+    .notification-row-actions {
+        grid-column: 2;
+
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .notification-row-heading {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .notification-menu {
+        position: fixed;
+
+        top: 70px;
+        right: 16px;
+        left: 16px;
+
+        width: auto;
+        max-width: none;
+    }
+
+}
+
+/* =========================================================
+   NOTIFICATION PREFERENCES
+   ========================================================= */
+
+
+.notifications-page {
+    display: grid;
+    gap: 24px;
+}
+
+
+/* ---------------------------------------------------------
+   HEADER
+   --------------------------------------------------------- */
+
+.notifications-page .page-header {
+    margin-bottom: 8px;
+}
+
+
+/* ---------------------------------------------------------
+   PANEL PREFERENZE
+   --------------------------------------------------------- */
+
+.notification-preferences-form {
+
+    display: grid;
+
+    gap: 0;
+
+    padding: 24px 28px 28px;
+
+}
+
+
+/* ---------------------------------------------------------
+   SINGOLA OPZIONE
+   --------------------------------------------------------- */
+
+.notification-option {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 30px;
+
+    padding: 18px 20px;
+
+    border-bottom: 1px solid var(--lef-border);
+
+}
+
+
+.notification-option:last-of-type {
+
+    border-bottom: none;
+
+}
+
+
+/* contenuto testo */
+
+.notification-option > div:first-child {
+
+    display: grid;
+
+    gap: 6px;
+
+}
+
+
+.notification-option strong {
+
+    color: var(--lef-navy-900);
+
+    font-size: 14px;
+
+    font-weight: 750;
+
+}
+
+
+.notification-option p {
+
+    margin: 0;
+
+    color: var(--lef-muted);
+
+    font-size: 12px;
+
+    line-height: 1.5;
+
+}
+
+
+/* ---------------------------------------------------------
+   CHECKBOX
+   --------------------------------------------------------- */
+
+
+.notification-option input[type="checkbox"] {
+
+    appearance: none;
+
+    width: 20px;
+
+    height: 20px;
+
+    border-radius: 5px;
+
+    border: 2px solid var(--lef-border);
+
+    background: white;
+
+    cursor: pointer;
+
+    position: relative;
+
+    flex-shrink: 0;
+
+}
+
+
+
+.notification-option input[type="checkbox"]:checked {
+
+    background: var(--lef-blue-700);
+
+    border-color: var(--lef-blue-700);
+
+}
+
+
+
+.notification-option input[type="checkbox"]:checked::after {
+
+    content: "";
+
+    position: absolute;
+
+    left: 5px;
+
+    top: 1px;
+
+    width: 6px;
+
+    height: 11px;
+
+    border: solid white;
+
+    border-width: 0 2px 2px 0;
+
+    transform: rotate(45deg);
+
+}
+
+
+/* ---------------------------------------------------------
+   BUTTON
+   --------------------------------------------------------- */
+
+
+.notification-preferences-form .button {
+
+    margin-top: 24px;
+
+    justify-self: end;
+
+}
+
+
+/* ---------------------------------------------------------
+   RESPONSIVE
+   --------------------------------------------------------- */
+
+@media (max-width: 680px) {
+
+
+    .notification-option {
+
+        align-items: flex-start;
+
+    }
+
+
+    .notification-preferences-form .button {
+
+        justify-self: stretch;
+
+        width: 100%;
+
+    }
+
+}
+
+/* =========================================================
+   NOTIFICATION BELL — definizione unica (icona semplice nella
+   topbar, con pallino rosso per il conteggio non lette)
+   ========================================================= */
+
+
+.notification-bell {
+    position: relative;
+}
+
+
+
+.notification-bell-button {
+
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+
+    width: 40px;
+    height: 40px;
+
+
+    cursor: pointer;
+
+
+    border-radius: 10px;
+
+
+    color: var(--lef-navy-900);
+
+    transition:
+        background .15s ease;
+
+}
+
+
+
+.notification-bell-button:hover {
+
+    background:
+        var(--lef-background-soft);
+
+}
+
+
+
+.notification-bell-icon {
+
+    width: 22px;
+
+    height: 22px;
+
+}
+
+
+
+.notification-badge {
+
+    position: absolute;
+
+
+    top: 2px;
+
+    right: 2px;
+
+
+    min-width: 18px;
+
+    height: 18px;
+
+
+    padding: 0 5px;
+
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+
+    border-radius: 999px;
+
+
+    background: var(--lef-danger);
+
+
+    color: white;
+
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+
+    line-height: 1;
+
+
+    border: 2px solid var(--lef-surface);
+
+}
+

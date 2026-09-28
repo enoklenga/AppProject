@@ -1,0 +1,392 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Fasi | LEFTRACK{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/phases.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="phases-page">
+
+    <div class="page-header">
+
+        <div>
+            <div class="eyebrow">Teamwork</div>
+
+            <h1>Fasi</h1>
+
+        </div>
+
+
+        {% if puo_gestire %}
+
+            <a
+                class="button button-primary"
+                href="{% url 'phases:fase-create' %}?commessa={{ commessa_selezionata.pk }}">
+
+                <svg
+                    class="btn-icon"
+                    aria-hidden="true">
+
+                    <use href="#icon-plus"></use>
+
+                </svg>
+
+                Nuova fase
+
+            </a>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- FILTRO COMMESSA -->
+
+    <form
+        method="get"
+        class="filter-bar list-filter-bar phase-filter-bar">
+
+        <div class="field">
+
+            <label for="filtro-commessa">
+                Commessa
+            </label>
+
+            <select
+                id="filtro-commessa"
+                name="commessa"
+                onchange="this.form.submit()">
+
+                <option value="">
+                    Seleziona una commessa
+                </option>
+
+                {% for commessa in commesse %}
+
+                    <option
+                        value="{{ commessa.pk }}"
+                        {% if commessa_selezionata.pk == commessa.pk %}selected{% endif %}>
+
+                        {{ commessa.codice }} – {{ commessa.cliente.ragione_sociale }}
+
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+    </form>
+
+
+    {% if commessa_selezionata %}
+
+        <section class="panel data-panel">
+
+            <div class="panel-heading">
+
+                <div>
+
+                    <div class="eyebrow">
+                        {{ commessa_selezionata.cliente.ragione_sociale }}
+                    </div>
+
+                    <h2>
+                        Fasi di {{ commessa_selezionata.codice }}
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="table-wrapper">
+
+                <table class="data-table phases-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th scope="col">
+                                Ordine
+                            </th>
+
+                            <th scope="col">
+                                Fase
+                            </th>
+
+                            <th scope="col">
+                                Stato
+                            </th>
+
+                            <th scope="col">
+                                Periodo
+                            </th>
+
+                            {% if puo_gestire %}
+
+                                <th
+                                    scope="col"
+                                    class="actions-column">
+
+                                    Azioni
+
+                                </th>
+
+                            {% endif %}
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for fase in fasi %}
+
+                            <tr>
+
+
+                                <!-- ORDINE -->
+
+                                <td class="phase-order-cell">
+
+                                    <span class="phase-order">
+                                        {{ fase.ordine }}
+                                    </span>
+
+                                </td>
+
+
+                                <!-- FASE -->
+
+                                <td class="table-primary">
+
+                                    <div class="entity-cell">
+
+                                        <span
+                                            class="entity-icon phase-entity-icon"
+                                            aria-hidden="true">
+
+                                            <svg>
+                                                <use href="#icon-layers"></use>
+                                            </svg>
+
+                                        </span>
+
+
+                                        <div class="entity-copy phase-entity-copy">
+
+                                            <strong>
+                                                {{ fase.nome }}
+                                            </strong>
+
+                                            {% if fase.descrizione %}
+
+                                                <span class="phase-description">
+                                                    {{ fase.descrizione }}
+                                                </span>
+
+                                            {% elif fase.sistema %}
+
+                                                <span>
+                                                    Fase predefinita
+                                                </span>
+
+                                            {% else %}
+
+                                                <span>
+                                                    Fase di commessa
+                                                </span>
+
+                                            {% endif %}
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- STATO -->
+
+                                <td class="table-status">
+
+                                    <span class="phase-status phase-status-{{ fase.stato|lower }}">
+                                        {{ fase.get_stato_display }}
+                                    </span>
+
+                                </td>
+
+
+                                <!-- PERIODO -->
+
+                                <td class="table-date">
+
+                                    <div class="period-cell">
+
+                                        <span>
+
+                                            {% if fase.data_inizio %}
+
+                                                {{ fase.data_inizio|date:"d/m/Y" }}
+
+                                            {% else %}
+
+                                                —
+
+                                            {% endif %}
+
+                                        </span>
+
+                                        <span
+                                            class="period-separator"
+                                            aria-hidden="true">
+
+                                            →
+
+                                        </span>
+
+                                        <span>
+
+                                            {% if fase.data_fine_prevista %}
+
+                                                {{ fase.data_fine_prevista|date:"d/m/Y" }}
+
+                                            {% else %}
+
+                                                —
+
+                                            {% endif %}
+
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- AZIONI -->
+
+                                {% if puo_gestire %}
+
+                                    <td class="table-actions">
+
+                                        <div class="row-actions">
+
+                                            <a
+                                                class="row-action"
+                                                href="{% url 'phases:fase-update' fase.pk %}">
+
+                                                <svg
+                                                    class="btn-icon"
+                                                    aria-hidden="true">
+
+                                                    <use href="#icon-edit"></use>
+
+                                                </svg>
+
+                                                Modifica
+
+                                            </a>
+
+
+                                            {% if not fase.sistema %}
+
+                                                <a
+                                                    class="row-action row-action-danger"
+                                                    href="{% url 'phases:fase-delete' fase.pk %}">
+
+                                                    <svg
+                                                        class="btn-icon"
+                                                        aria-hidden="true">
+
+                                                        <use href="#icon-trash"></use>
+
+                                                    </svg>
+
+                                                    Elimina
+
+                                                </a>
+
+                                            {% else %}
+
+                                                <span
+                                                    class="phase-default-label"
+                                                    title="La fase Generale è necessaria al funzionamento della commessa.">
+
+                                                    Predefinita
+
+                                                </span>
+
+                                            {% endif %}
+
+                                        </div>
+
+                                    </td>
+
+                                {% endif %}
+
+                            </tr>
+
+
+                        {% empty %}
+
+                            <tr>
+
+                                <td
+                                    colspan="{% if puo_gestire %}5{% else %}4{% endif %}"
+                                    class="empty-state">
+
+                                    <div class="table-empty-content">
+
+                                        <strong>
+                                            Nessuna fase presente
+                                        </strong>
+
+                                        <span>
+                                            Questa commessa non ha ancora fasi configurate.
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+    {% else %}
+
+        <div class="selection-empty-state">
+
+            <strong>
+                Seleziona una commessa
+            </strong>
+
+            <p>
+                Scegli una commessa dal filtro per visualizzare le relative fasi.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

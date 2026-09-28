@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if object %}Modifica spesa{% else %}Inserisci spesa{% endif %} | LEFTRACK
+{% endblock %}
+
+{% block content %}
+
+<div class="form-page">
+
+    <div class="page-header">
+
+        <div>
+            <div class="eyebrow">Trasferte</div>
+
+            <h1>
+                {% if object %}
+                    Modifica spesa
+                {% else %}
+                    Inserisci spesa
+                {% endif %}
+            </h1>
+
+        </div>
+
+    </div>
+
+
+    <section class="panel form-panel form-panel-modern">
+
+        <div class="form-panel-heading">
+
+            <span class="form-panel-icon" aria-hidden="true">
+                <svg>
+                    <use href="#icon-receipt"></use>
+                </svg>
+            </span>
+
+            <div>
+                <h2>Dati della spesa</h2>
+
+            </div>
+
+        </div>
+
+
+        <form method="post" class="modern-form">
+
+            {% csrf_token %}
+
+            {{ form.versione }}
+
+
+            {% if form.non_field_errors %}
+
+                <div class="form-global-errors">
+                    {{ form.non_field_errors }}
+                </div>
+
+            {% endif %}
+
+
+            <div class="form-grid modern-form-grid">
+
+                {% for field in form.visible_fields %}
+
+                    <div class="
+                        field
+                        {% if field.name == 'nota' %}
+                            field-full
+                        {% endif %}
+                        {% if field.errors %}
+                            field-has-error
+                        {% endif %}
+                    ">
+
+                        {{ field.label_tag }}
+
+                        {{ field }}
+
+                        {% if field.help_text %}
+
+                            <div class="field-help">
+                                {{ field.help_text }}
+                            </div>
+
+                        {% endif %}
+
+                        {% if field.errors %}
+
+                            <div class="field-errors">
+                                {{ field.errors }}
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+                {% endfor %}
+
+
+                {% if object and user.is_admin_lef %}
+
+                    <div class="field field-full admin-correction-field">
+
+                        <div class="admin-correction-heading">
+
+                            <span class="admin-correction-icon" aria-hidden="true">
+                                <svg>
+                                    <use href="#icon-edit"></use>
+                                </svg>
+                            </span>
+
+                            <div>
+                                <label for="id_motivazione">
+                                    Motivazione della correzione Admin
+                                </label>
+
+                                <span>
+                                    La modifica verrà registrata nell'audit.
+                                </span>
+                            </div>
+
+                        </div>
+
+
+                        <textarea
+                            id="id_motivazione"
+                            name="motivazione"
+                            placeholder="Indicare perché la spesa viene corretta."></textarea>
+
+                        <div class="field-help">
+                            Dopo la correzione la spesa verrà bloccata per il consulente.
+                        </div>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="form-actions form-actions-modern">
+
+                <a
+                    class="button button-ghost"
+                    href="{% url 'timesheets:spesa-list' %}">
+
+                    Annulla
+
+                </a>
+
+                <button
+                    class="button button-primary"
+                    type="submit">
+
+                    <svg class="btn-icon" aria-hidden="true">
+                        <use href="#icon-check"></use>
+                    </svg>
+
+                    {% if object %}
+                        Salva modifiche
+                    {% else %}
+                        Registra spesa
+                    {% endif %}
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+{% endblock %}

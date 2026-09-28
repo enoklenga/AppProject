@@ -1,0 +1,623 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dashboard di progetto | LEFTRACK{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-page dashboard-pm-page">
+
+    <!-- HEADER -->
+
+    <div class="page-header">
+
+        <div>
+
+            <div class="eyebrow">
+                Project Management
+            </div>
+
+            <h1>
+                Dashboard
+            </h1>
+
+
+        </div>
+
+    </div>
+
+
+    {% if not commesse_pm %}
+
+        <div class="panel dashboard-pm-empty">
+
+            <div class="table-empty-content">
+
+                <strong>
+                    Nessuna commessa gestita
+                </strong>
+
+                <span>
+                    Non risultano commesse con un'assegnazione
+                    Project Manager attiva.
+                </span>
+
+            </div>
+
+        </div>
+
+
+    {% else %}
+
+        <!-- FILTRI -->
+
+        <form
+            class="filter-bar dashboard-pm-filter"
+            method="get">
+
+            <div class="field">
+
+                <label for="id_mese">
+                    Mese
+                </label>
+
+                <input
+                    id="id_mese"
+                    type="month"
+                    name="mese"
+                    value="{{ mese_selezionato }}">
+
+            </div>
+
+
+            <div class="field">
+
+                <label for="id_commessa">
+                    Commessa gestita
+                </label>
+
+                <select
+                    id="id_commessa"
+                    name="commessa">
+
+                    {% for commessa in commesse_pm %}
+
+                        <option
+                            value="{{ commessa.id }}"
+                            {% if commessa_selezionata == commessa.id|stringformat:"s" %}selected{% endif %}>
+
+                            {{ commessa.codice }} – {{ commessa.cliente }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <button
+                class="button button-primary"
+                type="submit">
+
+                <svg
+                    class="btn-icon"
+                    aria-hidden="true">
+
+                    <use href="#icon-refresh"></use>
+
+                </svg>
+
+                Aggiorna
+
+            </button>
+
+        </form>
+
+
+        {% if dashboard %}
+
+            <!-- COMMESSA ATTIVA -->
+
+            <section class="dashboard-pm-project">
+
+                <div>
+
+                    <div class="eyebrow">
+                        Commessa selezionata
+                    </div>
+
+                    <h2>
+                        {{ dashboard.commessa.codice }}
+                    </h2>
+
+                    <p>
+                        {{ dashboard.commessa.cliente }}
+                    </p>
+
+                </div>
+
+
+                <a
+                    class="row-action row-action-primary"
+                    href="{% url 'projects:commessa-teamwork' dashboard.commessa.id %}">
+
+                    Apri Teamwork
+
+                    <svg
+                        class="btn-icon"
+                        aria-hidden="true">
+
+                        <use href="#icon-arrow-right"></use>
+
+                    </svg>
+
+                </a>
+
+            </section>
+
+
+            <!-- KPI -->
+
+            <section
+                class="kpi-grid dashboard-pm-kpi-grid"
+                aria-label="Indicatori principali">
+
+                <article class="kpi-card">
+
+                    <span class="kpi-label">
+                        Ore previste team
+                    </span>
+
+                    <strong class="kpi-value">
+                        {{ dashboard.totale_ore_previste }}
+                    </strong>
+
+                    <span class="kpi-meta">
+                        Monte ore complessivo
+                    </span>
+
+                </article>
+
+
+                <article
+                    class="kpi-card"
+                    data-tone="success">
+
+                    <span class="kpi-label">
+                        Ore consuntivate
+                    </span>
+
+                    <strong class="kpi-value">
+                        {{ dashboard.totale_ore_consuntivate }}
+                    </strong>
+
+                    <span class="kpi-meta">
+                        Consuntivazione cumulativa
+                    </span>
+
+                </article>
+
+
+                <article
+                    class="kpi-card"
+                    data-tone="neutral">
+
+                    <span class="kpi-label">
+                        Ore residue
+                    </span>
+
+                    <strong class="kpi-value">
+                        {{ dashboard.totale_ore_residue }}
+                    </strong>
+
+                    <span class="kpi-meta">
+                        Monte ore disponibile
+                    </span>
+
+                </article>
+
+
+                <article class="kpi-card">
+
+                    <span class="kpi-label">
+                        Ore del mese
+                    </span>
+
+                    <strong class="kpi-value">
+                        {{ dashboard.totale_ore_periodo }}
+                    </strong>
+
+                    <span class="kpi-meta">
+                        Ore registrate nel periodo
+                    </span>
+
+                </article>
+
+            </section>
+
+
+            <!-- DATA -->
+
+            {{ visuals.ore_giornaliere|json_script:"chart-pm-daily-data" }}
+            {{ visuals.team|json_script:"chart-pm-team-data" }}
+
+
+            <!-- CHARTS -->
+
+            <div class="chart-grid chart-grid-equal dashboard-pm-chart-grid">
+
+                <section class="chart-card">
+
+                    <div class="chart-card-header">
+
+                        <div>
+
+                            <div class="eyebrow">
+                                Consuntivazione
+                            </div>
+
+                            <h2>
+                                Andamento ore nel mese
+                            </h2>
+
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="dashboard-chart"
+                        data-dashboard-chart
+                        data-chart-type="line"
+                        data-source="chart-pm-daily-data"
+                        aria-label="Grafico andamento ore del team">
+                    </div>
+
+                </section>
+
+
+                <section class="chart-card">
+
+                    <div class="chart-card-header">
+
+                        <div>
+
+                            <div class="eyebrow">
+                                Team
+                            </div>
+
+                            <h2>
+                                Carico del team
+                            </h2>
+
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="dashboard-chart"
+                        data-dashboard-chart
+                        data-chart-type="bar"
+                        data-source="chart-pm-team-data"
+                        aria-label="Grafico carico del team">
+                    </div>
+
+
+                    <div
+                        class="chart-legend"
+                        aria-hidden="true">
+
+                        <span class="legend-item">
+                            <span class="legend-dot"></span>
+                            Previste
+                        </span>
+
+                        <span class="legend-item">
+                            <span class="legend-dot"></span>
+                            Consuntivate
+                        </span>
+
+                        <span class="legend-item">
+                            <span class="legend-dot"></span>
+                            Mese
+                        </span>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+
+            <!-- TEAM -->
+
+            <section class="panel data-panel dashboard-pm-section">
+
+                <div class="panel-heading">
+
+                    <div>
+
+                        <div class="eyebrow">
+                            Risorse
+                        </div>
+
+                        <h2>
+                            Avanzamento del team
+                        </h2>
+
+
+                    </div>
+
+                </div>
+
+
+                <div class="table-wrapper">
+
+                    <table class="data-table dashboard-pm-team-table">
+
+                        <caption class="sr-only">
+                            Avanzamento del team per consulente
+                        </caption>
+
+                        <thead>
+
+                            <tr>
+                                <th scope="col">Consulente</th>
+                                <th scope="col">Fase</th>
+                                <th scope="col">Ruolo</th>
+                                <th scope="col">Stato</th>
+                                <th scope="col">Ore previste</th>
+                                <th scope="col">Consuntivate</th>
+                                <th scope="col">Residue</th>
+                                <th scope="col">Ore mese</th>
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {% for voce in dashboard.team %}
+
+                                <tr class="{% if voce.superamento %}row-warning{% endif %}">
+
+                                    <td class="table-primary">
+                                        {{ voce.assegnazione.consulente }}
+                                    </td>
+
+
+                                    <td>
+
+                                        {% if voce.assegnazione.fase.sistema %}
+                                            Predefinita
+                                        {% else %}
+                                            {{ voce.assegnazione.fase.nome }}
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <td>
+                                        {{ voce.assegnazione.get_ruolo_commessa_display }}
+                                    </td>
+
+
+                                    <td class="table-status">
+
+                                        <span class="badge">
+                                            {{ voce.assegnazione.get_stato_display }}
+                                        </span>
+
+                                    </td>
+
+
+                                    <td class="table-numeric">
+                                        {{ voce.ore_previste }}
+                                    </td>
+
+
+                                    <td class="table-numeric">
+                                        {{ voce.ore_consuntivate }}
+                                    </td>
+
+
+                                    <td class="{% if voce.superamento %}table-status{% else %}table-numeric{% endif %}">
+
+                                        {% if voce.superamento %}
+
+                                            <span class="badge badge-bloccata">
+                                                Monte ore superato
+                                            </span>
+
+                                        {% else %}
+
+                                            {{ voce.ore_residue }}
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <td class="table-numeric">
+                                        {{ voce.ore_periodo }}
+                                    </td>
+
+                                </tr>
+
+
+                            {% empty %}
+
+                                <tr>
+
+                                    <td
+                                        colspan="8"
+                                        class="empty-state">
+
+                                        <div class="table-empty-content">
+
+                                            <strong>
+                                                Nessuna assegnazione
+                                            </strong>
+
+                                            <span>
+                                                Non risultano assegnazioni
+                                                per la commessa selezionata.
+                                            </span>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+
+            <!-- ATTIVITÀ DEL MESE -->
+
+            <section class="panel data-panel dashboard-pm-section">
+
+                <div class="panel-heading">
+
+                    <div>
+
+                        <div class="eyebrow">
+                            Consuntivazione
+                        </div>
+
+                        <h2>
+                            Attività del mese
+                        </h2>
+
+
+                    </div>
+
+                </div>
+
+
+                <div class="table-wrapper">
+
+                    <table class="data-table dashboard-pm-hours-table">
+
+                        <caption class="sr-only">
+                            Attività registrate dal team nel mese
+                        </caption>
+
+                        <thead>
+
+                            <tr>
+                                <th scope="col">Data</th>
+                                <th scope="col">Consulente</th>
+                                <th scope="col">Attività</th>
+                                <th scope="col">Ore</th>
+                                <th scope="col">Nota</th>
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {% for riga in dashboard.righe_ore %}
+
+                                <tr>
+
+                                    <td>
+                                        {{ riga.data|date:"d/m/Y" }}
+                                    </td>
+
+
+                                    <td class="table-primary">
+                                        {{ riga.assegnazione.consulente }}
+                                    </td>
+
+
+                                    <td>
+                                        {{ riga.get_tipo_attivita_display }}
+                                    </td>
+
+
+                                    <td class="table-numeric">
+
+                                        <strong>
+                                            {{ riga.ore }}
+                                        </strong>
+
+                                        <span class="table-unit">
+                                            h
+                                        </span>
+
+                                    </td>
+
+
+                                    <td class="table-wrap">
+                                        {{ riga.nota|default:"—" }}
+                                    </td>
+
+                                </tr>
+
+
+                            {% empty %}
+
+                                <tr>
+
+                                    <td
+                                        colspan="5"
+                                        class="empty-state">
+
+                                        <div class="table-empty-content">
+
+                                            <strong>
+                                                Nessuna attività registrata
+                                            </strong>
+
+                                            <span>
+                                                Non risultano ore registrate
+                                                nel mese selezionato.
+                                            </span>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+        {% endif %}
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_script %}
+<script defer src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}

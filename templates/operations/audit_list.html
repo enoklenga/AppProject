@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% load data_display %}
+
+{% block title %}Audit | LEFTRACK{% endblock %}
+
+{% block content %}
+
+<div class="operations-page">
+
+    <div class="page-header">
+        <div>
+            <div class="eyebrow">Controllo</div>
+            <h1>Registro audit</h1>
+        </div>
+
+        <a
+            class="button button-secondary"
+            href="{% url 'operations:audit-csv' %}?{{ request.GET.urlencode }}">
+
+            <svg class="btn-icon" aria-hidden="true">
+                <use href="#icon-download"></use>
+            </svg>
+
+            Esporta CSV
+        </a>
+    </div>
+
+
+    <form
+        class="filter-bar list-filter-bar audit-filter"
+        method="get">
+
+        {% for field in form.visible_fields %}
+            <div class="field {% if field.errors %}field-has-error{% endif %}">
+                {{ field.label_tag }}
+                {{ field }}
+
+                {% if field.errors %}
+                    <div class="field-errors">
+                        {{ field.errors }}
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <button
+            class="button button-secondary"
+            type="submit">
+
+            <svg class="btn-icon" aria-hidden="true">
+                <use href="#icon-filter"></use>
+            </svg>
+
+            Applica filtri
+        </button>
+
+    </form>
+
+
+    <section class="audit-panel">
+
+        <div class="audit-panel-heading">
+
+            <div>
+                <div class="eyebrow">Cronologia</div>
+                <h2>Eventi registrati</h2>
+            </div>
+
+        </div>
+
+
+        <div class="audit-list">
+
+            {% for evento in eventi %}
+
+                <article class="audit-event-modern">
+
+                    <div class="audit-event-header">
+
+                        <div class="audit-event-identity">
+
+                            <span class="badge badge-pending">
+                                {{ evento.log.azione }}
+                            </span>
+
+                            <div class="audit-event-title">
+
+                                <strong>
+                                    {{ evento.entita_display|default:evento.log.entita }}
+                                </strong>
+
+                                {% if not evento.entita_display %}
+                                    <span>
+                                        {{ evento.log.entita_id }}
+                                    </span>
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="audit-meta">
+
+                            <strong>
+                                {{ evento.log.created_at|date:"d/m/Y H:i:s" }}
+                            </strong>
+
+                            <span>
+                                {{ evento.log.utente }}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    {% if evento.log.motivazione %}
+
+                        <div class="audit-reason">
+                            <span>Motivazione</span>
+                            <p>{{ evento.log.motivazione }}</p>
+                        </div>
+
+                    {% endif %}
+
+
+                    <div class="audit-values">
+
+                        <details>
+
+                            <summary>
+                                Valore precedente
+                            </summary>
+
+                            <div class="audit-value-content">
+                                {% readable_data evento.precedente_json "Nessun valore precedente" %}
+                            </div>
+
+                        </details>
+
+
+                        <details>
+
+                            <summary>
+                                Nuovo valore
+                            </summary>
+
+                            <div class="audit-value-content">
+                                {% readable_data evento.nuovo_json "Nessun nuovo valore" %}
+                            </div>
+
+                        </details>
+
+                    </div>
+
+                </article>
+
+
+            {% empty %}
+
+                <div class="table-empty-content audit-empty">
+
+                    <strong>
+                        Nessun evento trovato
+                    </strong>
+
+                    <span>
+                        Nessun evento corrisponde ai filtri selezionati.
+                    </span>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+
+    {% include "common/pagination.html" %}
+
+</div>
+
+{% endblock %}

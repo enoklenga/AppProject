@@ -1,0 +1,44 @@
+/* ==========================================================================
+   Branding LEF asset-ready
+   Asset atteso: images/branding/lef-logo.png
+   ========================================================================== */
+
+.brand-logo-slot {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex: 0 0 auto;
+    background: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.32);
+    box-shadow: 0 4px 16px rgba(7, 33, 52, 0.16);
+}
+
+.brand-logo-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    background: #ffffff;
+}
+
+.brand-logo-slot-sidebar {
+    width: 62px;
+    height: 46px;
+    padding: 4px;
+    border-radius: 10px;
+}
+
+.brand-logo-slot-guest {
+    width: 62px;
+    height: 46px;
+    padding: 4px;
+    border-radius: 10px;
+}
+
+.brand-logo-slot-sidebar .brand-logo-image,
+.brand-logo-slot-guest .brand-logo-image {
+    border-radius: 6px;
+}

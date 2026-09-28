@@ -1,0 +1,24 @@
+{% if nav_data.breadcrumbs %}
+<div class="navigation-row">
+    <nav class="breadcrumbs" aria-label="Percorso di navigazione">
+        <ol>
+            {% for breadcrumb in nav_data.breadcrumbs %}
+                <li>
+                    {% if breadcrumb.url %}
+                        <a href="{{ breadcrumb.url }}">{{ breadcrumb.label }}</a>
+                    {% else %}
+                        <span aria-current="page">{{ breadcrumb.label }}</span>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ol>
+    </nav>
+
+    {% if nav_data.back_url %}
+        <a class="back-link" href="{{ nav_data.back_url }}">
+            <svg class="btn-icon" aria-hidden="true"><use href="#icon-arrow-left"></use></svg>
+            <span>{{ nav_data.back_label }}</span>
+        </a>
+    {% endif %}
+</div>
+{% endif %}

@@ -1,0 +1,91 @@
+/* =========================================================
+   LEF TIMESHEET — DOCUMENTS
+   ========================================================= */
+
+.documents-page {
+    display: grid;
+    gap: 24px;
+}
+
+/* ---------------------------------------------------------
+   FORM UPLOAD
+   --------------------------------------------------------- */
+
+.documents-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 20px;
+}
+
+.documents-form-grid .field-full {
+    grid-column: 1 / -1;
+}
+
+.field-hint {
+    margin-top: 6px;
+    color: var(--lef-muted);
+    font-size: 12px;
+}
+
+/* ---------------------------------------------------------
+   ELENCO DOCUMENTI
+   --------------------------------------------------------- */
+
+.document-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--lef-navy-900);
+    font-weight: 700;
+}
+
+.document-name .btn-icon {
+    color: var(--lef-muted);
+}
+
+.document-description {
+    margin: 4px 0 0;
+    color: var(--lef-muted);
+    font-size: 12px;
+}
+
+.document-category {
+    display: inline-flex;
+    align-items: center;
+
+    min-height: 22px;
+
+    padding: 3px 9px;
+
+    border: 1px solid transparent;
+    border-radius: 999px;
+
+    font-size: 10.5px;
+    font-weight: 800;
+
+    white-space: nowrap;
+}
+
+.document-category-contratto {
+    color: var(--lef-warning);
+    background: var(--lef-warning-soft);
+    border-color: rgba(145, 100, 0, 0.14);
+}
+
+.document-category-obiettivo {
+    color: var(--lef-info);
+    background: var(--lef-info-soft);
+    border-color: rgba(40, 117, 167, 0.14);
+}
+
+.document-category-altro {
+    color: var(--lef-muted);
+    background: var(--lef-background-soft);
+    border-color: var(--lef-border);
+}
+
+@media (max-width: 760px) {
+    .documents-form-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,1254 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Pianificazione | LEFTRACK{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/planning.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="planning-page">
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <div class="page-header">
+
+        <div>
+
+            <div class="eyebrow">
+                Operatività
+            </div>
+
+            <h1>
+                Pianificazione
+            </h1>
+
+
+        </div>
+
+
+        {% if puo_pianificare %}
+
+            <a
+                class="button button-primary"
+                href="{% url 'planning:pianificazione-create' %}{% if commessa_selezionata %}?commessa={{ commessa_selezionata }}{% if fase_selezionata %}&fase={{ fase_selezionata }}{% endif %}{% endif %}">
+
+                <svg
+                    class="btn-icon"
+                    aria-hidden="true">
+
+                    <use href="#icon-plus"></use>
+
+                </svg>
+
+                Pianifica ore
+
+            </a>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- =====================================================
+         FILTRI
+         ===================================================== -->
+
+    <form
+        class="filter-bar list-filter-bar planning-filter"
+        method="get">
+
+        <input
+            type="hidden"
+            name="vista"
+            value="{{ vista }}">
+
+        <input
+            type="hidden"
+            name="data"
+            value="{{ data_riferimento }}">
+
+
+        {% if mostra_filtro_consulente %}
+
+            <div class="field">
+
+                <label for="planning_consulente">
+                    Consulente
+                </label>
+
+                <select
+                    id="planning_consulente"
+                    name="consulente">
+
+                    <option value="">
+                        Tutti
+                    </option>
+
+                    {% for consulente in consulenti_filtro %}
+
+                        <option
+                            value="{{ consulente.pk }}"
+                            {% if consulente_selezionato == consulente.pk|stringformat:"s" %}selected{% endif %}>
+
+                            {{ consulente }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+        {% endif %}
+
+
+        <div class="field">
+
+            <label for="planning_commessa">
+                Commessa
+            </label>
+
+            <select
+                id="planning_commessa"
+                name="commessa">
+
+                <option value="">
+                    Tutte
+                </option>
+
+                {% for commessa in commesse_filtro %}
+
+                    <option
+                        value="{{ commessa.pk }}"
+                        {% if commessa_selezionata == commessa.pk|stringformat:"s" %}selected{% endif %}>
+
+                        {{ commessa.codice }} – {{ commessa.cliente.ragione_sociale }}
+
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <div class="field">
+
+            <label for="planning_fase">
+                Fase
+            </label>
+
+            <select
+                id="planning_fase"
+                name="fase">
+
+                <option value="">
+                    Tutte
+                </option>
+
+                {% for fase in fasi_filtro %}
+
+                    <option
+                        value="{{ fase.pk }}"
+                        {% if fase_selezionata == fase.pk|stringformat:"s" %}selected{% endif %}>
+
+                        {{ fase.commessa.codice }} – {{ fase.nome }}
+
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <button
+            class="button button-secondary"
+            type="submit">
+
+            <svg
+                class="btn-icon"
+                aria-hidden="true">
+
+                <use href="#icon-filter"></use>
+
+            </svg>
+
+            Applica
+
+        </button>
+
+    </form>
+
+
+    <!-- =====================================================
+         NAVIGAZIONE PERIODO
+         ===================================================== -->
+
+    <div class="planning-toolbar planning-toolbar-modern">
+
+        <div class="planning-period-navigation">
+
+            <a
+                class="button button-secondary"
+                href="{{ precedente_url }}">
+
+                Precedente
+
+            </a>
+
+
+            <a
+                class="button button-ghost"
+                href="{{ oggi_url }}">
+
+                Oggi
+
+            </a>
+
+
+            <a
+                class="button button-secondary"
+                href="{{ successivo_url }}">
+
+                Successivo
+
+            </a>
+
+        </div>
+
+
+        <div class="planning-period-title">
+            {{ titolo_periodo }}
+        </div>
+
+
+        <div
+            class="planning-view-switch"
+            aria-label="Tipo di visualizzazione">
+
+            <a
+                class="planning-view-button{% if vista == 'mese' %} is-active{% endif %}"
+                href="{{ mese_url }}">
+
+                Mese
+
+            </a>
+
+
+            <a
+                class="planning-view-button{% if vista == 'settimana' %} is-active{% endif %}"
+                href="{{ settimana_url }}">
+
+                Settimana
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         KPI
+         ===================================================== -->
+
+    <div class="metric-grid planning-kpi-grid">
+
+        <article class="metric-card">
+
+            <span>
+                Ore pianificate
+            </span>
+
+            <strong>
+                {{ totale_ore }}
+            </strong>
+
+        </article>
+
+
+        <article class="metric-card">
+
+            <span>
+                Giornate
+            </span>
+
+            <strong>
+                {{ numero_giornate }}
+            </strong>
+
+        </article>
+
+
+        <article class="metric-card">
+
+            <span>
+                Commesse
+            </span>
+
+            <strong>
+                {{ numero_commesse }}
+            </strong>
+
+        </article>
+
+    </div>
+
+
+    <!-- =====================================================
+         PIANIFICATO VS CONSUNTIVATO
+         ===================================================== -->
+
+    <section class="panel planning-comparison">
+
+        <div class="panel-heading">
+
+            <div>
+
+                <div class="eyebrow">
+                    Monitoraggio
+                </div>
+
+                <h2>
+                    Pianificato vs Consuntivato
+                </h2>
+
+
+                {% if confronto.valutabile %}
+                    <p>{{ confronto.data_inizio|date:"d/m/Y" }} – {{ confronto.data_fine|date:"d/m/Y" }}</p>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        {% if confronto.valutabile %}
+
+            <div class="metric-grid planning-comparison-metrics">
+
+                <article class="metric-card">
+
+                    <span>
+                        Pianificato
+                    </span>
+
+                    <strong>
+                        {{ confronto.ore_pianificate }} h
+                    </strong>
+
+                </article>
+
+
+                <article class="metric-card">
+
+                    <span>
+                        Consuntivato
+                    </span>
+
+                    <strong>
+                        {{ confronto.ore_consuntivate }} h
+                    </strong>
+
+                </article>
+
+
+                <article class="metric-card">
+
+                    <span>
+                        Scostamento
+                    </span>
+
+                    <strong>
+                        {% if confronto.scostamento > 0 %}+{% endif %}{{ confronto.scostamento }} h
+                    </strong>
+
+                    <small>
+                        Differenza
+                    </small>
+
+                </article>
+
+            </div>
+
+
+            {% if confronto.percentuale_scostamento != None %}
+
+                <div class="planning-comparison-summary">
+
+                    <span>
+                        Scostamento percentuale
+                    </span>
+
+                    <strong>
+                        {% if confronto.percentuale_scostamento > 0 %}+{% endif %}{{ confronto.percentuale_scostamento|floatformat:"-1" }}%
+                    </strong>
+
+                </div>
+
+            {% endif %}
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- =====================================================
+         VISTA MENSILE
+         ===================================================== -->
+
+    {% if vista == "mese" %}
+
+        <section class="planning-calendar-card">
+
+            <div class="planning-calendar-weekdays">
+
+                <span>Lun</span>
+                <span>Mar</span>
+                <span>Mer</span>
+                <span>Gio</span>
+                <span>Ven</span>
+                <span>Sab</span>
+                <span>Dom</span>
+
+            </div>
+
+
+            <div class="planning-calendar">
+
+                {% for settimana in calendar_weeks %}
+
+                    {% for giorno in settimana %}
+
+                        <article
+                            class="
+                                planning-day
+                                {% if not giorno.nel_mese %} is-outside{% endif %}
+                                {% if giorno.oggi %} is-today{% endif %}
+                                {% if giorno.passato %} is-past{% endif %}
+                            ">
+
+                            <div class="planning-day-header">
+
+                                <time
+                                    datetime="{{ giorno.data|date:'Y-m-d' }}"
+                                    class="planning-day-number">
+
+                                    {{ giorno.data.day }}
+
+                                </time>
+
+
+                                {% if giorno.puo_creare %}
+
+                                    <a
+                                        class="planning-day-add"
+                                        href="{% url 'planning:pianificazione-create' %}?data={{ giorno.data|date:'Y-m-d' }}{% if commessa_selezionata %}&commessa={{ commessa_selezionata }}{% endif %}{% if fase_selezionata %}&fase={{ fase_selezionata }}{% endif %}"
+                                        title="Pianifica ore per il {{ giorno.data|date:'d/m/Y' }}"
+                                        aria-label="Pianifica ore per il {{ giorno.data|date:'d/m/Y' }}">
+
+                                        <svg
+                                            class="btn-icon"
+                                            aria-hidden="true">
+
+                                            <use href="#icon-plus"></use>
+
+                                        </svg>
+
+                                    </a>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <div class="planning-events">
+
+                                {% for evento in giorno.eventi %}
+
+                                    {% with pianificazione=evento.object %}
+
+                                        {% if evento.can_edit %}
+
+                                            <a
+                                                class="planning-event"
+                                                href="{% url 'planning:pianificazione-update' pianificazione.pk %}?commessa={{ pianificazione.assegnazione.commessa_id }}&fase={{ pianificazione.assegnazione.fase_id }}">
+
+                                                <span class="planning-event-main">
+
+                                                    <strong>
+                                                        {{ pianificazione.assegnazione.commessa.codice }} · {{ pianificazione.assegnazione.fase.nome }}
+                                                    </strong>
+
+                                                    <span>
+                                                        {{ pianificazione.ore_pianificate }}h
+                                                    </span>
+
+                                                </span>
+
+
+                                                {% if evento.mostra_consulente %}
+
+                                                    <small>
+                                                        {{ pianificazione.assegnazione.consulente }}
+                                                    </small>
+
+                                                {% endif %}
+
+                                                <small>
+                                                    {% if pianificazione.confermata %}✓ Confermata{% elif evento.can_confirm %}Da confermare{% else %}{{ pianificazione.get_tipo_attivita_display }}{% endif %}
+                                                </small>
+
+                                            </a>
+
+
+                                        {% else %}
+
+                                            <div class="planning-event is-readonly">
+
+                                                <span class="planning-event-main">
+
+                                                    <strong>
+                                                        {{ pianificazione.assegnazione.commessa.codice }} · {{ pianificazione.assegnazione.fase.nome }}
+                                                    </strong>
+
+                                                    <span>
+                                                        {{ pianificazione.ore_pianificate }}h
+                                                    </span>
+
+                                                </span>
+
+
+                                                {% if evento.mostra_consulente %}
+
+                                                    <small>
+                                                        {{ pianificazione.assegnazione.consulente }}
+                                                    </small>
+
+                                                {% endif %}
+
+                                            </div>
+
+                                        {% endif %}
+
+                                    {% endwith %}
+
+                                {% endfor %}
+
+                            </div>
+
+                        </article>
+
+                    {% endfor %}
+
+                {% endfor %}
+
+            </div>
+
+        </section>
+
+    {% endif %}
+
+
+    <!-- =====================================================
+         VISTA SETTIMANALE
+         ===================================================== -->
+
+    {% if vista == "settimana" %}
+
+        <section class="planning-week-card">
+
+            <div class="planning-week">
+
+                {% for giorno in week_days %}
+
+                    <article
+                        class="
+                            planning-week-day
+                            {% if giorno.oggi %} is-today{% endif %}
+                            {% if giorno.passato %} is-past{% endif %}
+                        ">
+
+                        <div class="planning-week-day-header">
+
+                            <div>
+
+                                <strong>
+                                    {{ giorno.nome }}
+                                </strong>
+
+                                <span>
+                                    {{ giorno.data|date:"d/m" }}
+                                </span>
+
+                            </div>
+
+
+                            {% if giorno.puo_creare %}
+
+                                <a
+                                    class="planning-day-add"
+                                    href="{% url 'planning:pianificazione-create' %}?data={{ giorno.data|date:'Y-m-d' }}{% if commessa_selezionata %}&commessa={{ commessa_selezionata }}{% endif %}{% if fase_selezionata %}&fase={{ fase_selezionata }}{% endif %}"
+                                    aria-label="Pianifica ore per il {{ giorno.data|date:'d/m/Y' }}">
+
+                                    <svg
+                                        class="btn-icon"
+                                        aria-hidden="true">
+
+                                        <use href="#icon-plus"></use>
+
+                                    </svg>
+
+                                </a>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <div class="planning-events">
+
+                            {% for evento in giorno.eventi %}
+
+                                {% with pianificazione=evento.object %}
+
+                                    {% if evento.can_edit %}
+
+                                        <a
+                                            class="planning-event"
+                                            href="{% url 'planning:pianificazione-update' pianificazione.pk %}?commessa={{ pianificazione.assegnazione.commessa_id }}&fase={{ pianificazione.assegnazione.fase_id }}">
+
+                                            <span class="planning-event-main">
+
+                                                <strong>
+                                                    {{ pianificazione.assegnazione.commessa.codice }}
+                                                </strong>
+
+                                                <span>
+                                                    {{ pianificazione.ore_pianificate }}h
+                                                </span>
+
+                                            </span>
+
+
+                                            {% if evento.mostra_consulente %}
+
+                                                <small>
+                                                    {{ pianificazione.assegnazione.consulente }}
+                                                </small>
+
+                                            {% endif %}
+
+                                        </a>
+
+
+                                    {% else %}
+
+                                        <div class="planning-event is-readonly">
+
+                                            <span class="planning-event-main">
+
+                                                <strong>
+                                                    {{ pianificazione.assegnazione.commessa.codice }}
+                                                </strong>
+
+                                                <span>
+                                                    {{ pianificazione.ore_pianificate }}h
+                                                </span>
+
+                                            </span>
+
+
+                                            {% if evento.mostra_consulente %}
+
+                                                <small>
+                                                    {{ pianificazione.assegnazione.consulente }}
+                                                </small>
+
+                                            {% endif %}
+
+                                        </div>
+
+                                    {% endif %}
+
+                                {% endwith %}
+
+
+                            {% empty %}
+
+                                <span class="planning-day-empty">
+                                    Nessuna attività
+                                </span>
+
+                            {% endfor %}
+
+                        </div>
+
+                    </article>
+
+                {% endfor %}
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             CARICO SETTIMANALE
+             ================================================= -->
+
+        <section class="panel planning-load-panel">
+
+            <div class="panel-heading">
+
+                <div>
+
+                    <div class="eyebrow">
+                        Capacità
+                    </div>
+
+                    <h2>
+                        Carico settimanale
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="planning-load-list">
+
+                {% for carico in carichi_settimanali %}
+
+                    <div
+                        class="planning-load-item{% if carico.sovraccarico %} is-over{% endif %}">
+
+                        <div class="planning-load-heading">
+
+                            <strong>
+                                {{ carico.consulente }}
+                            </strong>
+
+                            <span>
+
+                                {{ carico.ore }} h occupate · {{ carico.disponibili }} h disponibili
+
+                                {% if carico.sovraccarico %}
+                                    · Sovraccarico
+                                {% endif %}
+
+                            </span>
+
+                        </div>
+
+
+                        <div class="planning-load-track">
+
+                            <progress
+                                class="planning-load-progress"
+                                value="{{ carico.percentuale }}"
+                                max="100"
+                                aria-label="Carico {{ carico.ore }} ore su {{ carico.capacita }}">
+
+                                {{ carico.percentuale|floatformat:"-1" }}%
+
+                            </progress>
+
+                        </div>
+
+                    </div>
+
+
+                {% empty %}
+
+                    <div class="empty-state">
+
+                        <div class="table-empty-content">
+
+                            <strong>
+                                Nessun consulente disponibile
+                            </strong>
+
+                            <span>
+                                Non risultano carichi da visualizzare nella settimana selezionata.
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </section>
+
+    {% endif %}
+
+
+    <!-- =====================================================
+         DETTAGLIO PIANIFICAZIONE
+         ===================================================== -->
+
+    <section class="panel data-panel planning-main-panel">
+
+        <div class="panel-heading">
+
+            <div>
+
+                <div class="eyebrow">
+                    Dettaglio
+                </div>
+
+                <h2>
+                    Pianificazione registrata
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+            <table class="data-table planning-main-table">
+
+                <thead>
+
+                    <tr>
+                        <th scope="col">Data</th>
+                        <th scope="col">Consulente</th>
+                        <th scope="col">Commessa</th>
+                        <th scope="col">Fase</th>
+                        <th scope="col">Cliente</th>
+                        <th scope="col">Ore</th>
+                        <th scope="col">Tipo</th>
+                        <th scope="col">Stato</th>
+                        {% if mostra_azioni %}
+                            <th scope="col" class="actions-column">
+                                Azioni
+                            </th>
+                        {% endif %}
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for evento in righe %}
+
+                        {% with pianificazione=evento.object %}
+
+                            <tr>
+
+                                <td class="table-date">
+
+                                    <strong>
+                                        {{ pianificazione.data|date:"d/m/Y" }}
+                                    </strong>
+
+                                </td>
+
+
+                                <td>
+
+                                    <div class="table-stack">
+
+                                        <strong>
+                                            {{ pianificazione.assegnazione.consulente }}
+                                        </strong>
+
+                                    </div>
+
+                                </td>
+
+
+                                <td class="table-primary">
+
+                                    {{ pianificazione.assegnazione.commessa.codice }}
+
+                                </td>
+
+
+                                <td>
+
+                                    {{ pianificazione.assegnazione.fase.nome }}
+
+                                </td>
+
+
+                                <td>
+
+                                    {{ pianificazione.assegnazione.commessa.cliente.ragione_sociale }}
+
+                                </td>
+
+
+                                <td class="table-numeric">
+
+                                    <strong>
+                                        {{ pianificazione.ore_pianificate }}
+                                    </strong>
+
+                                    <span class="table-unit">
+                                        h
+                                    </span>
+
+                                </td>
+
+
+                                <td>
+                                    {{ pianificazione.get_tipo_attivita_display }}
+                                </td>
+
+
+                                <td class="table-status">
+
+                                    {% if pianificazione.confermata %}
+
+                                        <span class="badge badge-attiva">
+                                            Confermata
+                                        </span>
+
+                                    {% elif pianificazione.data <= oggi %}
+
+                                        <span class="badge badge-chiusa">
+                                            Da confermare
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="badge badge-attiva">
+                                            Pianificata
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                {% if mostra_azioni %}
+                                <td class="table-actions">
+
+                                    <div class="row-actions">
+
+                                        {% if evento.can_confirm %}
+
+                                            <form method="post" action="{% url 'planning:pianificazione-confirm' pianificazione.pk %}">
+                                                {% csrf_token %}
+                                                <button class="row-action row-action-primary planning-action-confirm" type="submit">
+                                                    <svg class="btn-icon" aria-hidden="true"><use href="#icon-check"></use></svg>
+                                                    Conferma
+                                                </button>
+                                            </form>
+
+                                        {% endif %}
+
+                                        {% if evento.can_edit %}
+
+                                            <a
+                                                class="row-action planning-action-icon"
+                                                href="{% url 'planning:pianificazione-update' pianificazione.pk %}?commessa={{ pianificazione.assegnazione.commessa_id }}&fase={{ pianificazione.assegnazione.fase_id }}"
+                                                aria-label="Modifica pianificazione"
+                                                title="Modifica">
+
+                                                <svg class="btn-icon" aria-hidden="true">
+                                                    <use href="#icon-edit"></use>
+                                                </svg>
+                                                <span class="a11y-only">Modifica</span>
+
+                                            </a>
+
+                                        {% endif %}
+
+
+                                        {% if evento.can_delete %}
+
+                                            <a
+                                                class="row-action row-action-danger planning-action-icon"
+                                                href="{% url 'planning:pianificazione-delete' pianificazione.pk %}?commessa={{ pianificazione.assegnazione.commessa_id }}&fase={{ pianificazione.assegnazione.fase_id }}"
+                                                aria-label="Elimina pianificazione"
+                                                title="Elimina">
+
+                                                <svg class="btn-icon" aria-hidden="true">
+                                                    <use href="#icon-trash"></use>
+                                                </svg>
+                                                <span class="a11y-only">Elimina</span>
+
+                                            </a>
+
+                                        {% endif %}
+
+
+                                    </div>
+
+                                </td>
+                                {% endif %}
+
+                            </tr>
+
+                        {% endwith %}
+
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td
+                                colspan="{% if mostra_azioni %}9{% else %}8{% endif %}"
+                                class="empty-state">
+
+                                <div class="table-empty-content">
+
+                                    <strong>
+                                        Nessuna pianificazione
+                                    </strong>
+
+                                    <span>
+                                        Non risultano pianificazioni nel periodo selezionato.
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         CONFRONTO PER CONSULENTE
+         ===================================================== -->
+
+    {% if confronto_consulenti %}
+
+        <section class="panel data-panel planning-detail-section">
+
+            <div class="panel-heading">
+
+                <div>
+
+                    <div class="eyebrow">
+                        Analisi
+                    </div>
+
+                    <h2>
+                        Confronto per consulente
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="table-wrapper">
+
+                <table class="data-table planning-detail-table planning-consultant-table">
+
+                    <thead>
+
+                        <tr>
+                            <th scope="col">Consulente</th>
+                            <th scope="col">Pianificato</th>
+                            <th scope="col">Consuntivato</th>
+                            <th scope="col">Scostamento</th>
+                            <th scope="col">Scost. %</th>
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for riga in confronto_consulenti %}
+
+                            <tr>
+
+                                <td class="table-primary">
+
+                                    {% if riga.consulente__first_name or riga.consulente__last_name %}
+
+                                        {{ riga.consulente__first_name }}
+                                        {{ riga.consulente__last_name }}
+
+                                    {% else %}
+
+                                        {{ riga.consulente__email }}
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td class="table-numeric">
+                                    {{ riga.ore_pianificate }} h
+                                </td>
+
+
+                                <td class="table-numeric">
+                                    {{ riga.ore_consuntivate }} h
+                                </td>
+
+
+                                <td class="table-numeric">
+
+                                    {% if riga.scostamento > 0 %}+{% endif %}{{ riga.scostamento }} h
+
+                                </td>
+
+
+                                <td class="table-numeric">
+
+                                    {% if riga.percentuale_scostamento != None %}
+
+                                        {% if riga.percentuale_scostamento > 0 %}+{% endif %}{{ riga.percentuale_scostamento|floatformat:"-1" }}%
+
+                                    {% else %}
+
+                                        —
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    {% endif %}
+
+
+    <!-- =====================================================
+         CONFRONTO PER COMMESSA
+         ===================================================== -->
+
+    {% if confronto_commesse %}
+
+        <section class="panel data-panel planning-detail-section">
+
+            <div class="panel-heading">
+
+                <div>
+
+                    <div class="eyebrow">
+                        Analisi
+                    </div>
+
+                    <h2>
+                        Confronto per commessa
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="table-wrapper">
+
+                <table class="data-table planning-detail-table planning-project-table">
+
+                    <thead>
+
+                        <tr>
+                            <th scope="col">Commessa</th>
+                            <th scope="col">Cliente</th>
+                            <th scope="col">Pianificato</th>
+                            <th scope="col">Consuntivato</th>
+                            <th scope="col">Scostamento</th>
+                            <th scope="col">Scost. %</th>
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for riga in confronto_commesse %}
+
+                            <tr>
+
+                                <td class="table-primary">
+                                    {{ riga.commessa__codice }}
+                                </td>
+
+
+                                <td>
+                                    {{ riga.commessa__cliente__ragione_sociale }}
+                                </td>
+
+
+                                <td class="table-numeric">
+                                    {{ riga.ore_pianificate }} h
+                                </td>
+
+
+                                <td class="table-numeric">
+                                    {{ riga.ore_consuntivate }} h
+                                </td>
+
+
+                                <td class="table-numeric">
+
+                                    {% if riga.scostamento > 0 %}+{% endif %}{{ riga.scostamento }} h
+
+                                </td>
+
+
+                                <td class="table-numeric">
+
+                                    {% if riga.percentuale_scostamento != None %}
+
+                                        {% if riga.percentuale_scostamento > 0 %}+{% endif %}{{ riga.percentuale_scostamento|floatformat:"-1" }}%
+
+                                    {% else %}
+
+                                        —
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

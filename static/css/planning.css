@@ -1,0 +1,1556 @@
+/* =========================================================
+   LEF Timesheet — Planning
+   ========================================================= */
+
+.planning-page {
+    display: grid;
+    gap: 24px;
+}
+
+
+/* =========================================================
+   FILTER
+   ========================================================= */
+
+.planning-filter {
+    margin: 0;
+}
+
+
+/* =========================================================
+   TOOLBAR
+   ========================================================= */
+
+.planning-toolbar {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        auto
+        minmax(0, 1fr);
+
+    align-items: center;
+
+    gap: 20px;
+}
+
+.planning-period-navigation {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.planning-period-title {
+    color: var(--lef-navy-900);
+
+    font-size: 18px;
+    font-weight: 750;
+
+    text-align: center;
+}
+
+.planning-view-switch {
+    display: inline-flex;
+
+    justify-self: end;
+
+    padding: 3px;
+
+    background: var(--lef-background-soft);
+
+    border: 1px solid var(--lef-border);
+    border-radius: 9px;
+}
+
+.planning-view-button {
+    min-width: 90px;
+
+    padding: 7px 12px;
+
+    color: var(--lef-muted);
+
+    border-radius: 7px;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    text-align: center;
+}
+
+.planning-view-button:hover {
+    color: var(--lef-navy-900);
+
+    text-decoration: none;
+}
+
+.planning-view-button.is-active {
+    color: var(--lef-navy-900);
+
+    background: var(--lef-surface);
+
+    box-shadow: var(--shadow-sm);
+}
+
+
+/* =========================================================
+   MONTH CALENDAR
+   ========================================================= */
+
+.planning-calendar-card,
+.planning-week-card {
+    min-width: 0;
+
+    overflow: hidden;
+
+    background: var(--lef-surface);
+
+    border: 1px solid var(--lef-border);
+    border-radius: var(--radius-lg);
+
+    box-shadow: var(--shadow-sm);
+}
+
+.planning-calendar-weekdays {
+    display: grid;
+
+    grid-template-columns:
+        repeat(7, minmax(0, 1fr));
+
+    background: var(--lef-background-soft);
+
+    border-bottom: 1px solid var(--lef-border);
+}
+
+.planning-calendar-weekdays span {
+    padding: 10px;
+
+    color: var(--lef-muted);
+
+    font-size: 10px;
+    font-weight: 800;
+
+    text-align: center;
+    text-transform: uppercase;
+
+    letter-spacing: 0.07em;
+}
+
+.planning-calendar {
+    display: grid;
+
+    grid-template-columns:
+        repeat(7, minmax(0, 1fr));
+}
+
+.planning-day {
+    min-width: 0;
+    min-height: 130px;
+
+    padding: 9px;
+
+    background: var(--lef-surface);
+
+    border-right: 1px solid var(--lef-border);
+    border-bottom: 1px solid var(--lef-border);
+}
+
+.planning-day:nth-child(7n) {
+    border-right: 0;
+}
+
+.planning-day.is-outside {
+    background: var(--lef-background-soft);
+
+    opacity: 0.55;
+}
+
+.planning-day.is-today {
+    box-shadow:
+        inset 0 0 0 2px
+        var(--lef-blue-600);
+}
+
+.planning-day.is-past:not(.is-today) {
+    background:
+        color-mix(
+            in srgb,
+            var(--lef-background-soft) 50%,
+            var(--lef-surface)
+        );
+}
+
+.planning-day-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 8px;
+
+    margin-bottom: 8px;
+}
+
+.planning-day-number {
+    width: 26px;
+    height: 26px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    color: var(--lef-navy-900);
+
+    font-size: 12px;
+    font-weight: 750;
+
+    border-radius: 50%;
+}
+
+.planning-day.is-today .planning-day-number {
+    color: #fff;
+
+    background: var(--lef-blue-600);
+}
+
+.planning-day-add {
+    width: 26px;
+    height: 26px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    color: var(--lef-blue-700);
+
+    background: transparent;
+
+    border-radius: 7px;
+}
+
+.planning-day-add:hover {
+    color: var(--lef-blue-700);
+
+    background: var(--lef-background-soft);
+
+    text-decoration: none;
+}
+
+.planning-day-add .btn-icon {
+    width: 13px;
+    height: 13px;
+}
+
+
+/* =========================================================
+   PLANNING EVENTS
+   ========================================================= */
+
+.planning-events {
+    min-width: 0;
+
+    display: grid;
+
+    gap: 5px;
+}
+
+.planning-event {
+    min-width: 0;
+
+    display: block;
+
+    padding: 7px 8px;
+
+    color: var(--lef-navy-900);
+
+    background:
+        color-mix(
+            in srgb,
+            var(--lef-blue-600) 8%,
+            var(--lef-surface)
+        );
+
+    border:
+        1px solid
+        color-mix(
+            in srgb,
+            var(--lef-blue-600) 18%,
+            var(--lef-border)
+        );
+
+    border-radius: 7px;
+}
+
+.planning-event:hover {
+    background:
+        color-mix(
+            in srgb,
+            var(--lef-blue-600) 13%,
+            var(--lef-surface)
+        );
+
+    text-decoration: none;
+}
+
+.planning-event.is-readonly {
+    cursor: default;
+}
+
+.planning-event-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 6px;
+}
+
+.planning-event-main strong {
+    min-width: 0;
+
+    overflow: hidden;
+
+    font-size: 11px;
+    font-weight: 750;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.planning-event-main span {
+    flex: 0 0 auto;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    font-variant-numeric: tabular-nums;
+}
+
+.planning-event small {
+    display: block;
+
+    margin-top: 3px;
+
+    overflow: hidden;
+
+    color: var(--lef-muted);
+
+    font-size: 9px;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   WEEK
+   ========================================================= */
+
+.planning-week {
+    display: grid;
+
+    grid-template-columns:
+        repeat(7, minmax(140px, 1fr));
+
+    overflow-x: auto;
+}
+
+.planning-week-day {
+    min-height: 250px;
+
+    padding: 12px;
+
+    border-right: 1px solid var(--lef-border);
+}
+
+.planning-week-day:last-child {
+    border-right: 0;
+}
+
+.planning-week-day.is-today {
+    background:
+        color-mix(
+            in srgb,
+            var(--lef-blue-600) 4%,
+            var(--lef-surface)
+        );
+}
+
+.planning-week-day.is-past {
+    opacity: 0.75;
+}
+
+.planning-week-day-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 8px;
+
+    margin-bottom: 14px;
+}
+
+.planning-week-day-header > div {
+    display: flex;
+    flex-direction: column;
+}
+
+.planning-week-day-header strong {
+    color: var(--lef-navy-900);
+
+    font-size: 12px;
+}
+
+.planning-week-day-header span {
+    margin-top: 2px;
+
+    color: var(--lef-muted);
+
+    font-size: 11px;
+}
+
+.planning-day-empty {
+    padding: 12px 4px;
+
+    color: var(--lef-muted);
+
+    font-size: 10px;
+
+    text-align: center;
+}
+
+/* =========================================================
+   WEEKLY LOAD
+   ========================================================= */
+
+.planning-load-list {
+    width: min(100%, 820px);
+
+    display: grid;
+    gap: 22px;
+
+    padding: 8px 24px 24px;
+
+    box-sizing: border-box;
+}
+
+.planning-load-item {
+    width: 100%;
+
+    display: grid;
+    gap: 8px;
+}
+
+.planning-load-heading {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) 110px;
+
+    align-items: center;
+    gap: 24px;
+}
+
+.planning-load-heading strong {
+    min-width: 0;
+
+    color: var(--lef-navy-900);
+
+    font-size: 13px;
+    font-weight: 700;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.planning-load-heading span {
+    color: var(--lef-muted);
+
+    font-size: 12px;
+    font-weight: 600;
+
+    text-align: right;
+    white-space: nowrap;
+
+    font-variant-numeric: tabular-nums;
+}
+
+.planning-load-track {
+    width: 100%;
+    height: 9px;
+
+    overflow: hidden;
+
+    background: var(--lef-background-soft);
+
+    border-radius: 999px;
+}
+
+.planning-load-progress {
+    width: 100%;
+    height: 9px;
+
+    display: block;
+
+    appearance: none;
+    -webkit-appearance: none;
+
+    border: 0;
+    border-radius: 999px;
+
+    overflow: hidden;
+
+    background: var(--lef-background-soft);
+}
+
+.planning-load-progress::-webkit-progress-bar {
+    background: var(--lef-background-soft);
+    border-radius: 999px;
+}
+
+.planning-load-progress::-webkit-progress-value {
+    background: var(--lef-blue-600);
+    border-radius: 999px;
+}
+
+.planning-load-progress::-moz-progress-bar {
+    background: var(--lef-blue-600);
+    border-radius: 999px;
+}
+
+.planning-load-item.is-over
+.planning-load-progress::-webkit-progress-value {
+    background: var(--lef-danger);
+}
+
+.planning-load-item.is-over
+.planning-load-progress::-moz-progress-bar {
+    background: var(--lef-danger);
+}
+
+.planning-load-item.is-over .planning-load-heading span {
+    color: var(--lef-danger);
+    font-weight: 700;
+}
+
+/* =========================================================
+   PLANNED VS ACTUAL
+   ========================================================= */
+
+.planning-comparison {
+    display: grid;
+    gap: 24px;
+}
+
+/* Le tre card non devono partire dal bordo del pannello */
+.planning-comparison-metrics {
+    margin: 0 24px;
+}
+
+/* Riga riepilogativa in basso */
+.planning-comparison-summary {
+    width: min(100% - 48px, 760px);
+
+    margin: 0 24px 20px;
+
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 100px;
+
+    align-items: center;
+    gap: 24px;
+
+    padding-top: 16px;
+
+    border-top: 1px solid var(--lef-border);
+}
+
+.planning-comparison-summary span {
+    color: var(--lef-muted);
+
+    font-size: 12px;
+    font-weight: 500;
+
+    text-align: left;
+}
+
+.planning-comparison-summary strong {
+    color: var(--lef-navy-900);
+
+    font-size: 14px;
+    font-weight: 750;
+
+    text-align: right;
+
+    white-space: nowrap;
+
+    font-variant-numeric: tabular-nums;
+}
+
+.planning-comparison .metric-card small {
+    display: block;
+
+    margin-top: 5px;
+
+    color: var(--lef-muted);
+
+    font-size: 10px;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+    .planning-calendar {
+        min-width: 900px;
+    }
+
+    .planning-calendar-card {
+        overflow-x: auto;
+    }
+
+    .planning-calendar-weekdays {
+        min-width: 900px;
+    }
+
+    .planning-toolbar {
+        grid-template-columns:
+            1fr
+            auto;
+    }
+
+    .planning-period-title {
+        grid-column:
+            1 / -1;
+
+        grid-row: 1;
+
+        text-align: left;
+    }
+
+    .planning-period-navigation {
+        grid-column: 1;
+        grid-row: 2;
+    }
+
+    .planning-view-switch {
+        grid-column: 2;
+        grid-row: 2;
+    }
+}
+
+
+@media (max-width: 680px) {
+
+    .planning-toolbar {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .planning-period-title {
+        order: -1;
+
+        text-align: center;
+    }
+
+    .planning-period-navigation {
+        justify-content: center;
+
+        flex-wrap: wrap;
+    }
+
+    .planning-view-switch {
+        align-self: center;
+    }
+
+    .planning-load-heading {
+        align-items: flex-start;
+        flex-direction: column;
+
+        gap: 3px;
+    }
+}
+/* =========================================================
+   DETAIL TABLES IN PLANNING
+   ========================================================= */
+
+.planning-detail-section {
+    margin-top: 24px;
+}
+
+.planning-detail-section + .planning-detail-section {
+    margin-top: 28px;
+}
+
+.planning-detail-table th,
+.planning-detail-table td {
+    vertical-align: middle;
+}
+
+.planning-detail-table td:first-child,
+.planning-detail-table th:first-child {
+    width: 24%;
+}
+
+.planning-detail-table td:nth-child(2),
+.planning-detail-table th:nth-child(2) {
+    width: 18%;
+}
+
+.planning-detail-table .table-numeric {
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.planning-detail-table .table-primary {
+    font-weight: 700;
+    color: var(--lef-navy-900);
+}
+
+.planning-detail-table tbody tr:hover {
+    background: #fbfdff;
+}
+
+/* =========================================================
+   PLANNING DETAIL TABLES
+   ========================================================= */
+
+.planning-detail-section {
+    margin-top: 28px;
+}
+
+.planning-detail-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.planning-detail-table th,
+.planning-detail-table td {
+    vertical-align: middle;
+}
+
+.planning-detail-table th {
+    white-space: nowrap;
+}
+
+.planning-detail-table .table-primary {
+    color: var(--lef-navy-900);
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   CONFRONTO CONSULENTI
+   ========================================================= */
+
+.planning-consultant-table th:nth-child(1),
+.planning-consultant-table td:nth-child(1) {
+    width: 28%;
+    text-align: left;
+}
+
+.planning-consultant-table th:nth-child(2),
+.planning-consultant-table td:nth-child(2),
+.planning-consultant-table th:nth-child(3),
+.planning-consultant-table td:nth-child(3),
+.planning-consultant-table th:nth-child(4),
+.planning-consultant-table td:nth-child(4),
+.planning-consultant-table th:nth-child(5),
+.planning-consultant-table td:nth-child(5) {
+    width: 18%;
+    text-align: center;
+}
+
+
+/* =========================================================
+   CONFRONTO COMMESSE
+   ========================================================= */
+
+.planning-project-table th:nth-child(1),
+.planning-project-table td:nth-child(1) {
+    width: 22%;
+    text-align: left;
+}
+
+.planning-project-table th:nth-child(2),
+.planning-project-table td:nth-child(2) {
+    width: 24%;
+    text-align: left;
+}
+
+.planning-project-table th:nth-child(3),
+.planning-project-table td:nth-child(3),
+.planning-project-table th:nth-child(4),
+.planning-project-table td:nth-child(4),
+.planning-project-table th:nth-child(5),
+.planning-project-table td:nth-child(5),
+.planning-project-table th:nth-child(6),
+.planning-project-table td:nth-child(6) {
+    width: 13.5%;
+    text-align: center;
+}
+
+
+/* Sovrascrive l'allineamento numerico globale
+   solo nelle tabelle di confronto */
+.planning-detail-table .table-numeric {
+    text-align: center;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.planning-detail-table tbody tr:hover {
+    background: #fbfdff;
+}
+
+/* =========================================================
+   DETTAGLIO PIANIFICAZIONE
+   ========================================================= */
+
+.planning-main-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.planning-main-table th,
+.planning-main-table td {
+    vertical-align: middle;
+}
+
+
+/* Data */
+.planning-main-table th:nth-child(1),
+.planning-main-table td:nth-child(1) {
+    width: 11%;
+    text-align: left;
+}
+
+
+/* Consulente */
+.planning-main-table th:nth-child(2),
+.planning-main-table td:nth-child(2) {
+    width: 13%;
+    text-align: left;
+}
+
+
+/* Commessa */
+.planning-main-table th:nth-child(3),
+.planning-main-table td:nth-child(3) {
+    width: 12%;
+    text-align: left;
+}
+
+
+/* Fase */
+.planning-main-table th:nth-child(4),
+.planning-main-table td:nth-child(4) {
+    width: 14%;
+    text-align: left;
+}
+
+
+/* Cliente */
+.planning-main-table th:nth-child(5),
+.planning-main-table td:nth-child(5) {
+    width: 14%;
+    text-align: left;
+}
+
+
+/* Ore */
+.planning-main-table th:nth-child(6),
+.planning-main-table td:nth-child(6) {
+    width: 8%;
+    text-align: center;
+}
+
+
+/* Stato */
+.planning-main-table th:nth-child(7),
+.planning-main-table td:nth-child(7) {
+    width: 11%;
+    text-align: center;
+}
+
+
+/* Azioni */
+.planning-main-table th:nth-child(8),
+.planning-main-table td:nth-child(8) {
+    width: 17%;
+    text-align: right;
+}
+
+
+/* Sovrascrive il comportamento globale di table-numeric
+   solo per la colonna Ore */
+.planning-main-table td:nth-child(6).table-numeric {
+    text-align: center;
+}
+
+/* ==========================================================================
+   LEFTRACK PLANNING 2.0
+   ========================================================================== */
+
+
+/* FORM */
+
+.planning-frozen-note {
+    max-width: 1040px;
+
+    background: #fff9ee;
+    border-color: #f0dfbc;
+}
+
+.planning-frozen-note .form-context-icon {
+    color: #946500;
+    background: #fff0c9;
+}
+
+
+/* DELETE CONFIRMATION */
+
+.delete-confirm-panel {
+    max-width: 760px;
+}
+
+.delete-confirm-icon {
+    color: #a42b3b;
+    background: #fff1f3;
+}
+
+.delete-confirm-body {
+    padding: 22px 22px 0;
+}
+
+.delete-confirm-summary {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    overflow: hidden;
+
+    border: 1px solid var(--lef-border);
+    border-radius: 12px;
+
+    background: #fafbfd;
+}
+
+.delete-confirm-summary > div {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 4px;
+
+    padding: 13px 14px;
+
+    border-right: 1px solid var(--lef-border);
+}
+
+.delete-confirm-summary > div:last-child {
+    border-right: 0;
+}
+
+.delete-confirm-summary span {
+    color: var(--lef-muted);
+
+    font-size: 9.5px;
+    font-weight: 800;
+
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+
+.delete-confirm-summary strong {
+    overflow: hidden;
+
+    color: var(--lef-navy-900);
+
+    font-size: 12px;
+    font-weight: 800;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.delete-confirm-note {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    margin-top: 14px;
+
+    padding: 10px 12px;
+
+    color: #7e6b46;
+
+    background: #fffaf0;
+
+    border: 1px solid #f0e1c1;
+    border-radius: 9px;
+
+    font-size: 10.5px;
+}
+
+.delete-confirm-actions {
+    margin:
+        20px
+        -22px
+        0;
+}
+
+.delete-confirm-button {
+    min-height: 38px;
+
+    padding:
+        8px
+        13px;
+
+    font-size: 11px;
+}
+
+
+/* CALENDAR SURFACE */
+
+.planning-calendar-card,
+.planning-week-card {
+    border-radius: 16px;
+
+    border-color: #dfe7f0;
+
+    box-shadow: var(--shadow-sm);
+}
+
+.planning-calendar-weekdays {
+    background: #f7f9fc;
+}
+
+.planning-calendar-weekdays span {
+    color: #71859f;
+
+    font-size: 9.5px;
+    letter-spacing: .065em;
+}
+
+.planning-day {
+    transition:
+        background .12s ease,
+        box-shadow .12s ease;
+}
+
+.planning-day:not(.is-outside):hover {
+    background: #fbfdff;
+}
+
+.planning-day.is-today {
+    box-shadow:
+        inset 0 0 0 2px #8ebfff;
+}
+
+.planning-day.is-today .planning-day-number {
+    background: var(--lef-blue-700);
+}
+
+.planning-day-add {
+    border-radius: 8px;
+}
+
+.planning-day-add:hover {
+    background: var(--lef-accent-soft);
+}
+
+
+/* EVENTS */
+
+.planning-event {
+    padding: 7px 8px;
+
+    background: #f4f8fe;
+
+    border:
+        1px solid #e0eafa;
+
+    border-radius: 8px;
+}
+
+.planning-event:hover {
+    background: #eaf3ff;
+
+    border-color: #cbdff8;
+}
+
+.planning-event.is-readonly {
+    background: #f6f7f9;
+
+    border-color: #e8ebef;
+
+    opacity: .8;
+}
+
+
+/* PERIOD TOOLBAR */
+
+.planning-period-title {
+    font-size: 17px;
+    font-weight: 800;
+
+    letter-spacing: -.015em;
+}
+
+.planning-view-switch {
+    border-radius: 10px;
+}
+
+.planning-view-button {
+    font-size: 11px;
+}
+
+
+/* KPI */
+
+.planning-page > .metric-grid {
+    gap: 10px;
+}
+
+.planning-page > .metric-grid .metric-card {
+    min-height: 88px;
+}
+
+
+/* PLANNED VS ACTUAL */
+
+.planning-comparison {
+    overflow: hidden;
+
+    border-radius: 16px;
+}
+
+.planning-comparison .panel-heading {
+    background: #fafbfd;
+}
+
+.planning-comparison-summary {
+    padding: 12px 14px;
+
+    background: #f8faff;
+
+    border:
+        1px solid var(--lef-border);
+
+    border-radius: 10px;
+}
+
+
+/* MAIN TABLE */
+
+.planning-main-table {
+    font-size: 12px;
+}
+
+.planning-main-table thead {
+    background: #f7f9fc;
+}
+
+.planning-main-table thead th {
+    height: 46px;
+
+    padding-top: 0;
+    padding-bottom: 0;
+
+    color: #71859f;
+
+    border-bottom:
+        1px solid #e2e9f2;
+
+    font-size: 9.5px;
+    font-weight: 800;
+
+    letter-spacing: .065em;
+}
+
+.planning-main-table tbody td {
+    height: 62px;
+
+    padding-top: 9px;
+    padding-bottom: 9px;
+}
+
+.planning-main-table tbody tr:hover {
+    background: #f9fbfe;
+}
+
+.planning-main-table .row-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 5px;
+
+    flex-wrap: nowrap;
+}
+
+
+/* DETAIL TABLES */
+
+.planning-detail-section {
+    overflow: hidden;
+
+    border-radius: 16px;
+}
+
+.planning-detail-section .panel-heading {
+    background: #fafbfd;
+}
+
+.planning-detail-table thead {
+    background: #f7f9fc;
+}
+
+.planning-detail-table thead th {
+    color: #71859f;
+
+    font-size: 9.5px;
+    font-weight: 800;
+
+    letter-spacing: .055em;
+}
+
+
+/* LOAD */
+
+.planning-load-item {
+    padding: 11px 13px;
+
+    background: #fafbfd;
+
+    border:
+        1px solid #edf1f6;
+
+    border-radius: 10px;
+}
+
+.planning-load-item.is-over {
+    background: #fff7f7;
+
+    border-color: #efd6d8;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 700px) {
+
+    .delete-confirm-summary {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .delete-confirm-summary > div:nth-child(2) {
+        border-right: 0;
+    }
+
+    .delete-confirm-summary > div:nth-child(-n+2) {
+        border-bottom:
+            1px solid var(--lef-border);
+    }
+}
+
+/* ==========================================================================
+   LEFTRACK PLANNING 2.1
+   ========================================================================== */
+
+.planning-filter {
+    grid-template-columns:
+        repeat(3, minmax(180px, 1fr))
+        auto;
+}
+
+.planning-toolbar-modern {
+    padding: 11px 13px;
+
+    background: rgba(255, 255, 255, .9);
+
+    border: 1px solid var(--lef-border);
+    border-radius: 13px;
+
+    box-shadow: 0 2px 10px rgba(15, 38, 72, .025);
+}
+
+.planning-kpi-grid {
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+}
+
+.planning-kpi-grid .metric-card {
+    padding: 16px 18px;
+}
+
+.planning-kpi-grid .metric-card small {
+    display: block;
+
+    margin-top: 4px;
+
+    color: var(--lef-muted);
+
+    font-size: 9.5px;
+}
+
+.planning-main-panel {
+    overflow: hidden;
+
+    border-radius: 16px;
+}
+
+.planning-load-panel {
+    overflow: hidden;
+
+    border-radius: 16px;
+}
+
+.planning-load-panel .panel-heading {
+    background: #fafbfd;
+}
+
+@media (max-width: 1000px) {
+
+    .planning-filter {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 680px) {
+
+    .planning-filter,
+    .planning-kpi-grid {
+        grid-template-columns:
+            minmax(0, 1fr);
+    }
+}
+
+/* ==========================================================================
+   LEFTRACK PLANNING - MONITORAGGIO FIX
+   ========================================================================== */
+
+.planning-comparison {
+    display: block;
+
+    overflow: hidden;
+
+    padding-bottom: 24px;
+
+    background: var(--lef-surface);
+
+    border-radius: 16px;
+}
+
+
+/* Titolo monitoraggio */
+
+.planning-comparison .panel-heading {
+    margin: 0;
+
+    padding: 20px 24px 18px;
+
+    background: #fafbfd;
+
+    border-bottom: 1px solid var(--lef-border);
+}
+
+
+/* Le tre card */
+
+.planning-comparison-metrics {
+    width: auto;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 16px;
+
+    margin:
+        24px
+        24px
+        0;
+}
+
+
+.planning-comparison-metrics .metric-card {
+    min-width: 0;
+    min-height: 116px;
+
+    margin: 0;
+
+    padding: 20px 22px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    border: 1px solid var(--lef-border);
+
+    border-radius: 14px;
+
+    box-shadow: var(--shadow-sm);
+}
+
+
+.planning-comparison-metrics .metric-card span {
+    margin-bottom: 7px;
+}
+
+
+.planning-comparison-metrics .metric-card strong {
+    line-height: 1.05;
+}
+
+
+.planning-comparison-metrics .metric-card small {
+    margin-top: 7px;
+}
+
+
+/* Eventuale riepilogo percentuale */
+
+.planning-comparison-summary {
+    width: auto;
+
+    margin:
+        16px
+        24px
+        0;
+
+    padding: 12px 14px;
+
+    background: #f8faff;
+
+    border: 1px solid var(--lef-border);
+
+    border-radius: 10px;
+}
+
+
+/* Tablet */
+
+@media (max-width: 900px) {
+
+    .planning-comparison-metrics {
+        grid-template-columns:
+            repeat(3, minmax(180px, 1fr));
+
+        overflow-x: auto;
+    }
+}
+
+
+/* Mobile */
+
+@media (max-width: 680px) {
+
+    .planning-comparison-metrics {
+        grid-template-columns: 1fr;
+
+        margin:
+            18px
+            16px
+            0;
+    }
+
+    .planning-comparison-summary {
+        margin:
+            14px
+            16px
+            0;
+    }
+
+    .planning-comparison {
+        padding-bottom: 18px;
+    }
+}
+/* ==========================================================================
+   PLANNING TABLE UI/UX FIX — 2026-09-24
+   ========================================================================== */
+
+/* Nine real columns: Data, Consulente, Commessa, Fase, Cliente, Ore, Tipo,
+   Stato, Azioni. The previous rules stopped at column 8 and caused Stato
+   and Azioni to overlap. */
+.planning-main-table {
+    min-width: 1120px;
+    table-layout: fixed;
+}
+
+.planning-main-table th:nth-child(1),
+.planning-main-table td:nth-child(1) { width: 9%; }
+.planning-main-table th:nth-child(2),
+.planning-main-table td:nth-child(2) { width: 13%; }
+.planning-main-table th:nth-child(3),
+.planning-main-table td:nth-child(3) { width: 12%; }
+.planning-main-table th:nth-child(4),
+.planning-main-table td:nth-child(4) { width: 10%; }
+.planning-main-table th:nth-child(5),
+.planning-main-table td:nth-child(5) { width: 13%; }
+.planning-main-table th:nth-child(6),
+.planning-main-table td:nth-child(6) { width: 6%; text-align: center; }
+.planning-main-table th:nth-child(7),
+.planning-main-table td:nth-child(7) { width: 9%; text-align: left; }
+.planning-main-table th:nth-child(8),
+.planning-main-table td:nth-child(8) { width: 14%; text-align: left; }
+.planning-main-table th:nth-child(9),
+.planning-main-table td:nth-child(9) { width: 12%; text-align: right; }
+
+.planning-main-table td {
+    overflow-wrap: anywhere;
+}
+
+.planning-main-table .table-status .badge {
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.planning-main-table .row-actions {
+    min-width: 0;
+    gap: 6px;
+}
+
+.planning-main-table .row-actions form {
+    margin: 0;
+}
+
+.planning-main-table .planning-action-confirm {
+    min-height: 31px;
+    padding: 5px 10px;
+    white-space: nowrap;
+    border-radius: 999px;
+}
+
+.planning-main-table .planning-action-icon {
+    width: 31px;
+    min-width: 31px;
+    height: 31px;
+    min-height: 31px;
+    padding: 0;
+    flex: 0 0 31px;
+    border-radius: 999px;
+}
+
+.planning-main-table .planning-action-icon .btn-icon {
+    width: 14px;
+    height: 14px;
+}
+
+.planning-main-table .table-actions {
+    padding-right: 16px;
+}
+
+.planning-main-table .readonly-label {
+    white-space: nowrap;
+}

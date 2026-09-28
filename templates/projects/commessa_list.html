@@ -1,0 +1,460 @@
+{% extends "base.html" %}
+
+{% block title %}Commesse | LEFTRACK{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <div class="eyebrow">Gestione</div>
+        <h1>Commesse</h1>
+    </div>
+
+    {% if puo_modificare %}
+        <a
+            class="button button-primary"
+            href="{% url 'projects:commessa-create' %}">
+
+            <svg class="btn-icon" aria-hidden="true">
+                <use href="#icon-plus"></use>
+            </svg>
+
+            Nuova commessa
+
+        </a>
+    {% endif %}
+
+</div>
+
+
+<form
+    class="filter-bar list-filter-bar commesse-filter"
+    method="get">
+
+    <input
+        type="search"
+        name="q"
+        value="{{ request.GET.q }}"
+        placeholder="Cerca codice, descrizione o cliente"
+        aria-label="Cerca commessa">
+
+
+    <select
+        name="cliente"
+        aria-label="Filtra per cliente">
+
+        <option value="">
+            Tutti i clienti
+        </option>
+
+        {% for cliente in clienti_filtro %}
+
+            <option
+                value="{{ cliente.pk }}"
+                {% if request.GET.cliente == cliente.pk|stringformat:'s' %}selected{% endif %}>
+
+                {{ cliente.ragione_sociale }}
+
+            </option>
+
+        {% endfor %}
+
+    </select>
+
+
+    <select
+        name="stato"
+        aria-label="Filtra per stato">
+
+        <option value="">
+            Tutti gli stati
+        </option>
+
+        <option
+            value="APERTA"
+            {% if request.GET.stato == 'APERTA' %}selected{% endif %}>
+
+            Aperte
+
+        </option>
+
+        <option
+            value="CHIUSA"
+            {% if request.GET.stato == 'CHIUSA' %}selected{% endif %}>
+
+            Chiuse
+
+        </option>
+
+    </select>
+
+
+    <select
+        name="workflow"
+        aria-label="Filtra per fase del ciclo di vita">
+
+        <option value="">Tutte le fasi operative</option>
+
+        {% for valore, etichetta in workflow_stati %}
+            <option value="{{ valore }}" {% if request.GET.workflow == valore %}selected{% endif %}>
+                {{ etichetta }}
+            </option>
+        {% endfor %}
+
+    </select>
+
+
+    <button
+        class="button button-secondary"
+        type="submit">
+
+        <svg class="btn-icon" aria-hidden="true">
+            <use href="#icon-filter"></use>
+        </svg>
+
+        Filtra
+
+    </button>
+
+</form>
+
+
+<section class="panel data-panel">
+
+    <div class="table-wrapper">
+
+        <table class="data-table commesse-table">
+
+            <thead>
+
+                <tr>
+
+                    <th scope="col">
+                        Commessa
+                    </th>
+
+                    <th scope="col">
+                        Cliente
+                    </th>
+
+                    <th scope="col">
+                        Periodo
+                    </th>
+
+                    <th
+                        scope="col"
+                        class="table-numeric">
+
+                        Budget
+
+                    </th>
+
+                    <th
+                        scope="col"
+                        class="table-numeric">
+
+                        Assegnate
+
+                    </th>
+
+                    <th
+                        scope="col"
+                        class="table-numeric">
+
+                        Consulenti
+
+                    </th>
+
+                    <th scope="col">
+                        Avanzamento agenda
+                    </th>
+
+                    <th scope="col">
+                        Fase operativa
+                    </th>
+
+                    {% if puo_modificare or puo_cambiare_stato %}
+                        <th
+                            scope="col"
+                            class="actions-column">
+
+                            Azioni
+
+                        </th>
+                    {% endif %}
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for commessa in commesse %}
+
+                    <tr>
+
+
+                        <!-- COMMESSA -->
+
+                        <td class="table-primary">
+
+                            <div class="entity-cell">
+
+                                <span
+                                    class="entity-icon"
+                                    aria-hidden="true">
+
+                                    <svg>
+                                        <use href="#icon-folder"></use>
+                                    </svg>
+
+                                </span>
+
+
+                                <div class="entity-copy">
+
+                                    <strong>
+                                        <a href="{% url 'projects:commessa-teamwork' commessa.pk %}">
+                                            {{ commessa.codice }}
+                                        </a>
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- CLIENTE -->
+
+                        <td>
+
+                            <div class="table-stack">
+
+                                <strong>
+                                    {{ commessa.cliente.ragione_sociale }}
+                                </strong>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- PERIODO -->
+
+                        <td class="table-date">
+
+                            <div class="period-cell">
+
+                                <span>
+                                    {{ commessa.data_inizio|date:"d/m/Y" }}
+                                </span>
+
+                                <span
+                                    class="period-separator"
+                                    aria-hidden="true">
+
+                                    →
+
+                                </span>
+
+                                <span>
+
+                                    {% if commessa.data_fine_prevista %}
+
+                                        {{ commessa.data_fine_prevista|date:"d/m/Y" }}
+
+                                    {% else %}
+
+                                        —
+
+                                    {% endif %}
+
+                                </span>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- BUDGET -->
+
+                        <td class="table-numeric">
+
+                            {% if commessa.ore_budget %}
+
+                                <strong>
+                                    {{ commessa.ore_budget }}
+                                </strong>
+
+                                <span class="table-unit">
+                                    h
+                                </span>
+
+                            {% else %}
+
+                                <span class="table-muted">
+                                    —
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- ORE ASSEGNATE -->
+
+                        <td class="table-numeric">
+
+                            <strong>
+                                {{ commessa.ore_assegnate|default:0 }}
+                            </strong>
+
+                            <span class="table-unit">
+                                h
+                            </span>
+
+                        </td>
+
+
+                        <!-- CONSULENTI -->
+
+                        <td class="table-numeric">
+
+                            {{ commessa.assegnazioni_attive }}
+
+                        </td>
+
+
+                        <!-- AVANZAMENTO AGENDA -->
+
+                        <td>
+                            <div class="table-stack">
+                                <strong>{{ commessa.agenda_progress.percentuale_ore|floatformat:"-1" }}%</strong>
+                                <span>{{ commessa.agenda_progress.ore_risolte }} / {{ commessa.agenda_progress.ore_pianificate }} h</span>
+                                <span>{{ commessa.agenda_progress.sessioni_risolte }} / {{ commessa.agenda_progress.sessioni_totali }} giornate</span>
+                            </div>
+                        </td>
+
+
+                        <!-- FASE OPERATIVA -->
+
+                        <td class="table-status">
+                            <div class="table-stack">
+                                <span class="badge badge-{{ commessa.stato|lower }}">
+                                    {{ commessa.get_workflow_stato_display }}
+                                </span>
+                                {% if commessa.stato == 'CHIUSA' %}
+                                    <span>Operatività bloccata</span>
+                                {% endif %}
+                            </div>
+                        </td>
+
+
+                        <!-- AZIONI -->
+
+                        {% if puo_modificare or puo_cambiare_stato %}
+                        <td class="table-actions">
+
+                            <div class="row-actions">
+
+
+                                {% if puo_modificare %}
+                                    <a
+                                        class="row-action commessa-action-icon"
+                                        href="{% url 'projects:commessa-update' commessa.pk %}">
+
+                                        <svg
+                                            class="btn-icon"
+                                            aria-hidden="true">
+
+                                            <use href="#icon-edit"></use>
+
+                                        </svg>
+
+                                        <span class="a11y-only">Modifica</span>
+
+                                    </a>
+                                {% endif %}
+
+                                {% if puo_cambiare_stato %}
+                                    <form
+                                        method="post"
+                                        action="{% url 'projects:commessa-toggle-state' commessa.pk %}">
+
+                                        {% csrf_token %}
+
+                                        <button
+                                            class="
+                                                row-action
+                                                row-action-state
+                                                {% if commessa.stato != 'APERTA' %}is-success{% endif %}
+                                            "
+                                            type="submit">
+
+                                            {% if commessa.stato == 'APERTA' %}
+
+                                                Chiudi
+
+                                            {% else %}
+
+                                                Riapri
+
+                                            {% endif %}
+
+                                        </button>
+
+                                    </form>
+                                {% endif %}
+
+
+                            </div>
+
+                        </td>
+                        {% endif %}
+
+
+                    </tr>
+
+
+                {% empty %}
+
+                    <tr>
+
+                        <td
+                            colspan="{% if puo_modificare or puo_cambiare_stato %}9{% else %}8{% endif %}"
+                            class="empty-state">
+
+                            <div class="table-empty-content">
+
+                                <strong>
+                                    Nessuna commessa trovata
+                                </strong>
+
+                                <span>
+                                    Modifica i filtri oppure crea una nuova commessa.
+                                </span>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+{% include "common/pagination.html" %}
+
+{% endblock %}

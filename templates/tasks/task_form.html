@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ titolo }} | LEFTRACK{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/tasks.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="tasks-page form-page">
+
+    <div class="page-header">
+
+        <div>
+            <div class="eyebrow">Attività</div>
+
+            <h1>{{ titolo }}</h1>
+
+        </div>
+
+    </div>
+
+
+    <section class="panel form-panel form-panel-modern">
+
+        <div class="form-panel-heading">
+
+            <span class="form-panel-icon" aria-hidden="true">
+                <svg>
+                    <use href="#icon-task-list"></use>
+                </svg>
+            </span>
+
+            <div>
+                <h2>Dati dell'attività</h2>
+
+            </div>
+
+        </div>
+
+
+        <form
+            method="post"
+            id="task-form"
+            class="modern-form"
+            data-phases-url="{% url 'tasks:project-phases' %}"
+            data-assignees-url="{% url 'tasks:phase-assignees' %}">
+
+            {% csrf_token %}
+
+
+            {% if form.non_field_errors %}
+                <div class="form-global-errors">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+
+            <div class="form-grid modern-form-grid">
+
+
+                <div class="field field-full {% if form.titolo.errors %}field-has-error{% endif %}">
+
+                    {{ form.titolo.label_tag }}
+                    {{ form.titolo }}
+
+                    {% if form.titolo.errors %}
+                        <div class="field-errors">
+                            {{ form.titolo.errors }}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+
+                <div class="field {% if form.commessa.errors %}field-has-error{% endif %}">
+
+                    {{ form.commessa.label_tag }}
+                    {{ form.commessa }}
+
+                    {% if form.commessa.errors %}
+                        <div class="field-errors">
+                            {{ form.commessa.errors }}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+
+                <div class="field {% if form.fase.errors %}field-has-error{% endif %}">
+
+                    {{ form.fase.label_tag }}
+                    {{ form.fase }}
+
+                    {% if form.fase.errors %}
+                        <div class="field-errors">
+                            {{ form.fase.errors }}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+
+                <div class="field {% if form.assegnato_a.errors %}field-has-error{% endif %}">
+
+                    {{ form.assegnato_a.label_tag }}
+                    {{ form.assegnato_a }}
+
+                    {% if form.assegnato_a.errors %}
+                        <div class="field-errors">
+                            {{ form.assegnato_a.errors }}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+
+                <div class="field {% if form.priorita.errors %}field-has-error{% endif %}">
+
+                    {{ form.priorita.label_tag }}
+                    {{ form.priorita }}
+
+                    {% if form.priorita.errors %}
+                        <div class="field-errors">
+                            {{ form.priorita.errors }}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+
+                <div class="field {% if form.data_inizio.errors %}field-has-error{% endif %}">
+
+                    {{ form.data_inizio.label_tag }}
+                    {{ form.data_inizio }}
+
+                    {% if form.data_inizio.errors %}
+                        <div class="field-errors">
+                            {{ form.data_inizio.errors }}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+
+                <div class="field {% if form.data_scadenza.errors %}field-has-error{% endif %}">
+
+                    {{ form.data_scadenza.label_tag }}
+                    {{ form.data_scadenza }}
+
+                    {% if form.data_scadenza.errors %}
+                        <div class="field-errors">
+                            {{ form.data_scadenza.errors }}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+
+                <div class="field field-full {% if form.descrizione.errors %}field-has-error{% endif %}">
+
+                    {{ form.descrizione.label_tag }}
+                    {{ form.descrizione }}
+
+                    {% if form.descrizione.errors %}
+                        <div class="field-errors">
+                            {{ form.descrizione.errors }}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="form-actions form-actions-modern">
+
+                <a
+                    class="button button-ghost"
+                    href="{% url 'tasks:task-list' %}">
+
+                    Annulla
+
+                </a>
+
+                <button
+                    class="button button-primary"
+                    type="submit">
+
+                    <svg class="btn-icon" aria-hidden="true">
+                        <use href="#icon-check"></use>
+                    </svg>
+
+                    {% if is_update %}
+                        Salva modifiche
+                    {% else %}
+                        Crea attività
+                    {% endif %}
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+
+<script src="{% static 'js/tasks.js' %}"></script>
+
+{% endblock %}

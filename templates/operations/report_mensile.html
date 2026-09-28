@@ -1,0 +1,353 @@
+{% extends "base.html" %}
+
+{% block title %}Report mensile | LEFTRACK{% endblock %}
+
+{% block content %}
+
+<div class="operations-page">
+
+    <div class="page-header">
+
+        <div>
+            <div class="eyebrow">
+                Esportazioni operative
+            </div>
+
+            <h1>
+                Report mensile
+            </h1>
+
+        </div>
+
+
+        {% if report %}
+
+            <a
+                class="button button-primary"
+                href="{% url 'operations:report-mensile-xlsx' %}?{{ request.GET.urlencode }}">
+
+                <svg class="btn-icon" aria-hidden="true">
+                    <use href="#icon-download"></use>
+                </svg>
+
+                Esporta Excel
+            </a>
+
+        {% endif %}
+
+    </div>
+
+
+    <form
+        class="filter-bar list-filter-bar report-filter"
+        method="get">
+
+        {% for field in form.visible_fields %}
+
+            <div class="field {% if field.errors %}field-has-error{% endif %}">
+
+                {{ field.label_tag }}
+                {{ field }}
+
+                {% if field.errors %}
+                    <div class="field-errors">
+                        {{ field.errors }}
+                    </div>
+                {% endif %}
+
+            </div>
+
+        {% endfor %}
+
+
+        <button
+            class="button button-secondary"
+            type="submit">
+
+            <svg class="btn-icon" aria-hidden="true">
+                <use href="#icon-file-text"></use>
+            </svg>
+
+            Genera report
+        </button>
+
+    </form>
+
+
+    {% if report %}
+
+        <!-- KPI -->
+
+        <div class="metric-grid report-metric-grid">
+
+            <article class="metric-card">
+
+                <span>Ore</span>
+
+                <strong>
+                    {{ report.dashboard.totale_ore }}
+                </strong>
+
+            </article>
+
+
+            <article class="metric-card">
+
+                <span>Valore ore</span>
+
+                <strong>
+                    € {{ report.dashboard.totale_valore_ore|floatformat:2 }}
+                </strong>
+
+            </article>
+
+
+            <article class="metric-card">
+
+                <span>Spese</span>
+
+                <strong>
+                    € {{ report.dashboard.totale_spese|floatformat:2 }}
+                </strong>
+
+            </article>
+
+
+            <article class="metric-card report-total-card">
+
+                <span>Totale valorizzato</span>
+
+                <strong>
+                    € {{ report.dashboard.totale_fatturabile|floatformat:2 }}
+                </strong>
+
+            </article>
+
+
+            <article class="metric-card {% if report.dashboard.numero_righe_senza_tariffa %}metric-alert{% endif %}">
+
+                <span>Senza tariffa</span>
+
+                <strong>
+                    {{ report.dashboard.numero_righe_senza_tariffa }}
+                </strong>
+
+            </article>
+
+        </div>
+
+
+        <!-- AGGREGATI PRINCIPALI -->
+
+        <div class="report-summary-grid">
+
+            <section class="panel report-summary-panel">
+
+                <div class="panel-heading">
+                    <div>
+                        <div class="eyebrow">Analisi</div>
+                        <h2>Per cliente</h2>
+                    </div>
+                </div>
+
+                <div class="report-summary-content">
+                    {% include "operations/partials/aggregato_table.html" with aggregati=report.dashboard.per_cliente %}
+                </div>
+
+            </section>
+
+
+            <section class="panel report-summary-panel">
+
+                <div class="panel-heading">
+                    <div>
+                        <div class="eyebrow">Analisi</div>
+                        <h2>Per consulente</h2>
+                    </div>
+                </div>
+
+                <div class="report-summary-content">
+                    {% include "operations/partials/aggregato_table.html" with aggregati=report.dashboard.per_consulente %}
+                </div>
+
+            </section>
+
+        </div>
+
+
+        <section class="panel report-summary-panel">
+
+            <div class="panel-heading">
+                <div>
+                    <div class="eyebrow">Analisi</div>
+                    <h2>Per commessa</h2>
+                </div>
+            </div>
+
+            <div class="report-summary-content">
+                {% include "operations/partials/aggregato_table.html" with aggregati=report.dashboard.per_commessa %}
+            </div>
+
+        </section>
+
+
+        <section class="panel report-summary-panel">
+
+            <div class="panel-heading">
+                <div>
+                    <div class="eyebrow">Analisi</div>
+                    <h2>Per fase</h2>
+                </div>
+            </div>
+
+            <div class="report-summary-content">
+                {% include "operations/partials/aggregato_table.html" with aggregati=report.dashboard.per_fase %}
+            </div>
+
+        </section>
+
+
+        <!-- DETTAGLIO -->
+
+        <section class="panel data-panel operations-section">
+
+            <div class="panel-heading">
+
+                <div>
+                    <div class="eyebrow">
+                        Dettaglio
+                    </div>
+
+                    <h2>
+                        Ore registrate
+                    </h2>
+
+                    <p>
+                        {{ report.righe|length }}
+                        righe nel periodo e nei filtri selezionati.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="table-wrapper">
+
+                <table class="data-table report-detail-table">
+
+                    <thead>
+
+                        <tr>
+                            <th scope="col">Data</th>
+                            <th scope="col">Cliente</th>
+                            <th scope="col">Commessa</th>
+                            <th scope="col">Fase</th>
+                            <th scope="col">Consulente</th>
+                            <th scope="col">Attività</th>
+                            <th scope="col">Ore</th>
+                            <th scope="col">Nota</th>
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for riga in report.righe %}
+
+                            <tr>
+
+                                <td>
+                                    {{ riga.data|date:"d/m/Y" }}
+                                </td>
+
+
+                                <td>
+                                    {{ riga.assegnazione.commessa.cliente }}
+                                </td>
+
+
+                                <td class="table-primary">
+                                    {{ riga.assegnazione.commessa.codice }}
+                                </td>
+
+
+                                <td>
+
+                                    {% if riga.assegnazione.fase.sistema %}
+                                        Predefinita
+                                    {% else %}
+                                        {{ riga.assegnazione.fase.nome }}
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td>
+                                    {{ riga.assegnazione.consulente }}
+                                </td>
+
+
+                                <td>
+                                    {{ riga.get_tipo_attivita_display }}
+                                </td>
+
+
+                                <td class="table-numeric">
+
+                                    <strong>
+                                        {{ riga.ore }}
+                                    </strong>
+
+                                    <span class="table-unit">
+                                        h
+                                    </span>
+
+                                </td>
+
+
+                                <td class="table-wrap">
+                                    {{ riga.nota|default:"—" }}
+                                </td>
+
+                            </tr>
+
+
+                        {% empty %}
+
+                            <tr>
+
+                                <td colspan="8" class="empty-state">
+
+                                    <div class="table-empty-content">
+
+                                        <strong>
+                                            Nessuna ora trovata
+                                        </strong>
+
+                                        <span>
+                                            Modifica il periodo o i filtri
+                                            per visualizzare altri risultati.
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

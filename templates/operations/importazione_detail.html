@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+{% load data_display %}
+
+{% block title %}Dettaglio importazione | LEFTRACK{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <div class="eyebrow">Controllo</div>
+        <h1>{{ importazione.nome_file }}</h1>
+        <p>
+            Avviata il {{ importazione.created_at|date:"d/m/Y H:i" }}
+            da {{ importazione.avviata_da }}.
+        </p>
+    </div>
+
+    <a
+        class="button button-secondary"
+        href="{% url 'operations:importazione-list' %}">
+        <svg class="btn-icon" aria-hidden="true">
+            <use href="#icon-arrow-left"></use>
+        </svg>
+        Torna all’elenco
+    </a>
+</div>
+
+
+<div class="metric-grid">
+
+    <div class="metric-card">
+        <span>Stato</span>
+        <strong>{{ importazione.get_stato_display }}</strong>
+    </div>
+
+    <div class="metric-card">
+        <span>Righe totali</span>
+        <strong>{{ importazione.righe_totali }}</strong>
+    </div>
+
+    <div class="metric-card">
+        <span>Righe valide</span>
+        <strong>{{ importazione.righe_valide }}</strong>
+    </div>
+
+    <div class="metric-card {% if importazione.righe_errore %}metric-alert{% endif %}">
+        <span>Errori</span>
+        <strong>{{ importazione.righe_errore }}</strong>
+    </div>
+
+</div>
+
+
+{% if importazione.stato == "PRONTA" %}
+
+    <div class="notice notice-success">
+        Tutte le righe sono valide. Controlla l’anteprima e conferma il caricamento.
+    </div>
+
+{% elif importazione.stato == "COMPLETATA" %}
+
+    <div class="notice notice-success">
+        Importazione completata il
+        {{ importazione.completed_at|date:"d/m/Y H:i" }}.
+    </div>
+
+{% else %}
+
+    <div class="notice notice-warning">
+        Il file contiene errori e non può essere importato.
+        Correggilo e avvia una nuova importazione.
+    </div>
+
+{% endif %}
+
+
+{% if errori %}
+
+    <section class="panel">
+
+        <div class="panel-heading">
+
+            <div>
+                <h2>Errori di validazione</h2>
+            </div>
+
+            <a
+                class="button button-secondary"
+                href="{% url 'operations:importazione-errori-csv' importazione.id %}">
+                <svg class="btn-icon" aria-hidden="true">
+                    <use href="#icon-download"></use>
+                </svg>
+                Scarica errori CSV
+            </a>
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th scope="col">Riga</th>
+                        <th scope="col">Codice</th>
+                        <th scope="col">Messaggio</th>
+                        <th scope="col">Dati della riga</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for errore in errori %}
+
+                        <tr>
+
+                            <td class="table-numeric">
+                                {{ errore.numero_riga }}
+                            </td>
+
+                            <td>
+                                {{ errore.codice_errore }}
+                            </td>
+
+                            <td class="table-wrap">
+                                {{ errore.messaggio }}
+                            </td>
+
+                            <td class="import-data-cell">
+                                {% readable_data errore.dati_riga "Nessun dato disponibile" %}
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+{% endif %}
+
+
+{% if righe_valide %}
+
+    <section class="panel">
+
+        <div class="panel-heading">
+
+            <div>
+
+                <h2>Anteprima righe valide</h2>
+
+                <p>
+                    Visualizzate le prime {{ righe_valide|length }} righe su
+                    {{ numero_righe_sessione }}.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th scope="col">Riga</th>
+                        <th scope="col">Consulente</th>
+                        <th scope="col">Commessa</th>
+                        <th scope="col">Data</th>
+                        <th scope="col">Tipo/Categoria</th>
+                        <th scope="col">Ore/Importo</th>
+                        <th scope="col">Nota</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for elemento in righe_valide %}
+
+                        <tr>
+
+                            <td class="table-numeric">
+                                {{ elemento.numero_riga }}
+                            </td>
+
+                            <td class="table-primary">
+                                {{ elemento.dati.consulente_email }}
+                            </td>
+
+                            <td>
+                                {{ elemento.dati.codice_commessa }}
+                            </td>
+
+                            <td class="table-date">
+                                {{ elemento.dati.data }}
+                            </td>
+
+                            <td>
+                                {{ elemento.dati.tipo_attivita|default:elemento.dati.categoria }}
+                            </td>
+
+                            <td class="table-numeric">
+                                {{ elemento.dati.ore|default:elemento.dati.importo }}
+                            </td>
+
+                            <td class="table-wrap">
+                                {{ elemento.dati.nota|default:"—" }}
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+{% endif %}
+
+
+{% if importazione.stato == "PRONTA" and numero_righe_sessione %}
+
+    <form
+        class="panel form-panel"
+        method="post"
+        action="{% url 'operations:importazione-commit' importazione.id %}"
+        onsubmit="return confirm('Confermare il caricamento nel database?');">
+
+        {% csrf_token %}
+
+        <h2>Conferma importazione</h2>
+
+        <p>{{ numero_righe_sessione }} righe pronte per l’importazione.</p>
+
+        <button
+            class="button button-primary"
+            type="submit">
+            <svg class="btn-icon" aria-hidden="true">
+                <use href="#icon-check"></use>
+            </svg>
+            Conferma e importa
+        </button>
+
+    </form>
+
+{% endif %}
+
+{% endblock %}

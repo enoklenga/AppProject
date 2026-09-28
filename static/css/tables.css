@@ -1,0 +1,1124 @@
+/* LEF Timesheet Design System — data tables. */
+
+
+/* =========================================================
+   TABLE CONTAINER
+   ========================================================= */
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+
+    border-radius: inherit;
+
+    scrollbar-width: thin;
+    scrollbar-color: #c5d2dc transparent;
+}
+
+
+/* =========================================================
+   BASE TABLE
+   ========================================================= */
+
+table {
+    width: 100%;
+
+    border-collapse: collapse;
+    border-spacing: 0;
+
+    color: var(--lef-text);
+
+    font-size: 13.5px;
+}
+
+
+/* =========================================================
+   CELLS
+   ========================================================= */
+
+th,
+td {
+    padding:
+        13px
+        15px;
+
+    border-bottom:
+        1px solid
+        #e5edf3;
+
+    text-align: left;
+    vertical-align: middle;
+}
+
+
+/* =========================================================
+   TABLE HEADER
+   ========================================================= */
+
+thead {
+    background:
+        var(--lef-background-soft);
+}
+
+th {
+    color: #486581;
+
+    background:
+        var(--lef-background-soft);
+
+    font-size: 10.5px;
+    font-weight: 850;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.065em;
+
+    white-space: nowrap;
+}
+
+thead th:first-child {
+    padding-left: 18px;
+}
+
+thead th:last-child {
+    padding-right: 18px;
+}
+
+
+/* =========================================================
+   TABLE BODY
+   ========================================================= */
+
+tbody tr {
+    background:
+        var(--lef-surface);
+
+    transition:
+        background 0.12s ease,
+        box-shadow 0.12s ease;
+}
+
+tbody tr:hover {
+    background: #f8fbfd;
+}
+
+tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+tbody td:first-child {
+    padding-left: 18px;
+}
+
+tbody td:last-child {
+    padding-right: 18px;
+}
+
+
+/* =========================================================
+   PRIMARY CELL
+   ========================================================= */
+
+/*
+   Può essere usata quando la prima informazione della riga
+   deve avere maggiore gerarchia visiva.
+
+   Esempio:
+   <td class="table-primary">Mario Rossi</td>
+*/
+
+.table-primary {
+    color: var(--lef-navy-900);
+
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   SECONDARY / MUTED DATA
+   ========================================================= */
+
+.table-muted {
+    color: var(--lef-muted);
+}
+
+
+/* =========================================================
+   NUMERIC VALUES
+   ========================================================= */
+
+.table-numeric {
+    text-align: right;
+
+    font-variant-numeric: tabular-nums;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   DATE VALUES
+   ========================================================= */
+
+.table-date {
+    white-space: nowrap;
+
+    font-variant-numeric: tabular-nums;
+}
+
+
+/* =========================================================
+   MONEY
+   ========================================================= */
+
+.table-money {
+    text-align: right;
+
+    white-space: nowrap;
+
+    font-variant-numeric: tabular-nums;
+
+    font-weight: 650;
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.table-status {
+    white-space: nowrap;
+}
+
+.table-status .badge {
+    vertical-align: middle;
+}
+
+
+/* =========================================================
+   ACTION COLUMN
+   ========================================================= */
+
+.table-actions {
+    width: 1%;
+
+    text-align: right;
+
+    white-space: nowrap;
+}
+
+.table-actions .row-actions {
+    justify-content: flex-end;
+
+    flex-wrap: nowrap;
+
+    gap: 7px;
+}
+
+
+/* Compact buttons inside tables */
+
+.table-actions .button {
+    min-height: 32px;
+
+    padding:
+        5px
+        10px;
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   ROW STATES
+   ========================================================= */
+
+.row-warning,
+tbody tr.is-warning {
+    background:
+        var(--lef-warning-soft);
+}
+
+.row-warning:hover,
+tbody tr.is-warning:hover {
+    background: #fff4d2;
+}
+
+
+tbody tr.is-danger {
+    background:
+        var(--lef-danger-soft);
+}
+
+tbody tr.is-danger:hover {
+    background: #fde8e8;
+}
+
+
+tbody tr.is-selected {
+    background:
+        var(--lef-blue-100);
+}
+
+tbody tr.is-selected:hover {
+    background: #e3f0f8;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.table-empty td,
+td.empty-state {
+    padding:
+        34px
+        20px;
+
+    color:
+        var(--lef-muted);
+
+    text-align: center;
+}
+
+
+/* =========================================================
+   TABLE LINKS
+   ========================================================= */
+
+td a:not(.button) {
+    font-weight: 650;
+}
+
+td a:not(.button):hover {
+    color: var(--lef-blue-600);
+}
+
+
+/* =========================================================
+   LONG TEXT
+   ========================================================= */
+
+.table-wrap {
+    min-width: 220px;
+
+    white-space: normal;
+
+    overflow-wrap: anywhere;
+
+    line-height: 1.45;
+}
+
+
+/* =========================================================
+   TABLE INSIDE PANEL
+   ========================================================= */
+
+.panel > .table-wrapper:first-child table thead th:first-child {
+    border-top-left-radius: var(--radius-md);
+}
+
+.panel > .table-wrapper:first-child table thead th:last-child {
+    border-top-right-radius: var(--radius-md);
+}
+
+
+/* =========================================================
+   TABLE WITH PANEL HEADING
+   ========================================================= */
+
+.panel-heading + .table-wrapper table {
+    margin-top: 0;
+}
+
+
+/* =========================================================
+   HOVER EMPHASIS
+   ========================================================= */
+
+tbody tr:hover td {
+    color: var(--lef-text);
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    th,
+    td {
+        padding:
+            12px
+            13px;
+    }
+
+    thead th:first-child,
+    tbody td:first-child {
+        padding-left: 14px;
+    }
+
+    thead th:last-child,
+    tbody td:last-child {
+        padding-right: 14px;
+    }
+}
+
+
+@media (max-width: 680px) {
+
+    table {
+        font-size: 13px;
+    }
+
+    th {
+        font-size: 10px;
+    }
+
+    th,
+    td {
+        padding:
+            11px
+            12px;
+    }
+
+    .table-actions .button {
+        min-height: 34px;
+
+        padding:
+            6px
+            9px;
+    }
+}
+
+/* ==========================================================================
+   LEFTRACK DATA TABLES 2.0
+   ========================================================================== */
+
+.data-panel {
+    overflow: hidden;
+
+    border:
+        1px solid var(--lef-border);
+
+    border-radius:
+        16px;
+
+    background:
+        var(--lef-surface);
+
+    box-shadow:
+        var(--shadow-sm);
+}
+
+
+.data-table {
+    font-size: 13px;
+}
+
+
+.data-table thead {
+    background: #f7f9fc;
+}
+
+
+.data-table thead th {
+    height: 46px;
+
+    padding-top: 0;
+    padding-bottom: 0;
+
+    color: #71859f;
+
+    background: #f7f9fc;
+
+    border-bottom:
+        1px solid #e2e9f2;
+
+    font-size: 9.5px;
+    font-weight: 800;
+
+    letter-spacing: .075em;
+}
+
+
+.data-table tbody td {
+    height: 66px;
+
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+
+.data-table tbody tr {
+    transition:
+        background .15s ease,
+        box-shadow .15s ease;
+}
+
+
+.data-table tbody tr:hover {
+    background: #f9fbfe;
+}
+
+
+.entity-cell {
+    display: flex;
+    align-items: center;
+
+    gap: 11px;
+
+    min-width: 170px;
+}
+
+
+.entity-icon {
+    width: 34px;
+    height: 34px;
+
+    flex: 0 0 auto;
+
+    display: grid;
+    place-items: center;
+
+    color: var(--lef-blue-700);
+
+    background: var(--lef-accent-soft);
+
+    border-radius: 10px;
+}
+
+
+.entity-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+
+.entity-copy {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 2px;
+}
+
+
+.entity-copy strong {
+    overflow: hidden;
+
+    color: var(--lef-navy-900);
+
+    font-size: 12.5px;
+    font-weight: 800;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.entity-copy span {
+    color: #8a9aaf;
+
+    font-size: 10px;
+}
+
+
+.table-stack {
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+}
+
+
+.table-stack strong {
+    color: var(--lef-text);
+
+    font-weight: 650;
+}
+
+
+.period-cell {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 5px;
+
+    color: var(--lef-text);
+
+    font-size: 11.5px;
+}
+
+
+.period-separator {
+    color: #a3b2c4;
+}
+
+
+.table-unit {
+    margin-left: 2px;
+
+    color: var(--lef-muted);
+
+    font-size: 10px;
+    font-weight: 500;
+}
+
+
+/* ACTIONS */
+
+.data-table .row-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 5px;
+
+    flex-wrap: nowrap;
+}
+
+
+.data-table .row-actions form {
+    margin: 0;
+}
+
+
+.row-action {
+    min-height: 31px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 5px;
+
+    padding: 5px 8px;
+
+    color: #536b87;
+
+    background: transparent;
+
+    border:
+        1px solid transparent;
+
+    border-radius:
+        8px;
+
+    font: inherit;
+
+    font-size: 10.5px;
+    font-weight: 700;
+
+    line-height: 1;
+
+    white-space: nowrap;
+
+    cursor: pointer;
+
+    transition:
+        color .14s ease,
+        background .14s ease,
+        border-color .14s ease;
+}
+
+
+.row-action:hover {
+    color: var(--lef-blue-700);
+
+    background: #f2f6fc;
+
+    border-color: #e0e8f2;
+
+    text-decoration: none;
+}
+
+
+.row-action-primary {
+    color: var(--lef-blue-700);
+
+    background: var(--lef-accent-soft);
+
+    border-color: #dbe8fb;
+}
+
+
+.row-action-primary:hover {
+    color: #0d5bd4;
+
+    background: #deebff;
+}
+
+
+.row-action-state {
+    color: #7c6b52;
+}
+
+
+.row-action-state.is-success {
+    color: #087657;
+}
+
+
+.row-action .btn-icon {
+    width: 14px;
+    height: 14px;
+}
+
+
+/* EMPTY STATE */
+
+.table-empty-content {
+    display: flex;
+    flex-direction: column;
+
+    gap: 4px;
+
+    padding: 12px;
+}
+
+
+.table-empty-content strong {
+    color: var(--lef-text);
+
+    font-size: 13px;
+}
+
+
+.table-empty-content span {
+    color: var(--lef-muted);
+
+    font-size: 11px;
+}
+
+
+/* COMMESSE */
+
+.commesse-table th:first-child,
+.commesse-table td:first-child {
+    min-width: 190px;
+}
+
+
+.commesse-table th:nth-child(2),
+.commesse-table td:nth-child(2) {
+    min-width: 160px;
+}
+
+.commesse-table th:nth-child(7),
+.commesse-table td:nth-child(7) {
+    min-width: 188px;
+}
+
+
+.commesse-table .actions-column {
+    min-width: 235px;
+}
+
+/* ==========================================================================
+   SECONDARY / DESTRUCTIVE ROW ACTIONS
+   ========================================================================== */
+
+.row-action-danger {
+    color: #8a6670;
+    background: transparent;
+    border-color: transparent;
+}
+
+.row-action-danger:hover {
+    color: #b42335;
+    background: #fff4f5;
+    border-color: #f4d8dc;
+}
+
+/* ==========================================================================
+   LEFTRACK MANAGEMENT TABLES
+   ========================================================================== */
+
+.clients-table th:first-child,
+.clients-table td:first-child {
+    min-width: 220px;
+}
+
+.clients-table .actions-column {
+    min-width: 175px;
+}
+
+
+.consultants-table th:first-child,
+.consultants-table td:first-child {
+    min-width: 210px;
+}
+
+.consultants-table th:nth-child(2),
+.consultants-table td:nth-child(2) {
+    min-width: 210px;
+}
+
+.consultants-table .actions-column {
+    min-width: 235px;
+}
+
+
+.assignments-table th:first-child,
+.assignments-table td:first-child {
+    min-width: 230px;
+}
+
+.assignments-table th:nth-child(3),
+.assignments-table td:nth-child(3) {
+    min-width: 140px;
+}
+
+.assignments-table th:nth-child(4),
+.assignments-table td:nth-child(4) {
+    min-width: 160px;
+}
+
+.assignments-table .actions-column {
+    min-width: 180px;
+}
+
+
+.table-email {
+    color: #526b86;
+    font-size: 12px;
+}
+
+
+.account-status-stack {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+}
+
+
+.table-meta {
+    color: var(--lef-muted);
+    font-size: 9.5px;
+    white-space: nowrap;
+}
+
+
+.assignment-role {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 4px 7px;
+
+    color: #556d87;
+    background: #f1f4f8;
+
+    border-radius: 7px;
+
+    font-size: 10.5px;
+    font-weight: 650;
+
+    white-space: nowrap;
+}
+
+/* ==========================================================================
+   LEFTRACK TIMESHEETS + DOCUMENTS
+   ========================================================================== */
+
+.timesheet-filter {
+    grid-template-columns:
+        minmax(180px, .8fr)
+        minmax(220px, 1.2fr)
+        minmax(180px, 1fr)
+        auto;
+}
+
+.timesheet-filter-personal {
+    grid-template-columns:
+        minmax(220px, 320px)
+        auto;
+
+    justify-content: start;
+}
+
+.timesheet-table th:first-child,
+.timesheet-table td:first-child {
+    min-width: 105px;
+}
+
+.timesheet-table .actions-column {
+    min-width: 170px;
+}
+
+.timesheet-table th:nth-last-child(2),
+.timesheet-table td:nth-last-child(2) {
+    min-width: 120px;
+}
+
+.timesheet-note {
+    min-width: 170px;
+    max-width: 260px;
+
+    color: #5e7189;
+
+    line-height: 1.4;
+}
+
+.timesheet-value {
+    color: var(--lef-navy-900);
+
+    font-size: 12.5px;
+    font-weight: 800;
+}
+
+.table-small {
+    font-size: 10.5px;
+}
+
+.readonly-label {
+    display: inline-flex;
+    align-items: center;
+
+    min-height: 29px;
+
+    padding: 4px 8px;
+
+    color: #8493a6;
+
+    background: #f4f6f8;
+
+    border-radius: 8px;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+.expense-category {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 4px 7px;
+
+    color: #536a83;
+
+    background: #f1f4f8;
+
+    border-radius: 7px;
+
+    font-size: 10.5px;
+    font-weight: 650;
+
+    white-space: nowrap;
+}
+
+
+/* DOCUMENTS */
+
+.documents-filter {
+    grid-template-columns:
+        repeat(3, minmax(180px, 1fr));
+
+    max-width: 900px;
+}
+
+.documents-table th:first-child,
+.documents-table td:first-child {
+    min-width: 280px;
+}
+
+.documents-table .actions-column {
+    min-width: 170px;
+}
+
+.document-entity-cell {
+    min-width: 260px;
+}
+
+.document-entity-copy {
+    max-width: 360px;
+}
+
+.document-title-row {
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    min-width: 0;
+}
+
+.document-title-row > strong {
+    min-width: 0;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.document-description {
+    display: block;
+
+    max-width: 340px;
+
+    overflow: hidden;
+
+    color: var(--lef-muted);
+
+    font-size: 10.5px;
+    font-weight: 500;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.document-entity-icon {
+    color: var(--lef-blue-700);
+    background: var(--lef-accent-soft);
+}
+
+.table-size {
+    color: var(--lef-muted);
+
+    font-size: 11px;
+
+    white-space: nowrap;
+}
+
+
+/* APPROVAL ACTIONS */
+
+.approvazione-azioni {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+
+    flex-wrap: nowrap;
+}
+
+.approvazione-form-inline {
+    margin: 0;
+}
+
+.approval-action-approve {
+    color: #087657;
+
+    background: var(--lef-success-soft);
+
+    border-color: #cfeee2;
+}
+
+.approval-action-approve:hover {
+    color: #056046;
+
+    background: #dcf5eb;
+
+    border-color: #bfe7d8;
+}
+
+.approval-action-reject {
+    color: #8a6670;
+
+    background: transparent;
+
+    border-color: transparent;
+
+    list-style: none;
+}
+
+.approval-action-reject::-webkit-details-marker {
+    display: none;
+}
+
+.approval-action-reject:hover {
+    color: #b42335;
+
+    background: #fff4f5;
+
+    border-color: #f4d8dc;
+}
+
+.approvazione-rifiuta {
+    position: relative;
+}
+
+.approvazione-rifiuta-form {
+    position: absolute;
+
+    z-index: 30;
+
+    top: calc(100% + 8px);
+    right: 0;
+
+    width: 290px;
+
+    padding: 14px;
+
+    background: var(--lef-surface);
+
+    border:
+        1px solid var(--lef-border);
+
+    border-radius: 12px;
+
+    box-shadow: var(--shadow-md);
+}
+
+.approvazione-rifiuta-form textarea {
+    min-height: 82px;
+
+    margin-top: 6px;
+
+    font-size: 12px;
+}
+
+.approval-reject-label {
+    color: var(--lef-navy-900);
+
+    font-size: 11px;
+    font-weight: 750;
+}
+
+.approval-reject-confirm {
+    width: 100%;
+
+    margin-top: 8px;
+
+    color: #b42335;
+
+    background: #fff4f5;
+
+    border:
+        1px solid #efd2d7;
+}
+
+.approval-reject-confirm:hover {
+    color: #9e1c2e;
+
+    background: #fdebed;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+
+    .timesheet-filter,
+    .timesheet-filter-personal,
+    .documents-filter {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 680px) {
+
+    .timesheet-filter,
+    .timesheet-filter-personal,
+    .documents-filter {
+        grid-template-columns:
+            minmax(0, 1fr);
+    }
+}

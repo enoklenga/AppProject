@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Elimina fase | LEFTRACK{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/phases.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="phases-page confirmation-page">
+
+    <div class="page-header">
+        <div>
+            <div class="eyebrow">Fasi</div>
+            <h1>Elimina fase</h1>
+        </div>
+    </div>
+
+
+    <section class="panel form-panel confirmation-panel">
+
+        <h2>Conferma eliminazione</h2>
+
+        <p>
+            Stai per eliminare la fase
+            <strong>{{ fase.nome }}</strong>
+            della commessa
+            <strong>{{ fase.commessa.codice }}</strong>.
+        </p>
+
+        {% if fase.assegnazioni.count or fase.tasks.count or fase.documenti.count %}
+            <div class="field-hint confirmation-blocked">
+                <p>Questa fase contiene ancora dati collegati e non può essere eliminata:</p>
+                <ul>
+                    {% if fase.assegnazioni.count %}
+                        <li>{{ fase.assegnazioni.count }} assegnazion{{ fase.assegnazioni.count|pluralize:"e,i" }}</li>
+                    {% endif %}
+                    {% if fase.tasks.count %}
+                        <li>{{ fase.tasks.count }} attività</li>
+                    {% endif %}
+                    {% if fase.documenti.count %}
+                        <li>{{ fase.documenti.count }} document{{ fase.documenti.count|pluralize:"o,i" }}</li>
+                    {% endif %}
+                </ul>
+                <p>Rimuovi o rialloca prima queste dipendenze.</p>
+            </div>
+        {% else %}
+            <p class="muted">
+                Nessun dato operativo collegato: la fase può essere eliminata.
+            </p>
+        {% endif %}
+
+        <form method="post">
+
+            {% csrf_token %}
+
+            <div class="form-actions">
+
+                <button class="button button-danger" type="submit">
+                    Elimina definitivamente
+                </button>
+
+                <a class="button button-ghost" href="{% url 'phases:fase-list' %}?commessa={{ fase.commessa_id }}">
+                    Annulla
+                </a>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+{% endblock %}

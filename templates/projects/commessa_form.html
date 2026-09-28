@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if object %}Modifica commessa{% else %}Nuova commessa{% endif %} | LEFTRACK
+{% endblock %}
+
+{% block content %}
+
+<div class="form-page">
+
+    <div class="page-header">
+
+        <div>
+            <div class="eyebrow">Commesse</div>
+
+            <h1>
+                {% if object %}
+                    Modifica commessa
+                {% else %}
+                    Nuova commessa
+                {% endif %}
+            </h1>
+
+        </div>
+
+    </div>
+
+
+    <section class="panel form-panel form-panel-modern">
+
+        <div class="form-panel-heading">
+
+            <span class="form-panel-icon" aria-hidden="true">
+                <svg>
+                    <use href="#icon-folder"></use>
+                </svg>
+            </span>
+
+            <div>
+                <h2>Informazioni commessa</h2>
+
+            </div>
+
+        </div>
+
+
+        <form method="post" class="modern-form">
+
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="form-global-errors">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+
+            <div class="form-grid modern-form-grid">
+
+                {% for field in form %}
+
+                    <div class="
+                        field
+                        {% if field.name == 'descrizione' or field.name == 'handover_note' or field.name == 'note' %}
+                            field-full
+                        {% endif %}
+                        {% if field.errors %}
+                            field-has-error
+                        {% endif %}
+                    ">
+
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                        </label>
+
+                        {{ field }}
+
+                        {% if field.help_text %}
+                            <div class="field-help">
+                                {{ field.help_text }}
+                            </div>
+                        {% endif %}
+
+                        {% if field.errors %}
+                            <div class="field-errors">
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+
+            <div class="form-actions form-actions-modern">
+
+                <a
+                    class="button button-ghost"
+                    href="{% url 'projects:commessa-list' %}">
+
+                    Annulla
+
+                </a>
+
+                <button
+                    class="button button-primary"
+                    type="submit">
+
+                    <svg class="btn-icon" aria-hidden="true">
+                        <use href="#icon-check"></use>
+                    </svg>
+
+                    {% if object %}
+                        Salva modifiche
+                    {% else %}
+                        Crea commessa
+                    {% endif %}
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+{% endblock %}

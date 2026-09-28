@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Workflow {{ commessa.codice }} | LEFTRACK{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/teamwork.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-page teamwork-management-page">
+    <div class="page-header">
+        <div>
+            <div class="eyebrow">Commessa {{ commessa.codice }}</div>
+            <h1>Gestione workflow</h1>
+            <p>Stato attuale: <strong>{{ commessa.get_workflow_stato_display }}</strong></p>
+        </div>
+    </div>
+
+    <section class="panel form-panel form-panel-modern teamwork-management-panel">
+        <div class="form-panel-heading">
+            <span class="form-panel-icon" aria-hidden="true"><svg><use href="#icon-refresh"></use></svg></span>
+            <div>
+                <h2>Aggiorna stato della commessa</h2>
+            </div>
+        </div>
+
+        <form method="post" class="modern-form teamwork-workflow-form">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="form-global-errors">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <div class="form-grid modern-form-grid teamwork-workflow-grid">
+                {% for field in form %}
+                    <div class="field {% if field.name == 'motivazione' %}field-full{% endif %} {% if field.errors %}field-has-error{% endif %}">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}<div class="field-help">{{ field.help_text }}</div>{% endif %}
+                        {% if field.errors %}<div class="field-errors">{{ field.errors }}</div>{% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="form-actions form-actions-modern">
+                <a class="button button-ghost" href="{% url 'projects:commessa-teamwork' commessa.pk %}">Annulla</a>
+                <button class="button button-primary" type="submit">Aggiorna workflow</button>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}

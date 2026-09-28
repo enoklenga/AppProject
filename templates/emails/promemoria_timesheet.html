@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="it">
+<body style="font-family:Arial,sans-serif;color:#1f2933;line-height:1.55">
+    <p>
+        Gentile
+        <strong>{{ consulente.get_full_name|default:consulente.email }}</strong>,
+    </p>
+    <p>
+        nel sistema <strong>LEFTRACK</strong> non risultano ancora ore
+        registrate per il mese
+        <strong>{{ mese|stringformat:"02d" }}/{{ anno }}</strong>.
+    </p>
+    <p>
+        Ti chiediamo di verificare e completare la consuntivazione delle
+        attività relative alle commesse e alle fasi assegnate.
+    </p>
+    <p><strong>Fasi operative assegnate</strong></p>
+    <ul>
+        {% for assegnazione in fasi %}
+            <li>{{ assegnazione.commessa.codice }} – {{ assegnazione.fase.nome }}</li>
+        {% endfor %}
+    </ul>
+    <p>
+        <a href="{{ login_url }}"
+           style="display:inline-block;padding:10px 16px;background:#123a63;color:white;text-decoration:none;border-radius:5px">
+            Accedi a LEFTRACK
+        </a>
+    </p>
+    <p style="font-size:12px;color:#66788a">
+        Questo messaggio è stato generato automaticamente da LEFTRACK.
+    </p>
+</body>
+</html>

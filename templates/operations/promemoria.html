@@ -1,0 +1,526 @@
+{% extends "base.html" %}
+
+{% block title %}Promemoria | LEFTRACK{% endblock %}
+
+{% block content %}
+
+<div class="operations-page">
+
+    <div class="page-header">
+
+        <div>
+            <div class="eyebrow">Controllo</div>
+
+            <h1>
+                Promemoria
+            </h1>
+
+        </div>
+
+    </div>
+
+
+    {% if email_console %}
+
+        <div class="notice notice-warning">
+
+            <strong>Modalità di prova attiva.</strong>
+
+            Le email non vengono recapitate:
+            il contenuto viene scritto nei log
+            del servizio web o reminder.
+
+        </div>
+
+    {% endif %}
+
+
+    <div class="reminder-control-grid">
+
+        <!-- CONFIGURAZIONE -->
+
+        <section class="panel reminder-control-card">
+
+            <div class="reminder-card-heading">
+
+                <div>
+                    <div class="eyebrow">
+                        Automazione
+                    </div>
+
+                    <h2>
+                        Configurazione automatica
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <form
+                class="modern-form reminder-form"
+                method="post">
+
+                {% csrf_token %}
+
+                <input
+                    type="hidden"
+                    name="azione"
+                    value="salva_configurazione">
+
+
+                <div class="modern-form-grid">
+
+                    {% for field in form_configurazione.visible_fields %}
+
+                        {% if field.name == "solo_assenza_totale_ore" or field.name == "attiva" %}
+
+                            <div class="modern-checkbox-card">
+
+                                {{ field }}
+
+                                <label
+                                    class="modern-checkbox-label"
+                                    for="{{ field.id_for_label }}">
+
+                                    {{ field.label }}
+
+                                </label>
+
+                                {% if field.errors %}
+                                    <div class="field-errors">
+                                        {{ field.errors }}
+                                    </div>
+                                {% endif %}
+
+                            </div>
+
+                        {% else %}
+
+                            <div class="field {% if field.errors %}field-has-error{% endif %}">
+
+                                {{ field.label_tag }}
+                                {{ field }}
+
+                                {% if field.help_text %}
+                                    <div class="field-help">
+                                        {{ field.help_text }}
+                                    </div>
+                                {% endif %}
+
+                                {% if field.errors %}
+                                    <div class="field-errors">
+                                        {{ field.errors }}
+                                    </div>
+                                {% endif %}
+
+                            </div>
+
+                        {% endif %}
+
+                    {% endfor %}
+
+                </div>
+
+
+                <div class="form-actions form-actions-modern">
+
+                    <button
+                        class="button button-primary"
+                        type="submit">
+
+                        <svg class="btn-icon" aria-hidden="true">
+                            <use href="#icon-check"></use>
+                        </svg>
+
+                        Salva configurazione
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+
+        <!-- INVIO MANUALE -->
+
+        <section class="panel reminder-control-card">
+
+            <div class="reminder-card-heading">
+
+                <div>
+                    <div class="eyebrow">
+                        Azione manuale
+                    </div>
+
+                    <h2>
+                        Invio immediato
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <form
+                class="modern-form reminder-form"
+                method="post">
+
+                {% csrf_token %}
+
+                <input
+                    type="hidden"
+                    name="azione"
+                    value="invia">
+
+
+                {% if form_invio.non_field_errors %}
+
+                    <div class="form-global-errors">
+                        {{ form_invio.non_field_errors }}
+                    </div>
+
+                {% endif %}
+
+
+                <div class="modern-form-grid">
+
+                    {% for field in form_invio.visible_fields %}
+
+                        {% if field.name == "conferma" %}
+
+                            <div class="modern-checkbox-card">
+
+                                {{ field }}
+
+                                <label
+                                    class="modern-checkbox-label"
+                                    for="{{ field.id_for_label }}">
+
+                                    {{ field.label }}
+
+                                </label>
+
+                                {% if field.errors %}
+                                    <div class="field-errors">
+                                        {{ field.errors }}
+                                    </div>
+                                {% endif %}
+
+                            </div>
+
+                        {% else %}
+
+                            <div class="field {% if field.errors %}field-has-error{% endif %}">
+
+                                {{ field.label_tag }}
+                                {{ field }}
+
+                                {% if field.help_text %}
+                                    <div class="field-help">
+                                        {{ field.help_text }}
+                                    </div>
+                                {% endif %}
+
+                                {% if field.errors %}
+                                    <div class="field-errors">
+                                        {{ field.errors }}
+                                    </div>
+                                {% endif %}
+
+                            </div>
+
+                        {% endif %}
+
+                    {% endfor %}
+
+                </div>
+
+
+                <div class="form-actions form-actions-modern">
+
+                    <button
+                        class="button button-primary"
+                        type="submit">
+
+                        <svg class="btn-icon" aria-hidden="true">
+                            <use href="#icon-send"></use>
+                        </svg>
+
+                        Invia ai consulenti in elenco
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+    </div>
+
+
+    <!-- ANTEPRIMA -->
+
+    <form
+        class="filter-bar list-filter-bar reminder-filter"
+        method="get">
+
+        <div class="field">
+
+            <label for="id_mese_anteprima">
+                Mese anteprima
+            </label>
+
+            <input
+                id="id_mese_anteprima"
+                type="month"
+                name="mese"
+                value="{{ mese_selezionato }}">
+
+        </div>
+
+
+        <button
+            class="button button-secondary"
+            type="submit">
+
+            <svg class="btn-icon" aria-hidden="true">
+                <use href="#icon-refresh"></use>
+            </svg>
+
+            Aggiorna anteprima
+        </button>
+
+    </form>
+
+
+    <!-- DESTINATARI -->
+
+    <section class="panel data-panel operations-section">
+
+        <div class="panel-heading">
+
+            <div>
+                <div class="eyebrow">
+                    Anteprima
+                </div>
+
+                <h2>
+                    Destinatari individuati
+                </h2>
+
+                <p>
+                    {{ destinatari|length }}
+                    consulenti senza ore nel mese selezionato.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+            <table class="data-table">
+
+                <thead>
+
+                    <tr>
+                        <th scope="col">Consulente</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Stato promemoria</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for destinatario in destinatari %}
+
+                        <tr>
+
+                            <td class="table-primary">
+                                {{ destinatario.consulente }}
+                            </td>
+
+
+                            <td>
+                                {{ destinatario.consulente.email }}
+                            </td>
+
+
+                            <td class="table-status">
+
+                                {% if destinatario.gia_inviato %}
+
+                                    <span class="badge badge-success">
+                                        Già inviato
+                                    </span>
+
+                                {% elif destinatario.ultimo_stato == "ERRORE" %}
+
+                                    <span class="badge badge-errore">
+                                        Errore precedente: verrà ritentato
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge badge-pending">
+                                        Da inviare
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td colspan="3" class="empty-state">
+
+                                <div class="table-empty-content">
+
+                                    <strong>
+                                        Nessun promemoria necessario
+                                    </strong>
+
+                                    <span>
+                                        Nessun consulente richiede il promemoria
+                                        nel mese selezionato.
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- REGISTRO -->
+
+    <section class="panel data-panel operations-section">
+
+        <div class="panel-heading">
+
+            <div>
+                <div class="eyebrow">
+                    Cronologia
+                </div>
+
+                <h2>
+                    Registro degli invii
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+            <table class="data-table">
+
+                <thead>
+
+                    <tr>
+                        <th scope="col">Data tentativo</th>
+                        <th scope="col">Consulente</th>
+                        <th scope="col">Stato</th>
+                        <th scope="col">Errore</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for invio in invii %}
+
+                        <tr>
+
+                            <td class="table-date">
+                                {{ invio.data_tentativo|date:"d/m/Y H:i" }}
+                            </td>
+
+
+                            <td class="table-primary">
+                                {{ invio.consulente }}
+                            </td>
+
+
+                            <td class="table-status">
+
+                                {% if invio.stato == "INVIATO" %}
+
+                                    <span class="badge badge-success">
+                                        Inviato
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge badge-errore">
+                                        Errore
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td class="table-wrap">
+                                {{ invio.errore|default:"—" }}
+                            </td>
+
+                        </tr>
+
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td colspan="4" class="empty-state">
+
+                                <div class="table-empty-content">
+
+                                    <strong>
+                                        Nessun tentativo registrato
+                                    </strong>
+
+                                    <span>
+                                        Gli invii effettuati compariranno qui.
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}

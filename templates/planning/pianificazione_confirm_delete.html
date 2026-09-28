@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Elimina pianificazione | LEFTRACK{% endblock %}
+
+{% block content %}
+
+<div class="confirmation-page">
+
+<div class="page-header">
+
+    <div>
+
+        <div class="eyebrow">
+            Pianificazione
+        </div>
+
+        <h1>
+            Elimina pianificazione
+        </h1>
+
+    </div>
+
+</div>
+
+
+<section class="panel form-panel confirmation-panel">
+
+    <h2>
+        Conferma eliminazione
+    </h2>
+
+    <p>
+        Stai per eliminare la pianificazione di
+        <strong>
+            {{ pianificazione.ore_pianificate }} ore
+        </strong>
+        sulla commessa
+        <strong>
+            {{ pianificazione.assegnazione.commessa.codice }}
+        </strong>
+        del
+        <strong>
+            {{ pianificazione.data|date:"d/m/Y" }}
+        </strong>.
+    </p>
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        <div class="form-actions">
+
+            <button
+                class="button button-danger"
+                type="submit">
+
+                <svg class="btn-icon" aria-hidden="true">
+                    <use href="#icon-trash"></use>
+                </svg>
+
+                Elimina
+
+            </button>
+
+
+            <a
+                class="button button-ghost"
+                href="{% if request.GET.commessa %}{% url 'planning:pianificazione-list' %}?commessa={{ request.GET.commessa }}{% if request.GET.fase %}&fase={{ request.GET.fase }}{% endif %}{% else %}{% url 'planning:pianificazione-list' %}{% endif %}">
+                Annulla
+            </a>
+
+        </div>
+
+    </form>
+
+</section>
+
+</div>
+
+{% endblock %}

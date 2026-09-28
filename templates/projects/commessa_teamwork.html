@@ -1,0 +1,570 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Teamwork — {{ commessa.codice }} | LEFTRACK{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/teamwork.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="teamwork-page">
+
+    <!-- HERO COMMESSA -->
+
+    <section class="teamwork-hero">
+
+        <div class="teamwork-hero-main">
+
+            <div class="teamwork-hero-icon" aria-hidden="true">
+                <svg>
+                    <use href="#icon-briefcase"></use>
+                </svg>
+            </div>
+
+            <div class="teamwork-hero-copy">
+
+                <div class="eyebrow">Teamwork</div>
+
+                <div class="teamwork-title-row">
+
+                    <h1>{{ commessa.codice }}</h1>
+
+                    <span class="badge badge-{{ commessa.stato|lower }}">
+                        {{ commessa.get_workflow_stato_display }}
+                    </span>
+
+                </div>
+
+                <p class="teamwork-client">
+                    {{ commessa.cliente.ragione_sociale }}
+                </p>
+
+                <div class="teamwork-meta">
+
+                    <span>
+                        <strong>Periodo</strong>
+
+                        {{ commessa.data_inizio|date:"d/m/Y" }}
+
+                        <span class="teamwork-meta-arrow">→</span>
+
+                        {% if commessa.data_fine_prevista %}
+                            {{ commessa.data_fine_prevista|date:"d/m/Y" }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </span>
+
+                    {% if commessa.ore_budget %}
+                        <span>
+                            <strong>Budget</strong>
+                            {{ commessa.ore_budget }} h
+                        </span>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <section class="panel teamwork-status-panel">
+        <div class="panel-heading">
+            <div>
+                <div class="eyebrow">Presa in carico</div>
+                <h2>Handover commerciale</h2>
+                <p>
+                    {% if commessa.handover_completato %}
+                        Verificato{% if commessa.handover_completato_il %} il {{ commessa.handover_completato_il|date:"d/m/Y H:i" }}{% endif %}.
+                    {% else %}
+                        Da completare.
+                    {% endif %}
+                </p>
+            </div>
+            {% if puo_gestire_handover or puo_gestire_workflow %}
+                <div class="teamwork-panel-actions">
+                    {% if puo_gestire_handover %}
+                        <a class="button button-secondary" href="{% url 'projects:commessa-handover' commessa.pk %}">Gestisci handover</a>
+                    {% endif %}
+                    {% if puo_gestire_workflow %}
+                        <a class="button button-secondary" href="{% url 'projects:commessa-workflow' commessa.pk %}">Gestisci workflow</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+        {% if commessa.handover_note %}
+            <p>{{ commessa.handover_note|linebreaksbr }}</p>
+        {% endif %}
+    </section>
+
+
+    <section class="panel teamwork-progress-panel">
+        <div class="panel-heading">
+            <div>
+                <div class="eyebrow">Avanzamento operativo</div>
+                <h2>Agenda della commessa</h2>
+            </div>
+        </div>
+
+        <div class="metric-grid teamwork-progress-grid">
+            <article class="metric-card">
+                <span>Avanzamento ore</span>
+                <strong>{{ agenda_progress.percentuale_ore|floatformat:"-1" }}%</strong>
+                <small>{{ agenda_progress.ore_risolte }} / {{ agenda_progress.ore_pianificate }} h risolte</small>
+            </article>
+            <article class="metric-card">
+                <span>Giornate/sessioni</span>
+                <strong>{{ agenda_progress.sessioni_risolte }} / {{ agenda_progress.sessioni_totali }}</strong>
+                <small>{{ agenda_progress.sessioni_da_confermare }} da risolvere</small>
+            </article>
+            <article class="metric-card">
+                <span>Chiusura commessa</span>
+                <strong>{% if agenda_progress.completa %}Pronta{% else %}Bloccata{% endif %}</strong>
+                <small>{% if agenda_progress.completa %}Tutte le sessioni sono risolte{% else %}{{ agenda_progress.ore_da_confermare }} h ancora da risolvere{% endif %}</small>
+            </article>
+        </div>
+    </section>
+
+
+    <!-- ACCESSI RAPIDI -->
+
+    <section>
+
+        <div class="teamwork-section-heading">
+
+            <div>
+                <div class="eyebrow">Operatività</div>
+                <h2>Area di lavoro</h2>
+            </div>
+
+        </div>
+
+
+        <div class="teamwork-grid{% if accesso_portafoglio and puo_vedere_attivita %} teamwork-grid-three{% elif accesso_portafoglio %} teamwork-grid-two{% endif %}">
+
+            {% if puo_vedere_pianificazione %}
+            <a
+                class="teamwork-card"
+                href="{% url 'planning:pianificazione-list' %}?commessa={{ commessa.pk }}">
+
+                <span class="teamwork-card-icon-wrap">
+                    <svg class="teamwork-card-icon" aria-hidden="true">
+                        <use href="#icon-calendar"></use>
+                    </svg>
+                </span>
+
+                <div class="teamwork-card-copy">
+                    <strong>Calendario</strong>
+                    <p>Pianificazione condivisa del team</p>
+                </div>
+
+                <span class="teamwork-card-arrow" aria-hidden="true">
+                    →
+                </span>
+
+            </a>
+            {% endif %}
+
+
+            {% if puo_vedere_attivita %}
+            <a
+                class="teamwork-card"
+                href="{% url 'tasks:task-list' %}?commessa={{ commessa.pk }}">
+
+                <span class="teamwork-card-icon-wrap">
+                    <svg class="teamwork-card-icon" aria-hidden="true">
+                        <use href="#icon-task-list"></use>
+                    </svg>
+                </span>
+
+                <div class="teamwork-card-copy">
+                    <strong>Attività</strong>
+                    <p>{{ task_aperti }} attività aperte</p>
+                </div>
+
+                <span class="teamwork-card-value">
+                    {{ task_aperti }}
+                </span>
+
+                <span class="teamwork-card-arrow" aria-hidden="true">
+                    →
+                </span>
+
+            </a>
+            {% endif %}
+
+
+            <a
+                class="teamwork-card"
+                href="{% url 'phases:fase-list' %}?commessa={{ commessa.pk }}">
+
+                <span class="teamwork-card-icon-wrap">
+                    <svg class="teamwork-card-icon" aria-hidden="true">
+                        <use href="#icon-layers"></use>
+                    </svg>
+                </span>
+
+                <div class="teamwork-card-copy">
+                    <strong>Fasi</strong>
+
+                    <p>
+                        {{ fasi_totali }}
+                        fas{{ fasi_totali|pluralize:"e,i" }}
+                    </p>
+                </div>
+
+                <span class="teamwork-card-value">
+                    {{ fasi_totali }}
+                </span>
+
+                <span class="teamwork-card-arrow" aria-hidden="true">
+                    →
+                </span>
+
+            </a>
+
+
+            <a
+                class="teamwork-card"
+                href="{% url 'documents:document-list' %}?commessa={{ commessa.pk }}">
+
+                <span class="teamwork-card-icon-wrap">
+                    <svg class="teamwork-card-icon" aria-hidden="true">
+                        <use href="#icon-file-text"></use>
+                    </svg>
+                </span>
+
+                <div class="teamwork-card-copy">
+                    <strong>Documenti</strong>
+
+                    <p>
+                        {{ documenti_totali }}
+                        document{{ documenti_totali|pluralize:"o,i" }}
+                    </p>
+                </div>
+
+                <span class="teamwork-card-value">
+                    {{ documenti_totali }}
+                </span>
+
+                <span class="teamwork-card-arrow" aria-hidden="true">
+                    →
+                </span>
+
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <!-- FASI -->
+
+    <section class="panel data-panel teamwork-section">
+
+        <div class="panel-heading teamwork-panel-heading">
+
+            <div>
+
+                <div class="eyebrow">Struttura</div>
+
+                <h2>Fasi operative</h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+            <table class="data-table teamwork-table teamwork-phases-table">
+
+                <thead>
+
+                    <tr>
+                        <th scope="col">Fase</th>
+                        <th scope="col">Stato</th>
+                        <th scope="col">Team</th>
+                        <th scope="col" class="table-numeric">Attività aperte</th>
+                        <th scope="col" class="table-numeric">Documenti</th>
+                        {% if puo_vedere_pianificazione %}
+                            <th scope="col" class="actions-column">Azioni</th>
+                        {% endif %}
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for fase in fasi %}
+
+                        <tr>
+
+                            <td class="table-primary">
+
+                                <div class="entity-cell">
+
+                                    <span class="entity-icon" aria-hidden="true">
+                                        <svg>
+                                            <use href="#icon-layers"></use>
+                                        </svg>
+                                    </span>
+
+                                    <div class="entity-copy">
+
+                                        <strong>
+                                            {{ fase.nome }}
+                                        </strong>
+
+                                        {% if fase.sistema %}
+                                            <span>Fase predefinita</span>
+                                        {% else %}
+                                            <span>Fase di commessa</span>
+                                        {% endif %}
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <td class="table-status">
+
+                                <span class="badge badge-{{ fase.stato|lower }}">
+                                    {{ fase.get_stato_display }}
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="teamwork-members-inline">
+
+                                    {% for membro in fase.membri %}
+
+                                        <span class="teamwork-member-chip">
+                                            {{ membro.consulente }}
+                                        </span>
+
+                                    {% empty %}
+
+                                        <span class="table-muted">
+                                            Nessun membro
+                                        </span>
+
+                                    {% endfor %}
+
+                                </div>
+
+                            </td>
+
+
+                            <td class="table-numeric">
+
+                                <strong>
+                                    {{ fase.task_aperti }}
+                                </strong>
+
+                            </td>
+
+
+                            <td class="table-numeric">
+
+                                <strong>
+                                    {{ fase.documenti_totali }}
+                                </strong>
+
+                            </td>
+
+
+                            {% if puo_vedere_pianificazione %}
+                            <td class="table-actions">
+
+                                <div class="row-actions">
+
+                                    <a
+                                        class="row-action row-action-primary"
+                                        href="{% url 'planning:pianificazione-list' %}?commessa={{ commessa.pk }}&fase={{ fase.pk }}">
+
+                                        <svg
+                                            class="btn-icon"
+                                            aria-hidden="true">
+
+                                            <use href="#icon-calendar"></use>
+
+                                        </svg>
+
+                                        Calendario
+
+                                    </a>
+                                </div>
+
+                            </td>
+                            {% endif %}
+
+                        </tr>
+
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td
+                                colspan="{% if puo_vedere_pianificazione %}6{% else %}5{% endif %}"
+                                class="empty-state">
+
+                                <div class="table-empty-content">
+
+                                    <strong>
+                                        Nessuna fase presente
+                                    </strong>
+
+                                    <span>
+                                        Non risultano fasi operative per questa commessa.
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- TEAM -->
+
+    <section class="panel data-panel teamwork-section">
+
+        <div class="panel-heading teamwork-panel-heading">
+
+            <div>
+
+                <div class="eyebrow">Persone</div>
+
+                <h2>Membri del Teamwork</h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+            <table class="data-table teamwork-table teamwork-members-table">
+
+                <thead>
+
+                    <tr>
+                        <th scope="col">Persona</th>
+                        <th scope="col">Fase</th>
+                        <th scope="col">Ruolo</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for assegnazione in membri %}
+
+                        <tr>
+
+                            <td class="table-primary">
+
+                                <div class="entity-cell">
+
+                                    <span
+                                        class="entity-icon teamwork-person-icon"
+                                        aria-hidden="true">
+
+                                        <svg>
+                                            <use href="#icon-users"></use>
+                                        </svg>
+
+                                    </span>
+
+                                    <div class="entity-copy">
+
+                                        <strong>
+                                            {{ assegnazione.consulente }}
+                                        </strong>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                {{ assegnazione.fase.nome }}
+
+                            </td>
+
+
+                            <td>
+
+                                <span class="teamwork-role">
+                                    {{ assegnazione.get_ruolo_commessa_display }}
+                                </span>
+
+                            </td>
+
+                        </tr>
+
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td
+                                colspan="3"
+                                class="empty-state">
+
+                                <div class="table-empty-content">
+
+                                    <strong>
+                                        Nessun membro attivo
+                                    </strong>
+
+                                    <span>
+                                        Non risultano assegnazioni attive su questa commessa.
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}

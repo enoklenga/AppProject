@@ -1,0 +1,460 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Documenti | LEFTRACK{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/documents.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="documents-page">
+
+    <div class="page-header">
+
+        <div>
+            <div class="eyebrow">Operatività</div>
+
+            <h1>Documenti</h1>
+
+        </div>
+
+
+        {% if puo_caricare %}
+
+            <a
+                class="button button-primary"
+                href="{% url 'documents:document-upload' %}{% if request.GET.commessa %}?commessa={{ request.GET.commessa }}{% endif %}">
+
+                <svg
+                    class="btn-icon"
+                    aria-hidden="true">
+
+                    <use href="#icon-upload"></use>
+
+                </svg>
+
+                Carica documento
+
+            </a>
+
+        {% endif %}
+
+    </div>
+
+
+    <form
+        method="get"
+        class="filter-bar list-filter-bar documents-filter">
+
+        <div class="field">
+
+            <label for="filtro-commessa">
+                Commessa
+            </label>
+
+            <select
+                id="filtro-commessa"
+                name="commessa"
+                onchange="this.form.submit()">
+
+                <option value="">
+                    Tutte
+                </option>
+
+                {% for commessa in commesse %}
+
+                    <option
+                        value="{{ commessa.pk }}"
+                        {% if commessa_selezionata == commessa.pk|stringformat:"s" %}selected{% endif %}>
+
+                        {{ commessa.codice }}
+
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        {% if commessa_selezionata %}
+
+            <div class="field">
+
+                <label for="filtro-fase">
+                    Fase
+                </label>
+
+                <select
+                    id="filtro-fase"
+                    name="fase"
+                    onchange="this.form.submit()">
+
+                    <option value="">
+                        Tutte
+                    </option>
+
+                    {% for fase in fasi %}
+
+                        <option
+                            value="{{ fase.pk }}"
+                            {% if fase_selezionata == fase.pk|stringformat:"s" %}selected{% endif %}>
+
+                            {{ fase.nome }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+        {% endif %}
+
+
+        <div class="field">
+
+            <label for="filtro-categoria">
+                Categoria
+            </label>
+
+            <select
+                id="filtro-categoria"
+                name="categoria"
+                onchange="this.form.submit()">
+
+                <option value="">
+                    Tutte
+                </option>
+
+                {% for valore, etichetta in categorie %}
+
+                    <option
+                        value="{{ valore }}"
+                        {% if categoria_selezionata == valore %}selected{% endif %}>
+
+                        {{ etichetta }}
+
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <noscript>
+
+            <button
+                class="button button-secondary"
+                type="submit">
+
+                <svg
+                    class="btn-icon"
+                    aria-hidden="true">
+
+                    <use href="#icon-filter"></use>
+
+                </svg>
+
+                Applica filtri
+
+            </button>
+
+        </noscript>
+
+    </form>
+
+
+    <section class="panel data-panel">
+
+        <div class="panel-heading">
+
+            <div>
+
+                <div class="eyebrow">
+                    Archivio
+                </div>
+
+                <h2>
+                    Elenco documenti
+                </h2>
+
+                <p>
+                    {{ totale }} document{{ totale|pluralize:"o,i" }}
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+            <table class="data-table documents-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th scope="col">
+                            Documento
+                        </th>
+
+                        <th scope="col">
+                            Commessa
+                        </th>
+
+                        <th scope="col">
+                            Fase
+                        </th>
+
+                        <th scope="col">
+                            Categoria
+                        </th>
+
+                        <th scope="col">
+                            Caricato da
+                        </th>
+
+                        <th scope="col">
+                            Data
+                        </th>
+
+                        <th scope="col">
+                            Dimensione
+                        </th>
+
+                        <th
+                            scope="col"
+                            class="actions-column">
+
+                            Azioni
+
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for documento in documenti %}
+
+                        <tr>
+
+
+                            <!-- DOCUMENTO -->
+
+                            <td class="table-primary">
+
+                                <div class="entity-cell document-entity-cell">
+
+                                    <span
+                                        class="entity-icon document-entity-icon"
+                                        aria-hidden="true">
+
+                                        <svg>
+                                            <use href="#icon-file-text"></use>
+                                        </svg>
+
+                                    </span>
+
+
+                                    <div class="entity-copy document-entity-copy">
+
+                                        <div class="document-title-row">
+
+                                            <strong>
+                                                {{ documento.nome_originale }}
+                                            </strong>
+
+                                            {% if documento.privato %}
+
+                                                <span
+                                                    class="badge badge-neutral"
+                                                    title="Visibile solo agli Admin LEF">
+
+                                                    <svg
+                                                        class="btn-icon"
+                                                        aria-hidden="true">
+
+                                                        <use href="#icon-lock"></use>
+
+                                                    </svg>
+
+                                                    Privato
+
+                                                </span>
+
+                                            {% endif %}
+
+                                        </div>
+
+
+                                        {% if documento.descrizione %}
+
+                                            <span class="document-description">
+                                                {{ documento.descrizione|truncatechars:90 }}
+                                            </span>
+
+                                        {% endif %}
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- COMMESSA -->
+
+                            <td>
+
+                                <strong class="table-secondary-strong">
+                                    {{ documento.commessa.codice }}
+                                </strong>
+
+                            </td>
+
+
+                            <!-- FASE -->
+
+                            <td>
+
+                                {{ documento.fase.nome|default:"Generale" }}
+
+                            </td>
+
+
+                            <!-- CATEGORIA -->
+
+                            <td>
+
+                                <span class="document-category document-category-{{ documento.categoria|lower }}">
+                                    {{ documento.get_categoria_display }}
+                                </span>
+
+                            </td>
+
+
+                            <!-- CARICATO DA -->
+
+                            <td>
+
+                                {{ documento.caricato_da }}
+
+                            </td>
+
+
+                            <!-- DATA -->
+
+                            <td class="table-date">
+
+                                {{ documento.created_at|date:"d/m/Y" }}
+
+                            </td>
+
+
+                            <!-- DIMENSIONE -->
+
+                            <td class="table-size">
+
+                                {{ documento.dimensione_leggibile }}
+
+                            </td>
+
+
+                            <!-- AZIONI -->
+
+                            <td class="table-actions">
+
+                                <div class="row-actions">
+
+                                    <a
+                                        class="row-action row-action-primary"
+                                        href="{% url 'documents:document-download' documento.pk %}">
+
+                                        <svg
+                                            class="btn-icon"
+                                            aria-hidden="true">
+
+                                            <use href="#icon-download"></use>
+
+                                        </svg>
+
+                                        Scarica
+
+                                    </a>
+
+
+                                    {% if request.user.is_admin_lef or documento.commessa.stato == "APERTA" %}
+
+                                        <a
+                                            class="row-action row-action-danger document-action-icon"
+                                            href="{% url 'documents:document-delete' documento.pk %}">
+
+                                            <svg
+                                                class="btn-icon"
+                                                aria-hidden="true">
+
+                                                <use href="#icon-trash"></use>
+
+                                            </svg>
+
+                                            <span class="a11y-only">Elimina</span>
+
+                                        </a>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td
+                                colspan="8"
+                                class="empty-state">
+
+                                <div class="table-empty-content">
+
+                                    <strong>
+                                        Nessun documento trovato
+                                    </strong>
+
+                                    <span>
+                                        Modifica i filtri oppure carica un nuovo documento.
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}

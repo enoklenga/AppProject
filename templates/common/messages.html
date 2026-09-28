@@ -1,0 +1,30 @@
+{% if messages %}
+<section
+    class="messages"
+    aria-label="Notifiche di sistema"
+    aria-live="polite">
+    {% for message in messages %}
+        <div
+            class="message message-{{ message.tags|default:'info' }}"
+            {% if message.tags == "error" %}role="alert"{% else %}role="status"{% endif %}
+            data-message>
+            <div class="message-content">
+                <span class="message-symbol" aria-hidden="true">
+                    {% if message.tags == "success" %}✓
+                    {% elif message.tags == "warning" %}!
+                    {% elif message.tags == "error" %}×
+                    {% else %}i{% endif %}
+                </span>
+                <div>{{ message }}</div>
+            </div>
+            <button
+                class="message-dismiss"
+                type="button"
+                aria-label="Chiudi notifica"
+                data-message-dismiss>
+                <svg class="btn-icon" aria-hidden="true"><use href="#icon-x"></use></svg>
+            </button>
+        </div>
+    {% endfor %}
+</section>
+{% endif %}

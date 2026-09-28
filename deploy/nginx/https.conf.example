@@ -1,0 +1,45 @@
+# Esempio da adattare dopo aver ottenuto certificato e dominio.
+# Sostituire timesheet.example.it e montare i certificati nel container Nginx.
+
+server {
+    listen 80;
+    server_name timesheet.example.it;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name timesheet.example.it;
+
+    ssl_certificate /etc/nginx/certs/fullchain.pem;
+    ssl_certificate_key /etc/nginx/certs/privkey.pem;
+
+    client_max_body_size 12m;
+
+    location /static/ {
+        alias /static/;
+        access_log off;
+        expires 7d;
+    }
+
+    location /media/ {
+        alias /media/;
+        access_log off;
+        expires 1d;
+    }
+
+    # I documenti riservati non vengono mai serviti direttamente da Nginx.
+    location /private_media/ {
+        return 404;
+    }
+
+    location / {
+        proxy_pass http://web:8000;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_connect_timeout 10s;
+        proxy_read_timeout 90s;
+    }
+}

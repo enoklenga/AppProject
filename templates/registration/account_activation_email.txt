@@ -1,0 +1,10 @@
+Gentile {{ user.get_full_name|default:user.email }},
+
+è stato creato per te un account LEFTRACK.
+
+Per attivarlo e scegliere personalmente la tua password, apri questo link:
+{{ activation_url }}
+
+Il link è personale e temporaneo. Se non ti aspettavi questo invito, puoi ignorare il messaggio.
+
+LEFTRACK

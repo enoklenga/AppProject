@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Persone e ruoli | LEFTRACK{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <div class="eyebrow">Gestione</div>
+        <h1>Persone e ruoli</h1>
+    </div>
+    <div class="page-header-actions">
+        <a class="button button-secondary" href="{% url 'accounts:skill-matrix' %}">Skill Matrix</a>
+        {% if puo_gestire_utenti %}
+            <a class="button button-primary" href="{% url 'accounts:consulente-create' %}">
+                <svg class="btn-icon" aria-hidden="true"><use href="#icon-plus"></use></svg>
+                Nuovo utente
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<form class="filter-bar list-filter-bar" method="get">
+    <input type="search" name="q" value="{{ request.GET.q }}" placeholder="Cerca nome, cognome o email" aria-label="Cerca utente">
+    <select name="ruolo" aria-label="Filtra per ruolo">
+        <option value="">Tutti i ruoli</option>
+        {% for valore, etichetta in ruoli_filtro %}
+            <option value="{{ valore }}" {% if request.GET.ruolo == valore %}selected{% endif %}>{{ etichetta }}</option>
+        {% endfor %}
+    </select>
+    <select name="stato" aria-label="Filtra per stato">
+        <option value="">Tutti gli stati</option>
+        <option value="invito" {% if request.GET.stato == 'invito' %}selected{% endif %}>In attesa di attivazione</option>
+        <option value="attivi" {% if request.GET.stato == 'attivi' %}selected{% endif %}>Attivi</option>
+        <option value="disattivati" {% if request.GET.stato == 'disattivati' %}selected{% endif %}>Disattivati</option>
+    </select>
+    <button class="button button-secondary" type="submit">
+        <svg class="btn-icon" aria-hidden="true"><use href="#icon-filter"></use></svg>
+        Filtra
+    </button>
+</form>
+
+<section class="panel data-panel">
+    <div class="table-wrapper">
+        <table class="data-table consultants-table">
+            <thead>
+                <tr>
+                    <th scope="col">Persona</th>
+                    <th scope="col">Ruolo</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Telefono</th>
+                    <th scope="col">Stato account</th>
+                    {% if puo_gestire_utenti %}
+                        <th scope="col" class="actions-column">Azioni</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for consulente in consulenti %}
+                    <tr>
+                        <td class="table-primary">
+                            <div class="entity-cell">
+                                <span class="entity-icon consultant-entity-icon" aria-hidden="true">
+                                    <svg><use href="#icon-users"></use></svg>
+                                </span>
+                                <div class="entity-copy">
+                                    <strong>{{ consulente.get_full_name|default:consulente.email }}</strong>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="badge badge-neutral role-badge">{{ consulente.get_ruolo_display }}</span></td>
+                        <td><span class="table-email">{{ consulente.email }}</span></td>
+                        <td>{% if consulente.telefono %}{{ consulente.telefono }}{% else %}<span class="table-muted">—</span>{% endif %}</td>
+                        <td class="table-status">
+                            {% if consulente.is_pending_activation %}
+                                {% if consulente.invito_inviato_il %}
+                                    <div class="account-status-stack">
+                                        <span class="badge badge-pending">Invito inviato</span>
+                                        <span class="table-meta">{{ consulente.invito_inviato_il|date:"d/m/Y H:i" }}</span>
+                                    </div>
+                                {% else %}
+                                    <span class="badge badge-errore">Invito da reinviare</span>
+                                {% endif %}
+                            {% elif consulente.is_active %}
+                                <span class="badge badge-attiva">Attivo</span>
+                            {% else %}
+                                <span class="badge badge-chiusa">Disattivato</span>
+                            {% endif %}
+                        </td>
+                        {% if puo_gestire_utenti %}
+                        <td class="table-actions">
+                            <div class="row-actions">
+                                {% if puo_gestire_utenti and consulente.is_risorsa_ingaggiabile %}
+                                    <a class="row-action" href="{% url 'accounts:skill-matrix-user-update' consulente.pk %}">Skill</a>
+                                {% endif %}
+                                {% if puo_gestire_utenti and consulente.is_pending_activation %}
+                                    <form method="post" action="{% url 'accounts:consulente-resend-invite' consulente.pk %}">
+                                        {% csrf_token %}
+                                        <button class="row-action row-action-primary" type="submit">Reinvia invito</button>
+                                    </form>
+                                {% endif %}
+                                {% if puo_gestire_utenti %}
+                                    <a class="row-action consultant-action-icon" href="{% url 'accounts:consulente-update' consulente.pk %}" aria-label="Modifica utente" title="Modifica">
+                                        <svg class="btn-icon" aria-hidden="true"><use href="#icon-edit"></use></svg>
+                                        <span class="a11y-only">Modifica</span>
+                                    </a>
+                                {% endif %}
+                                {% if puo_gestire_utenti and not consulente.is_pending_activation %}
+                                    <form method="post" action="{% url 'accounts:consulente-toggle-active' consulente.pk %}">
+                                        {% csrf_token %}
+                                        <button class="row-action row-action-state {% if not consulente.is_active %}is-success{% endif %}" type="submit">
+                                            {% if consulente.is_active %}Disattiva{% else %}Riattiva{% endif %}
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                        {% endif %}
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="{% if puo_gestire_utenti %}6{% else %}5{% endif %}" class="empty-state">Nessun utente trovato.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% include "common/pagination.html" %}
+{% endblock %}

@@ -1,0 +1,184 @@
+/* Accessibility layer
+   Obiettivo: WCAG 2.2 AA-oriented UI behavior (non costituisce certificazione). */
+
+/* Keyboard focus: always visible and not dependent on color alone. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 3px solid #0b6ea8;
+    outline-offset: 2px;
+    box-shadow: none;
+}
+
+.skip-link:focus-visible {
+    outline-color: #ffffff;
+    outline-offset: 3px;
+}
+
+/* Interactive targets: target size baseline for touch and motor accessibility. */
+:where(button, .button, .link-button, .sidebar-toggle, .sidebar-close, .logout-button, .message-dismiss) {
+    min-height: 44px;
+}
+
+:where(.sidebar-toggle, .sidebar-close, .logout-button, .message-dismiss) {
+    min-width: 44px;
+}
+
+.nav-link {
+    min-height: 44px;
+}
+
+/* Avoid conveying state with color alone. */
+.badge::before {
+    display: inline-block;
+    margin-right: 0.35em;
+    font-size: 0.75em;
+    line-height: 1;
+    vertical-align: 0.08em;
+}
+
+.badge-modificabile::before,
+.badge-attiva::before,
+.badge-completata::before,
+.badge-aperta::before {
+    content: "✓";
+}
+
+.badge-bloccata::before,
+.badge-errore::before,
+.badge-danger::before,
+.badge-chiusa::before,
+.badge-conclusa::before {
+    content: "!";
+}
+
+.badge-warning::before,
+.badge-in-attesa::before,
+.badge-da-completare::before,
+.badge-pending::before,
+.badge-validazione::before,
+.badge-pronta::before {
+    content: "•";
+}
+
+/* Stronger readability for helper text. */
+.muted,
+.kpi-meta,
+.chart-card-header p,
+.progress-heading span,
+.grouped-series-name,
+.grouped-series-value {
+    color: #526d82;
+}
+
+/* Clickable cards must look and behave like interactive elements. */
+a.kpi-card,
+a.content-card {
+    text-decoration: none;
+}
+
+a.kpi-card:hover,
+a.content-card:hover {
+    border-color: var(--lef-blue-600);
+}
+
+a.kpi-card:focus-visible,
+a.content-card:focus-visible {
+    outline: 3px solid #0b6ea8;
+    outline-offset: 3px;
+}
+
+/* Horizontal data regions can receive keyboard focus when JS detects overflow. */
+.table-wrapper.is-scrollable {
+    position: relative;
+    scrollbar-gutter: stable;
+}
+
+.table-wrapper.is-scrollable:focus-visible {
+    outline: 3px solid #0b6ea8;
+    outline-offset: 3px;
+}
+
+.table-scroll-hint {
+    margin: 0 0 var(--space-2);
+    color: #526d82;
+    font-size: var(--font-size-xs);
+}
+
+/* Chart text must retain readable contrast. */
+.chart-axis-label,
+.bar-value,
+.grouped-series-name,
+.grouped-series-value {
+    color: #526d82;
+    fill: #526d82;
+}
+
+/* Screen-reader-only class remains available even if component CSS changes. */
+.a11y-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* User preferences. */
+@media (prefers-reduced-motion: reduce) {
+    html:focus-within {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+@media (prefers-contrast: more) {
+    :root {
+        --lef-border: #8798a5;
+        --lef-border-strong: #667785;
+        --lef-muted: #40596b;
+    }
+
+    .button,
+    input,
+    select,
+    textarea,
+    .panel,
+    .chart-card,
+    .kpi-card {
+        border-width: 2px;
+    }
+}
+
+/* Windows High Contrast / forced colors. */
+@media (forced-colors: active) {
+    :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+        outline: 2px solid Highlight;
+    }
+
+    .bar-fill,
+    .progress-value,
+    .legend-dot,
+    .kpi-card::before {
+        forced-color-adjust: auto;
+        background: Highlight;
+    }
+
+    .chart-line,
+    .chart-point {
+        stroke: Highlight;
+    }
+
+    .chart-area {
+        fill: transparent;
+    }
+}

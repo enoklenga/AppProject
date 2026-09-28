@@ -1,0 +1,32 @@
+# Ambiente / segreti
+.env
+.env.production
+.env.staging
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Django generated / runtime data
+staticfiles/
+media/
+private_media/
+backups/
+logs/
+
+# Test / coverage
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Database dump
+*.sql

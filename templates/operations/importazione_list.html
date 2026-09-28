@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}Importazioni | LEFTRACK{% endblock %}
+
+{% block content %}
+
+<div class="operations-page">
+
+    <div class="page-header">
+
+        <div>
+            <div class="eyebrow">Dati storici</div>
+            <h1>Importazioni</h1>
+
+        </div>
+
+
+        <a
+            class="button button-primary"
+            href="{% url 'operations:importazione-create' %}">
+
+            <svg class="btn-icon" aria-hidden="true">
+                <use href="#icon-plus"></use>
+            </svg>
+
+            Nuova importazione
+        </a>
+
+    </div>
+
+
+    <div class="import-template-grid">
+
+        <a
+            class="import-template-card"
+            href="{% url 'operations:importazione-template' 'ORE' %}">
+
+            <div>
+                <div class="eyebrow">Modello Excel</div>
+
+                <h2>
+                    Template ore
+                </h2>
+
+            </div>
+
+            <span class="row-action row-action-primary">
+                Scarica template
+            </span>
+
+        </a>
+
+
+        <a
+            class="import-template-card"
+            href="{% url 'operations:importazione-template' 'SPESE' %}">
+
+            <div>
+                <div class="eyebrow">Modello Excel</div>
+
+                <h2>
+                    Template spese
+                </h2>
+
+            </div>
+
+            <span class="row-action row-action-primary">
+                Scarica template
+            </span>
+
+        </a>
+
+    </div>
+
+
+    <section class="panel data-panel operations-section">
+
+        <div class="panel-heading">
+
+            <div>
+                <div class="eyebrow">Storico</div>
+
+                <h2>
+                    Importazioni eseguite
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+            <table class="data-table import-table">
+
+                <thead>
+
+                    <tr>
+                        <th scope="col">Data</th>
+                        <th scope="col">File</th>
+                        <th scope="col">Avviata da</th>
+                        <th scope="col">Stato</th>
+                        <th scope="col">Totali</th>
+                        <th scope="col">Valide</th>
+                        <th scope="col">Errori</th>
+                        <th scope="col" class="actions-column">Azioni</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for importazione in importazioni %}
+
+                        <tr>
+
+                            <td>
+                                <div class="table-stack">
+                                    <strong>
+                                        {{ importazione.created_at|date:"d/m/Y" }}
+                                    </strong>
+
+                                    <span>
+                                        {{ importazione.created_at|date:"H:i" }}
+                                    </span>
+                                </div>
+                            </td>
+
+
+                            <td class="table-primary">
+                                {{ importazione.nome_file }}
+                            </td>
+
+
+                            <td>
+                                {{ importazione.avviata_da }}
+                            </td>
+
+
+                            <td>
+
+                                <span class="badge badge-{{ importazione.stato|lower }}">
+                                    {{ importazione.get_stato_display }}
+                                </span>
+
+                            </td>
+
+
+                            <td class="table-numeric">
+                                <strong>{{ importazione.righe_totali }}</strong>
+                            </td>
+
+
+                            <td class="table-numeric">
+                                <strong>{{ importazione.righe_valide }}</strong>
+                            </td>
+
+
+                            <td class="table-numeric">
+                                <strong>{{ importazione.righe_errore }}</strong>
+                            </td>
+
+
+                            <td class="table-actions">
+
+                                <div class="row-actions">
+
+                                    <a
+                                        class="row-action row-action-primary"
+                                        href="{% url 'operations:importazione-detail' importazione.id %}">
+
+                                        Apri
+                                    </a>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td
+                                colspan="8"
+                                class="empty-state">
+
+                                <div class="table-empty-content">
+
+                                    <strong>
+                                        Nessuna importazione
+                                    </strong>
+
+                                    <span>
+                                        Le importazioni effettuate compariranno qui.
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    {% include "common/pagination.html" %}
+
+</div>
+
+{% endblock %}

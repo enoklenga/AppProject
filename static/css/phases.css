@@ -1,0 +1,176 @@
+/* =========================================================
+   LEF TIMESHEET — PHASES
+   ========================================================= */
+
+.phases-page {
+    display: grid;
+    gap: 24px;
+}
+
+.phases-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 20px;
+}
+
+.phases-form-grid .field-full {
+    grid-column: 1 / -1;
+}
+
+.field-hint {
+    margin-top: 6px;
+    color: var(--lef-muted);
+    font-size: 12px;
+}
+
+.phase-description {
+    margin: 4px 0 0;
+    color: var(--lef-muted);
+    font-size: 12px;
+}
+
+.phase-status {
+    display: inline-flex;
+    align-items: center;
+
+    min-height: 22px;
+
+    padding: 3px 9px;
+
+    border: 1px solid transparent;
+    border-radius: 999px;
+
+    font-size: 10.5px;
+    font-weight: 800;
+
+    white-space: nowrap;
+}
+
+.phase-status-da_iniziare {
+    color: var(--lef-muted);
+    background: var(--lef-background-soft);
+    border-color: var(--lef-border);
+}
+
+.phase-status-in_corso {
+    color: var(--lef-info);
+    background: var(--lef-info-soft);
+    border-color: rgba(40, 117, 167, 0.14);
+}
+
+.phase-status-completata {
+    color: var(--lef-success);
+    background: var(--lef-success-soft);
+    border-color: rgba(16, 92, 57, 0.12);
+}
+
+.phase-status-sospesa {
+    color: var(--lef-warning);
+    background: var(--lef-warning-soft);
+    border-color: rgba(145, 100, 0, 0.14);
+}
+
+@media (max-width: 760px) {
+    .phases-form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ==========================================================================
+   LEFTRACK PHASES 2.0
+   ========================================================================== */
+
+.phase-filter-bar {
+    grid-template-columns:
+        minmax(320px, 560px);
+}
+
+.phase-order-cell {
+    width: 70px;
+}
+
+.phase-order {
+    width: 28px;
+    height: 28px;
+
+    display: inline-grid;
+    place-items: center;
+
+    color: #60758f;
+    background: #f0f4f8;
+
+    border-radius: 8px;
+
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.phase-entity-copy {
+    max-width: 480px;
+}
+
+.phase-entity-copy .phase-description {
+    display: block;
+
+    max-width: 420px;
+
+    overflow: hidden;
+
+    color: var(--lef-muted);
+
+    font-size: 10.5px;
+    font-weight: 500;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.phase-default-label {
+    display: inline-flex;
+    align-items: center;
+
+    min-height: 29px;
+
+    padding: 4px 8px;
+
+    color: #8392a6;
+
+    background: #f5f7fa;
+
+    border-radius: 8px;
+
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.selection-empty-state {
+    padding: 34px;
+
+    color: var(--lef-muted);
+
+    background: var(--lef-surface);
+
+    border:
+        1px dashed #d7e1ec;
+
+    border-radius: 14px;
+
+    text-align: center;
+}
+
+.selection-empty-state strong {
+    display: block;
+
+    color: var(--lef-navy-900);
+
+    font-size: 14px;
+}
+
+.selection-empty-state p {
+    margin:
+        5px
+        0
+        0;
+
+    font-size: 12px;
+}

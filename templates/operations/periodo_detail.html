@@ -1,0 +1,1257 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Chiusura mese | LEFTRACK{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/operations.css' %}">
+
+{% endblock %}
+
+{% block content %}
+
+<div class="period-page">
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <div class="page-header">
+
+        <div>
+            <div class="eyebrow">Controllo mensile</div>
+
+            <h1>Chiusura e valorizzazione</h1>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SELETTORE PERIODO
+         ===================================================== -->
+
+    <form
+        class="filter-bar list-filter-bar period-filter"
+        method="get">
+
+        <div class="field">
+
+            <label for="id_mese">
+                Mese
+            </label>
+
+            <input
+                id="id_mese"
+                type="month"
+                name="mese"
+                value="{{ mese_selezionato }}">
+
+        </div>
+
+        <button
+            class="button button-secondary"
+            type="submit">
+
+            <svg
+                class="btn-icon"
+                aria-hidden="true">
+
+                <use href="#icon-refresh"></use>
+
+            </svg>
+
+            Carica periodo
+
+        </button>
+
+    </form>
+
+
+    <!-- =====================================================
+         HERO PERIODO
+         ===================================================== -->
+
+    <section class="period-control-card">
+
+        <div class="period-control-header">
+
+            <div class="period-control-heading">
+
+                <span
+                    class="period-control-icon"
+                    aria-hidden="true">
+
+                    <svg>
+                        <use href="#icon-calendar"></use>
+                    </svg>
+
+                </span>
+
+
+                <div>
+
+                    <div class="eyebrow">
+                        Periodo selezionato
+                    </div>
+
+                    <h2>
+                        {{ mese_data|date:"F Y"|capfirst }}
+                    </h2>
+
+
+                </div>
+
+            </div>
+
+
+            {% if stato_chiuso %}
+
+                <span class="period-status period-status-closed">
+
+                    <svg
+                        class="btn-icon"
+                        aria-hidden="true">
+
+                        <use href="#icon-lock"></use>
+
+                    </svg>
+
+                    Chiuso
+
+                </span>
+
+            {% else %}
+
+                <span class="period-status period-status-open">
+
+                    <svg
+                        class="btn-icon"
+                        aria-hidden="true">
+
+                        <use href="#icon-unlock"></use>
+
+                    </svg>
+
+                    Aperto
+
+                </span>
+
+            {% endif %}
+
+        </div>
+
+
+        <div class="period-control-body">
+
+            <!-- ORE -->
+
+            <article class="period-approval-card">
+
+                <div class="period-approval-heading">
+
+                    <span
+                        class="period-approval-icon"
+                        aria-hidden="true">
+
+                        <svg>
+                            <use href="#icon-clock"></use>
+                        </svg>
+
+                    </span>
+
+                    <div>
+                        <strong>Timesheet</strong>
+                        <span>Stato approvazione ore</span>
+                    </div>
+
+                </div>
+
+
+                <div class="period-approval-stats">
+
+                    <div class="period-approval-stat">
+
+                        <span
+                            class="period-summary-dot"
+                            data-tone="success">
+                        </span>
+
+                        <div>
+                            <strong>
+                                {{ riepilogo.approvazione_ore.approvate }}
+                            </strong>
+
+                            <span>
+                                Approvati
+                            </span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="period-approval-stat">
+
+                        <span
+                            class="period-summary-dot"
+                            data-tone="warning">
+                        </span>
+
+                        <div>
+                            <strong>
+                                {{ riepilogo.approvazione_ore.da_approvare }}
+                            </strong>
+
+                            <span>
+                                Da approvare
+                            </span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="period-approval-stat">
+
+                        <span
+                            class="period-summary-dot"
+                            data-tone="danger">
+                        </span>
+
+                        <div>
+                            <strong>
+                                {{ riepilogo.approvazione_ore.rifiutate }}
+                            </strong>
+
+                            <span>
+                                Rifiutati
+                            </span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </article>
+
+
+            <!-- SPESE -->
+
+            <article class="period-approval-card">
+
+                <div class="period-approval-heading">
+
+                    <span
+                        class="period-approval-icon"
+                        aria-hidden="true">
+
+                        <svg>
+                            <use href="#icon-receipt"></use>
+                        </svg>
+
+                    </span>
+
+                    <div>
+                        <strong>Spese</strong>
+                        <span>Stato approvazione spese</span>
+                    </div>
+
+                </div>
+
+
+                <div class="period-approval-stats">
+
+                    <div class="period-approval-stat">
+
+                        <span
+                            class="period-summary-dot"
+                            data-tone="success">
+                        </span>
+
+                        <div>
+                            <strong>
+                                {{ riepilogo.approvazione_spese.approvate }}
+                            </strong>
+
+                            <span>
+                                Approvate
+                            </span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="period-approval-stat">
+
+                        <span
+                            class="period-summary-dot"
+                            data-tone="warning">
+                        </span>
+
+                        <div>
+                            <strong>
+                                {{ riepilogo.approvazione_spese.da_approvare }}
+                            </strong>
+
+                            <span>
+                                Da approvare
+                            </span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="period-approval-stat">
+
+                        <span
+                            class="period-summary-dot"
+                            data-tone="danger">
+                        </span>
+
+                        <div>
+                            <strong>
+                                {{ riepilogo.approvazione_spese.rifiutate }}
+                            </strong>
+
+                            <span>
+                                Rifiutate
+                            </span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </article>
+
+        </div>
+
+
+        <div class="period-control-footer">
+
+            <div class="period-control-totals">
+
+                <div>
+                    <span>Ore totali</span>
+
+                    <strong>
+                        {{ riepilogo.totale_ore }} h
+                    </strong>
+                </div>
+
+
+                <div>
+                    <span>Spese totali</span>
+
+                    <strong>
+                        € {{ riepilogo.totale_spese|floatformat:2 }}
+                    </strong>
+                </div>
+
+            </div>
+
+
+            <div class="period-control-links">
+
+                <a
+                    class="row-action"
+                    href="{% url 'timesheets:ore-list' %}?mese={{ mese_selezionato }}">
+
+                    Visualizza timesheet
+
+                </a>
+
+
+                <a
+                    class="row-action"
+                    href="{% url 'timesheets:spesa-list' %}?mese={{ mese_selezionato }}">
+
+                    Visualizza spese
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         KPI ECONOMICI
+         ===================================================== -->
+
+    <div class="metric-grid period-metric-grid">
+
+        <article class="metric-card">
+
+            <span>Ore registrate</span>
+
+            <strong>
+                {{ riepilogo.totale_ore }}
+            </strong>
+
+        </article>
+
+
+        <article class="metric-card">
+
+            <span>Valore ore</span>
+
+            <strong>
+                € {{ riepilogo.totale_importo_ore|floatformat:2 }}
+            </strong>
+
+        </article>
+
+
+        <article class="metric-card">
+
+            <span>Spese</span>
+
+            <strong>
+                € {{ riepilogo.totale_spese|floatformat:2 }}
+            </strong>
+
+        </article>
+
+
+        <article class="metric-card period-metric-highlight">
+
+            <span>Totale fatturabile valorizzato</span>
+
+            <strong>
+                € {{ riepilogo.totale_fatturabile|floatformat:2 }}
+            </strong>
+
+        </article>
+
+    </div>
+
+
+    <!-- =====================================================
+         STATO / BLOCCHI
+         ===================================================== -->
+
+    <div class="period-notices">
+
+        {% if stato_chiuso %}
+
+            <div class="notice notice-success">
+
+                <strong>Periodo chiuso.</strong>
+
+                {% if periodo.data_chiusura %}
+                    Chiusura effettuata il
+                    {{ periodo.data_chiusura|date:"d/m/Y H:i" }}.
+                {% endif %}
+
+                Ore e spese sono in sola lettura.
+
+            </div>
+
+        {% else %}
+
+            <div class="notice notice-info">
+
+                <strong>Periodo aperto.</strong>
+
+                Ore e spese possono essere ancora aggiornate
+                fino alla chiusura.
+
+            </div>
+
+        {% endif %}
+
+
+        {% if riepilogo.approvazione_ore.bloccante or riepilogo.approvazione_spese.bloccante %}
+
+            <div class="notice notice-warning">
+
+                <strong>Approvazioni incomplete.</strong>
+
+                Sono presenti registrazioni non ancora approvate
+                o rifiutate. La chiusura ordinaria è bloccata
+                fino al completamento delle approvazioni oppure
+                richiede una forzatura motivata.
+
+            </div>
+
+        {% endif %}
+
+
+        {% if riepilogo.righe_senza_tariffa %}
+
+            <div class="notice notice-warning">
+
+                <strong>Tariffe mancanti.</strong>
+
+                Sono presenti
+                {{ riepilogo.righe_senza_tariffa|length }}
+                righe senza tariffa.
+                La chiusura ordinaria è bloccata.
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- =====================================================
+         TARIFFE MANCANTI
+         ===================================================== -->
+
+    {% if riepilogo.righe_senza_tariffa %}
+
+        <section class="panel data-panel period-section">
+
+            <div class="panel-heading">
+
+                <div>
+
+                    <div class="eyebrow">
+                        Controllo
+                    </div>
+
+                    <h2>
+                        Tariffe mancanti
+                    </h2>
+
+                    <p>
+                        Aggiungi la decorrenza corretta prima della
+                        chiusura oppure utilizza la forzatura motivata.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="table-wrapper">
+
+                <table class="data-table period-table">
+
+                    <thead>
+
+                        <tr>
+                            <th scope="col">Data</th>
+                            <th scope="col">Commessa</th>
+                            <th scope="col">Fase</th>
+                            <th scope="col">Consulente</th>
+                            <th scope="col">Attività</th>
+                            <th scope="col">Ore</th>
+                            <th scope="col" class="actions-column">Azione</th>
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for riga in riepilogo.righe_senza_tariffa %}
+
+                            <tr>
+
+                                <td>
+                                    {{ riga.data|date:"d/m/Y" }}
+                                </td>
+
+
+                                <td class="table-primary">
+                                    {{ riga.assegnazione.commessa.codice }}
+                                </td>
+
+
+                                <td>
+                                    {{ riga.assegnazione.fase.nome }}
+                                </td>
+
+
+                                <td>
+                                    {{ riga.assegnazione.consulente }}
+                                </td>
+
+
+                                <td>
+                                    {{ riga.get_tipo_attivita_display }}
+                                </td>
+
+
+                                <td class="table-numeric">
+
+                                    <strong>
+                                        {{ riga.ore }}
+                                    </strong>
+
+                                    <span class="table-unit">
+                                        h
+                                    </span>
+
+                                </td>
+
+
+                               <td class="table-actions">
+
+                                    <div class="row-actions">
+
+                                        <a
+                                            class="row-action row-action-primary"
+                                            href="{% url 'projects:tariffa-create' %}?assegnazione={{ riga.assegnazione_id }}&tipo_attivita={{ riga.tipo_attivita }}&valida_dal={{ riga.data|date:'Y-m-d' }}&mese={{ mese_selezionato }}">
+
+                                            Aggiungi tariffa
+
+                                        </a>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    {% endif %}
+
+
+    <!-- =====================================================
+         VALORIZZAZIONE ORE
+         ===================================================== -->
+
+    <section class="panel data-panel period-section">
+
+        <div class="panel-heading">
+
+            <div>
+
+                <div class="eyebrow">
+                    Timesheet
+                </div>
+
+                <h2>
+                    Dettaglio valorizzazione ore
+                </h2>
+
+
+            </div>
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+            <table class="data-table period-table period-hours-table">
+
+                <thead>
+
+                    <tr>
+                        <th scope="col">Data</th>
+                        <th scope="col">Commessa</th>
+                        <th scope="col">Fase</th>
+                        <th scope="col">Consulente</th>
+                        <th scope="col">Attività</th>
+                        <th scope="col">Ore</th>
+                        <th scope="col">Tariffa</th>
+                        <th scope="col">Importo</th>
+                        <th scope="col">Approvazione</th>
+
+                        {% if not stato_chiuso %}
+                            <th
+                                scope="col"
+                                class="actions-column">
+
+                                Azioni
+
+                            </th>
+                        {% endif %}
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for elemento in riepilogo.righe_valorizzate %}
+
+                        <tr>
+
+                            <td>
+                                {{ elemento.riga.data|date:"d/m/Y" }}
+                            </td>
+
+
+                            <td class="table-primary">
+                                {{ elemento.riga.assegnazione.commessa.codice }}
+                            </td>
+
+
+                            <td>
+                                {{ elemento.riga.assegnazione.fase.nome }}
+                            </td>
+
+
+                            <td>
+                                {{ elemento.riga.assegnazione.consulente }}
+                            </td>
+
+
+                            <td>
+                                {{ elemento.riga.get_tipo_attivita_display }}
+                            </td>
+
+
+                            <td class="table-numeric">
+
+                                <strong>
+                                    {{ elemento.riga.ore }}
+                                </strong>
+
+                                <span class="table-unit">
+                                    h
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                {% if elemento.tariffa %}
+
+                                    <div class="table-stack">
+
+                                        <strong>
+                                            € {{ elemento.tariffa.tariffa_oraria|floatformat:2 }}
+                                        </strong>
+
+                                        <span>
+                                            dal {{ elemento.tariffa.valida_dal|date:"d/m/Y" }}
+                                        </span>
+
+                                    </div>
+
+                                {% else %}
+
+                                    <span class="badge badge-bloccata">
+                                        Mancante
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td class="table-numeric">
+
+                                {% if elemento.importo is not None %}
+
+                                    <strong>
+                                        € {{ elemento.importo|floatformat:2 }}
+                                    </strong>
+
+                                {% else %}
+
+                                    —
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+
+                                {% include "operations/partials/badge_approvazione.html" with stato=elemento.riga.stato_approvazione nota=elemento.riga.nota_approvazione %}
+
+                            </td>
+
+
+                            {% if not stato_chiuso %}
+
+                                <td class="table-actions">
+
+                                    {% include "operations/partials/approvazione_azioni.html" with approva_url_name="timesheets:ore-approva" rifiuta_url_name="timesheets:ore-rifiuta" oggetto_id=elemento.riga.id %}
+
+                                </td>
+
+                            {% endif %}
+
+                        </tr>
+
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td
+                                colspan="{% if stato_chiuso %}9{% else %}10{% endif %}"
+                                class="empty-state">
+
+                                <div class="table-empty-content">
+
+                                    <strong>
+                                        Nessuna ora registrata
+                                    </strong>
+
+                                    <span>
+                                        Non risultano ore nel periodo selezionato.
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         SPESE
+         ===================================================== -->
+
+    <section class="panel data-panel period-section">
+
+        <div class="panel-heading">
+
+            <div>
+
+                <div class="eyebrow">
+                    Trasferte
+                </div>
+
+                <h2>
+                    Dettaglio spese
+                </h2>
+
+
+            </div>
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+            <table class="data-table period-table period-expenses-table">
+
+                <thead>
+
+                    <tr>
+                        <th scope="col">Data</th>
+                        <th scope="col">Commessa</th>
+                        <th scope="col">Consulente</th>
+                        <th scope="col">Categoria</th>
+                        <th scope="col">Importo</th>
+                        <th scope="col">Approvazione</th>
+
+                        {% if not stato_chiuso %}
+
+                            <th
+                                scope="col"
+                                class="actions-column">
+
+                                Azioni
+
+                            </th>
+
+                        {% endif %}
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for spesa in riepilogo.spese %}
+
+                        <tr>
+
+                            <td>
+                                {{ spesa.data|date:"d/m/Y" }}
+                            </td>
+
+
+                            <td class="table-primary">
+                                {{ spesa.assegnazione.commessa.codice }}
+                            </td>
+
+
+                            <td>
+                                {{ spesa.assegnazione.consulente }}
+                            </td>
+
+
+                            <td>
+
+                                <span class="expense-category">
+                                    {{ spesa.get_categoria_display }}
+                                </span>
+
+                            </td>
+
+
+                            <td class="table-numeric">
+
+                                <strong>
+                                    € {{ spesa.importo|floatformat:2 }}
+                                </strong>
+
+                            </td>
+
+
+                            <td>
+
+                                {% include "operations/partials/badge_approvazione.html" with stato=spesa.stato_approvazione nota=spesa.nota_approvazione %}
+
+                            </td>
+
+
+                            {% if not stato_chiuso %}
+
+                                <td class="table-actions">
+
+                                    {% include "operations/partials/approvazione_azioni.html" with approva_url_name="timesheets:spesa-approva" rifiuta_url_name="timesheets:spesa-rifiuta" oggetto_id=spesa.id %}
+
+                                </td>
+
+                            {% endif %}
+
+                        </tr>
+
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td
+                                colspan="{% if stato_chiuso %}6{% else %}7{% endif %}"
+                                class="empty-state">
+
+                                <div class="table-empty-content">
+
+                                    <strong>
+                                        Nessuna spesa registrata
+                                    </strong>
+
+                                    <span>
+                                        Non risultano spese nel periodo selezionato.
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         CHIUSURA / RIAPERTURA
+         ===================================================== -->
+
+    {% if stato_chiuso %}
+
+        <section class="panel period-action-panel period-action-panel-reopen">
+
+            <div class="period-action-heading">
+
+                <span
+                    class="period-action-icon"
+                    aria-hidden="true">
+
+                    <svg>
+                        <use href="#icon-unlock"></use>
+                    </svg>
+
+                </span>
+
+
+                <div>
+
+                    <div class="eyebrow">
+                        Gestione periodo
+                    </div>
+
+                    <h2>
+                        Riapri il periodo
+                    </h2>
+
+                    <p>
+                        La riapertura rende nuovamente modificabili ore e spese.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <form
+                method="post"
+                class="period-action-form">
+
+                {% csrf_token %}
+
+                <input
+                    type="hidden"
+                    name="mese"
+                    value="{{ mese_selezionato }}">
+
+                <input
+                    type="hidden"
+                    name="azione"
+                    value="riapri">
+
+
+                {% if form_riapertura.non_field_errors %}
+
+                    <div class="form-global-errors">
+                        {{ form_riapertura.non_field_errors }}
+                    </div>
+
+                {% endif %}
+
+
+                <div class="field">
+
+                    {{ form_riapertura.motivazione.label_tag }}
+
+                    {{ form_riapertura.motivazione }}
+
+                    {% if form_riapertura.motivazione.errors %}
+
+                        <div class="field-errors">
+                            {{ form_riapertura.motivazione.errors }}
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+
+                <div class="period-action-buttons">
+
+                    <button
+                        class="button button-secondary"
+                        type="submit">
+
+                        <svg
+                            class="btn-icon"
+                            aria-hidden="true">
+
+                            <use href="#icon-unlock"></use>
+
+                        </svg>
+
+                        Riapri periodo
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+
+    {% else %}
+
+        <section class="panel period-action-panel period-action-panel-close">
+
+            <div class="period-action-heading">
+
+                <span
+                    class="period-action-icon"
+                    aria-hidden="true">
+
+                    <svg>
+                        <use href="#icon-lock"></use>
+                    </svg>
+
+                </span>
+
+
+                <div>
+
+                    <div class="eyebrow">
+                        Chiusura mensile
+                    </div>
+
+                    <h2>
+                        Chiudi il periodo
+                    </h2>
+
+                    <p>
+                        Dopo la chiusura nessun utente, compreso l'Admin,
+                        potrà modificare ore o spese fino a una riapertura esplicita.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <form
+                method="post"
+                class="period-action-form">
+
+                {% csrf_token %}
+
+                <input
+                    type="hidden"
+                    name="mese"
+                    value="{{ mese_selezionato }}">
+
+                <input
+                    type="hidden"
+                    name="azione"
+                    value="chiudi">
+
+
+                {% if form_chiusura.non_field_errors %}
+
+                    <div class="form-global-errors">
+                        {{ form_chiusura.non_field_errors }}
+                    </div>
+
+                {% endif %}
+
+
+                {% if riepilogo.righe_senza_tariffa %}
+
+                    <div class="period-force-option">
+
+                        {{ form_chiusura.forza_tariffe_mancanti }}
+
+                        <label for="{{ form_chiusura.forza_tariffe_mancanti.id_for_label }}">
+
+                            <strong>
+                                {{ form_chiusura.forza_tariffe_mancanti.label }}
+                            </strong>
+
+                            <span>
+                                Consenti la chiusura nonostante le tariffe mancanti.
+                            </span>
+
+                        </label>
+
+                        {% if form_chiusura.forza_tariffe_mancanti.errors %}
+
+                            <div class="field-errors">
+                                {{ form_chiusura.forza_tariffe_mancanti.errors }}
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+                {% endif %}
+
+
+                {% if riepilogo.approvazione_ore.bloccante or riepilogo.approvazione_spese.bloccante %}
+
+                    <div class="period-force-option">
+
+                        {{ form_chiusura.forza_approvazioni_mancanti }}
+
+                        <label for="{{ form_chiusura.forza_approvazioni_mancanti.id_for_label }}">
+
+                            <strong>
+                                {{ form_chiusura.forza_approvazioni_mancanti.label }}
+                            </strong>
+
+                            <span>
+                                Consenti la chiusura nonostante approvazioni incomplete.
+                            </span>
+
+                        </label>
+
+                        {% if form_chiusura.forza_approvazioni_mancanti.errors %}
+
+                            <div class="field-errors">
+                                {{ form_chiusura.forza_approvazioni_mancanti.errors }}
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+                {% endif %}
+
+
+                <div class="field">
+
+                    {{ form_chiusura.motivazione.label_tag }}
+
+                    {{ form_chiusura.motivazione }}
+
+                    {% if form_chiusura.motivazione.errors %}
+
+                        <div class="field-errors">
+                            {{ form_chiusura.motivazione.errors }}
+                        </div>
+
+                    {% endif %}
+
+                    <div class="field-help">
+                        Obbligatoria in caso di chiusura forzata;
+                        può essere utilizzata anche per documentare
+                        controlli o eccezioni.
+                    </div>
+
+                </div>
+
+
+                <div class="period-action-buttons">
+
+                    <button
+                        class="button button-primary"
+                        type="submit">
+
+                        <svg
+                            class="btn-icon"
+                            aria-hidden="true">
+
+                            <use href="#icon-lock"></use>
+
+                        </svg>
+
+                        Chiudi periodo
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

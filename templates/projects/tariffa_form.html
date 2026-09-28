@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}Nuova tariffa | LEFTRACK{% endblock %}
+
+{% block content %}
+
+<div class="form-page">
+
+    <div class="page-header">
+
+        <div>
+            <div class="eyebrow">
+                Valorizzazione economica
+            </div>
+
+            <h1>
+                Nuova tariffa
+            </h1>
+
+        </div>
+
+
+        {% if request.GET.mese %}
+
+            <div class="page-header-actions">
+
+                <a
+                    class="button button-ghost"
+                    href="{% url 'operations:periodo-detail' %}?mese={{ request.GET.mese }}">
+
+                    ← Torna al periodo
+
+                </a>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <section class="panel form-panel form-panel-modern">
+
+        <div class="form-panel-heading">
+
+            <span
+                class="form-panel-icon"
+                aria-hidden="true">
+
+                <svg>
+                    <use href="#icon-receipt"></use>
+                </svg>
+
+            </span>
+
+            <div>
+
+                <h2>
+                    Dati tariffa
+                </h2>
+
+
+            </div>
+
+        </div>
+
+
+        <form
+            method="post"
+            class="modern-form">
+
+            {% csrf_token %}
+
+
+            {% if form.non_field_errors %}
+
+                <div class="form-global-errors">
+                    {{ form.non_field_errors }}
+                </div>
+
+            {% endif %}
+
+
+            <div class="form-grid modern-form-grid">
+
+                {% for field in form.visible_fields %}
+
+                    <div class="
+                        field
+                        {% if field.errors %}field-has-error{% endif %}
+                    ">
+
+                        {{ field.label_tag }}
+
+                        {{ field }}
+
+                        {% if field.help_text %}
+
+                            <div class="field-help">
+                                {{ field.help_text }}
+                            </div>
+
+                        {% endif %}
+
+
+                        {% if field.errors %}
+
+                            <div class="field-errors">
+                                {{ field.errors }}
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+
+            <div class="form-actions form-actions-modern">
+
+                {% if request.GET.mese %}
+
+                    <a
+                        class="button button-ghost"
+                        href="{% url 'operations:periodo-detail' %}?mese={{ request.GET.mese }}">
+
+                        Annulla
+
+                    </a>
+
+                {% else %}
+
+                    <a
+                        class="button button-ghost"
+                        href="{% url 'projects:tariffa-list' %}">
+
+                        Annulla
+
+                    </a>
+
+                {% endif %}
+
+
+                <button
+                    class="button button-primary"
+                    type="submit">
+
+                    <svg
+                        class="btn-icon"
+                        aria-hidden="true">
+
+                        <use href="#icon-check"></use>
+
+                    </svg>
+
+                    Registra tariffa
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+{% endblock %}

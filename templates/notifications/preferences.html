@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}
+Preferenze notifiche | LEFTRACK
+{% endblock %}
+
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/notifications.css' %}">
+{% endblock %}
+
+
+{% block content %}
+
+<div class="notifications-page">
+
+
+    <div class="page-header">
+
+        <div>
+
+            <div class="eyebrow">
+                Profilo
+            </div>
+
+            <h1>
+                Preferenze notifiche
+            </h1>
+
+
+        </div>
+
+    </div>
+
+
+    <form method="post" class="notification-preferences-form">
+
+        {% csrf_token %}
+
+
+        <section class="panel">
+
+            <div class="panel-heading">
+                <h2>Attività</h2>
+            </div>
+
+            <div class="notification-option">
+                <div>
+                    <strong>{{ form.task_assigned.label }}</strong>
+                    <p>Ricevi notifiche quando ti viene assegnata un'attività.</p>
+                </div>
+                <div>{{ form.task_assigned }}</div>
+            </div>
+
+            <div class="notification-option">
+                <div>
+                    <strong>{{ form.task_creato.label }}</strong>
+                    <p>Ricevi notifiche quando viene creata una nuova attività su una tua commessa.</p>
+                </div>
+                <div>{{ form.task_creato }}</div>
+            </div>
+
+            <div class="notification-option">
+                <div>
+                    <strong>{{ form.task_riassegnato.label }}</strong>
+                    <p>Ricevi notifiche quando cambia l'assegnatario di un'attività.</p>
+                </div>
+                <div>{{ form.task_riassegnato }}</div>
+            </div>
+
+            <div class="notification-option">
+                <div>
+                    <strong>{{ form.task_cambio_stato.label }}</strong>
+                    <p>Ricevi notifiche quando cambia lo stato di un'attività.</p>
+                </div>
+                <div>{{ form.task_cambio_stato }}</div>
+            </div>
+
+            <div class="notification-option">
+                <div>
+                    <strong>{{ form.task_commented.label }}</strong>
+                    <p>Ricevi notifiche quando qualcuno commenta un'attività.</p>
+                </div>
+                <div>{{ form.task_commented }}</div>
+            </div>
+
+            <div class="notification-option">
+                <div>
+                    <strong>{{ form.task_due_soon.label }}</strong>
+                    <p>Ricevi promemoria prima della scadenza.</p>
+                </div>
+                <div>{{ form.task_due_soon }}</div>
+            </div>
+
+            <div class="notification-option">
+                <div>
+                    <strong>{{ form.task_overdue.label }}</strong>
+                    <p>Ricevi notifiche sulle attività scadute.</p>
+                </div>
+                <div>{{ form.task_overdue }}</div>
+            </div>
+
+            <div class="notification-option">
+                <div>
+                    <strong>{{ form.task_eliminato.label }}</strong>
+                    <p>Ricevi notifiche quando viene eliminata un'attività.</p>
+                </div>
+                <div>{{ form.task_eliminato }}</div>
+            </div>
+
+        </section>
+
+
+        <section class="panel">
+
+            <div class="panel-heading">
+                <h2>Pianificazione</h2>
+            </div>
+
+            <div class="notification-option">
+                <div>
+                    <strong>{{ form.pianificazione_creata.label }}</strong>
+                    <p>Ricevi notifiche quando un collega pianifica una nuova giornata sulla vostra commessa.</p>
+                </div>
+                <div>{{ form.pianificazione_creata }}</div>
+            </div>
+
+            <div class="notification-option">
+                <div>
+                    <strong>{{ form.pianificazione_aggiornata.label }}</strong>
+                    <p>Ricevi notifiche quando una pianificazione viene modificata o eliminata.</p>
+                </div>
+                <div>{{ form.pianificazione_aggiornata }}</div>
+            </div>
+
+        </section>
+
+
+        <section class="panel">
+
+            <div class="panel-heading">
+                <h2>Fasi</h2>
+            </div>
+
+            <div class="notification-option">
+                <div>
+                    <strong>{{ form.fase_creata.label }}</strong>
+                    <p>Ricevi notifiche quando viene creata una nuova fase su una tua commessa.</p>
+                </div>
+                <div>{{ form.fase_creata }}</div>
+            </div>
+
+            <div class="notification-option">
+                <div>
+                    <strong>{{ form.fase_aggiornata.label }}</strong>
+                    <p>Ricevi notifiche quando una fase viene modificata, conclusa o riaperta.</p>
+                </div>
+                <div>{{ form.fase_aggiornata }}</div>
+            </div>
+
+        </section>
+
+
+        <section class="panel">
+
+            <div class="panel-heading">
+                <h2>Documenti</h2>
+            </div>
+
+            <div class="notification-option">
+                <div>
+                    <strong>{{ form.documento_caricato.label }}</strong>
+                    <p>Ricevi notifiche quando viene caricato un nuovo documento su una tua commessa.</p>
+                </div>
+                <div>{{ form.documento_caricato }}</div>
+            </div>
+
+            <div class="notification-option">
+                <div>
+                    <strong>{{ form.documento_eliminato.label }}</strong>
+                    <p>Ricevi notifiche quando viene eliminato un documento da una tua commessa.</p>
+                </div>
+                <div>{{ form.documento_eliminato }}</div>
+            </div>
+
+        </section>
+
+
+        <button class="button button-primary" type="submit">
+            Salva preferenze
+        </button>
+
+    </form>
+
+
+</div>
+
+{% endblock %}

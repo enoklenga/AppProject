@@ -1,0 +1,7 @@
+{% if is_paginated %}
+<nav class="pagination" aria-label="Paginazione">
+    {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}">Precedente</a>{% endif %}
+    <span>Pagina {{ page_obj.number }} di {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}">Successiva</a>{% endif %}
+</nav>
+{% endif %}

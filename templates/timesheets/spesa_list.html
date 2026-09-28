@@ -1,0 +1,488 @@
+{% extends "base.html" %}
+
+{% block title %}Spese | LEFTRACK{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+
+        <div class="eyebrow">
+            Trasferte
+        </div>
+
+        <h1>
+            {% if can_view_all %}
+                Spese registrate
+            {% else %}
+                Le mie spese
+            {% endif %}
+        </h1>
+
+        <p>
+            Totale del periodo:
+            <strong>€ {{ totale_spese|floatformat:2 }}</strong>.
+        </p>
+
+    </div>
+
+
+    <div class="page-header-actions">
+
+        {% if request.GET.mese and can_manage_finance %}
+
+            <a
+                class="button button-ghost"
+                href="{% url 'operations:periodo-detail' %}?mese={{ request.GET.mese }}">
+
+                ← Torna al periodo
+
+            </a>
+
+        {% endif %}
+
+
+        {% if can_write and not periodo_chiuso %}
+
+            <a
+                class="button button-primary"
+                href="{% url 'timesheets:spesa-create' %}">
+
+                <svg
+                    class="btn-icon"
+                    aria-hidden="true">
+
+                    <use href="#icon-receipt"></use>
+
+                </svg>
+
+                Inserisci spesa
+
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+{% if periodo_chiuso %}
+
+    <div class="notice notice-warning">
+        Il mese selezionato è chiuso: non sono consentite modifiche.
+    </div>
+
+{% endif %}
+
+
+<form
+    class="filter-bar list-filter-bar timesheet-filter{% if not can_view_all %} timesheet-filter-personal{% endif %}"
+    method="get">
+
+    <div class="field">
+
+        <label for="id_mese">
+            Mese
+        </label>
+
+        <input
+            id="id_mese"
+            type="month"
+            name="mese"
+            value="{{ mese_selezionato }}">
+
+    </div>
+
+
+    {% if can_view_all %}
+
+        <div class="field">
+
+            <label for="id_consulente">
+                Consulente
+            </label>
+
+            <select
+                id="id_consulente"
+                name="consulente">
+
+                <option value="">
+                    Tutti
+                </option>
+
+                {% for consulente in consulenti_filtro %}
+
+                    <option
+                        value="{{ consulente.id }}"
+                        {% if request.GET.consulente == consulente.id|stringformat:"s" %}selected{% endif %}>
+
+                        {{ consulente }}
+
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <div class="field">
+
+            <label for="id_commessa">
+                Commessa
+            </label>
+
+            <select
+                id="id_commessa"
+                name="commessa">
+
+                <option value="">
+                    Tutte
+                </option>
+
+                {% for commessa in commesse_filtro %}
+
+                    <option
+                        value="{{ commessa.id }}"
+                        {% if request.GET.commessa == commessa.id|stringformat:"s" %}selected{% endif %}>
+
+                        {{ commessa.codice }}
+
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+    {% endif %}
+
+
+    <button
+        class="button button-secondary"
+        type="submit">
+
+        <svg
+            class="btn-icon"
+            aria-hidden="true">
+
+            <use href="#icon-filter"></use>
+
+        </svg>
+
+        Applica filtri
+
+    </button>
+
+</form>
+
+
+<section class="panel data-panel">
+
+    <div class="table-wrapper">
+
+        <table class="data-table timesheet-table expenses-table">
+
+            <thead>
+
+                <tr>
+
+                    <th scope="col">
+                        Data
+                    </th>
+
+                    {% if can_view_all %}
+
+                        <th scope="col">
+                            Consulente
+                        </th>
+
+                    {% endif %}
+
+                    <th scope="col">
+                        Commessa
+                    </th>
+
+                    <th scope="col">
+                        Fase
+                    </th>
+
+                    <th scope="col">
+                        Categoria
+                    </th>
+
+                    <th
+                        scope="col"
+                        class="table-numeric">
+
+                        Importo
+
+                    </th>
+
+                    <th scope="col">
+                        Nota
+                    </th>
+
+                    <th scope="col">
+                        Stato
+                    </th>
+
+                    <th scope="col">
+                        Approvazione
+                    </th>
+
+                    {% if mostra_azioni %}
+                        <th
+                            scope="col"
+                            class="actions-column">
+
+                            Azioni
+
+                        </th>
+                    {% endif %}
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for spesa in spese %}
+
+                    <tr>
+
+
+                        <!-- DATA -->
+
+                        <td class="table-date">
+
+                            <strong>
+                                {{ spesa.data|date:"d/m/Y" }}
+                            </strong>
+
+                        </td>
+
+
+                        <!-- CONSULENTE -->
+
+                        {% if can_view_all %}
+
+                            <td>
+
+                                <strong>
+                                    {{ spesa.assegnazione.consulente }}
+                                </strong>
+
+                            </td>
+
+                        {% endif %}
+
+
+                        <!-- COMMESSA -->
+
+                        <td>
+
+                            <div class="table-stack">
+
+                                <strong class="table-secondary-strong">
+                                    {{ spesa.assegnazione.commessa.codice }}
+                                </strong>
+
+                                <span class="table-muted table-small">
+                                    {{ spesa.assegnazione.commessa.cliente }}
+                                </span>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- FASE -->
+
+                        <td>
+
+                            {{ spesa.assegnazione.fase.nome }}
+
+                        </td>
+
+
+                        <!-- CATEGORIA -->
+
+                        <td>
+
+                            <span class="expense-category">
+                                {{ spesa.get_categoria_display }}
+                            </span>
+
+                        </td>
+
+
+                        <!-- IMPORTO -->
+
+                        <td class="table-numeric">
+
+                            <strong class="timesheet-value">
+                                € {{ spesa.importo|floatformat:2 }}
+                            </strong>
+
+                        </td>
+
+
+                        <!-- NOTA -->
+
+                        <td class="timesheet-note">
+
+                            {% if spesa.nota %}
+
+                                {{ spesa.nota|truncatechars:70 }}
+
+                            {% else %}
+
+                                <span class="table-muted">
+                                    —
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- STATO -->
+
+                        <td class="table-status">
+
+                            {% if spesa.bloccata_per_consulente %}
+
+                                <span class="badge badge-bloccata">
+                                    Bloccata
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge badge-modificabile">
+                                    Modificabile
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- APPROVAZIONE -->
+
+                        <td class="table-status">
+
+                            {% include "operations/partials/badge_approvazione.html" with stato=spesa.stato_approvazione nota=spesa.nota_approvazione %}
+
+                        </td>
+
+
+                        <!-- AZIONI -->
+
+                        {% if mostra_azioni %}
+                        <td class="table-actions">
+
+                            <div class="row-actions">
+
+                                {% if can_write and not periodo_chiuso and is_admin or can_write and not periodo_chiuso and not spesa.bloccata_per_consulente %}
+
+                                    <a
+                                        class="row-action"
+                                        href="{% url 'timesheets:spesa-update' spesa.id %}">
+
+                                        <svg
+                                            class="btn-icon"
+                                            aria-hidden="true">
+
+                                            <use href="#icon-edit"></use>
+
+                                        </svg>
+
+                                        Modifica
+
+                                    </a>
+
+
+                                    <form
+                                        method="post"
+                                        action="{% url 'timesheets:spesa-delete' spesa.id %}"
+                                        onsubmit="return confirm('Eliminare questa spesa?');">
+
+                                        {% csrf_token %}
+
+                                        <input
+                                            type="hidden"
+                                            name="versione"
+                                            value="{{ spesa.versione }}">
+
+                                        <button
+                                            class="row-action row-action-danger"
+                                            type="submit">
+
+                                            <svg
+                                                class="btn-icon"
+                                                aria-hidden="true">
+
+                                                <use href="#icon-trash"></use>
+
+                                            </svg>
+
+                                            Elimina
+
+                                        </button>
+
+                                    </form>
+
+                                {% endif %}
+
+                            </div>
+
+                        </td>
+                        {% endif %}
+
+                    </tr>
+
+
+                {% empty %}
+
+                    <tr>
+
+                        <td
+                            colspan="{% if can_view_all %}{% if mostra_azioni %}10{% else %}9{% endif %}{% else %}{% if mostra_azioni %}9{% else %}8{% endif %}{% endif %}"
+                            class="empty-state">
+
+                            <div class="table-empty-content">
+
+                                <strong>
+                                    Nessuna spesa registrata
+                                </strong>
+
+                                <span>
+                                    Non risultano spese nel periodo selezionato.
+                                </span>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+{% include "common/pagination.html" %}
+
+{% endblock %}

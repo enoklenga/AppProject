@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Skill Matrix | LEFTRACK{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div><div class="eyebrow">Gestione risorse</div><h1>Skill Matrix</h1></div>
+    {% if puo_modificare %}
+        <a class="button button-secondary" href="{% url 'accounts:skill-list' %}">Gestisci skill</a>
+    {% endif %}
+</div>
+<section class="panel data-panel"><div class="table-wrapper"><table class="data-table skill-matrix-table">
+<thead><tr><th>Risorsa</th>{% for skill in skills %}<th>{{ skill.nome }}{% if skill.categoria %}<div class="table-meta">{{ skill.categoria }}</div>{% endif %}</th>{% endfor %}{% if puo_modificare %}<th class="actions-column">Azioni</th>{% endif %}</tr></thead>
+<tbody>
+{% for riga in righe %}<tr><td class="table-primary"><strong>{{ riga.risorsa }}</strong><div class="table-meta">{{ riga.risorsa.get_ruolo_display }}</div></td>{% for livello in riga.celle %}<td>{% if livello %}<span class="badge skill-level skill-level-{{ livello.livello }}">L{{ livello.livello }}</span>{% else %}<span class="table-muted">—</span>{% endif %}</td>{% endfor %}{% if puo_modificare %}<td><a class="row-action row-action-primary" href="{% url 'accounts:skill-matrix-user-update' riga.risorsa.pk %}">Valuta</a></td>{% endif %}</tr>
+{% empty %}<tr><td colspan="99" class="empty-state">Nessuna risorsa ingaggiabile.</td></tr>{% endfor %}
+</tbody></table></div></section>
+{% endblock %}

@@ -1,0 +1,91 @@
+<div class="approvazione-azioni">
+
+    <form
+        method="post"
+        action="{% url approva_url_name oggetto_id %}"
+        class="approvazione-form-inline">
+
+        {% csrf_token %}
+
+        <input
+            type="hidden"
+            name="next"
+            value="{% url 'operations:periodo-detail' %}?mese={{ mese_selezionato }}">
+
+
+        <button
+            class="row-action approval-action-approve"
+            type="submit"
+            title="Approva">
+
+            <svg
+                class="btn-icon"
+                aria-hidden="true">
+
+                <use href="#icon-check"></use>
+
+            </svg>
+
+            Approva
+
+        </button>
+
+    </form>
+
+
+    <details class="approvazione-rifiuta">
+
+        <summary
+            class="row-action approval-action-reject"
+            title="Rifiuta">
+
+            <svg
+                class="btn-icon"
+                aria-hidden="true">
+
+                <use href="#icon-x"></use>
+
+            </svg>
+
+            Rifiuta
+
+        </summary>
+
+
+        <form
+            method="post"
+            action="{% url rifiuta_url_name oggetto_id %}"
+            class="approvazione-rifiuta-form">
+
+            {% csrf_token %}
+
+            <input
+                type="hidden"
+                name="next"
+                value="{% url 'operations:periodo-detail' %}?mese={{ mese_selezionato }}">
+
+
+            <label class="approval-reject-label">
+                Motivo del rifiuto
+            </label>
+
+            <textarea
+                name="motivazione"
+                rows="3"
+                placeholder="Inserisci il motivo del rifiuto"
+                required></textarea>
+
+
+            <button
+                class="button button-small approval-reject-confirm"
+                type="submit">
+
+                Conferma rifiuto
+
+            </button>
+
+        </form>
+
+    </details>
+
+</div>

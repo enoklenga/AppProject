@@ -1,0 +1,408 @@
+{% extends "base.html" %}
+
+{% block title %}Assegnazioni | LEFTRACK{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <div class="eyebrow">Gestione</div>
+
+        <h1>Assegnazioni</h1>
+
+    </div>
+
+    <a
+        class="button button-primary"
+        href="{% url 'projects:assegnazione-create' %}">
+
+        <svg class="btn-icon" aria-hidden="true">
+            <use href="#icon-plus"></use>
+        </svg>
+
+        Nuova assegnazione
+
+    </a>
+
+</div>
+
+
+<form
+    class="filter-bar list-filter-bar"
+    method="get">
+
+    <input
+        type="search"
+        name="q"
+        value="{{ request.GET.q }}"
+        placeholder="Cerca consulente o codice commessa"
+        aria-label="Cerca assegnazione">
+
+
+    <select
+        name="commessa"
+        aria-label="Filtra per commessa">
+
+        <option value="">
+            Tutte le commesse
+        </option>
+
+        {% for commessa in commesse_filtro %}
+
+            <option
+                value="{{ commessa.pk }}"
+                {% if request.GET.commessa == commessa.pk|stringformat:'s' %}selected{% endif %}>
+
+                {{ commessa.codice }}
+
+            </option>
+
+        {% endfor %}
+
+    </select>
+
+
+    <select
+        name="stato"
+        aria-label="Filtra per stato">
+
+        <option value="">
+            Tutti gli stati
+        </option>
+
+        <option
+            value="ATTIVA"
+            {% if request.GET.stato == 'ATTIVA' %}selected{% endif %}>
+
+            Attive
+
+        </option>
+
+        <option
+            value="CONCLUSA"
+            {% if request.GET.stato == 'CONCLUSA' %}selected{% endif %}>
+
+            Concluse
+
+        </option>
+
+    </select>
+
+
+    <button
+        class="button button-secondary"
+        type="submit">
+
+        <svg class="btn-icon" aria-hidden="true">
+            <use href="#icon-filter"></use>
+        </svg>
+
+        Filtra
+
+    </button>
+
+</form>
+
+
+<section class="panel data-panel">
+
+    <div class="table-wrapper">
+
+        <table class="data-table assignments-table">
+
+            <thead>
+
+                <tr>
+
+                    <th scope="col">
+                        Consulente
+                    </th>
+
+                    <th scope="col">
+                        Commessa
+                    </th>
+
+                    <th scope="col">
+                        Fase
+                    </th>
+
+                    <th scope="col">
+                        Cliente
+                    </th>
+
+                    <th scope="col">
+                        Ruolo
+                    </th>
+
+                    <th
+                        scope="col"
+                        class="table-numeric">
+
+                        Ore previste
+
+                    </th>
+
+                    <th scope="col">
+                        Periodo
+                    </th>
+
+                    <th scope="col">
+                        Stato
+                    </th>
+
+                    <th
+                        scope="col"
+                        class="actions-column">
+
+                        Azioni
+
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for assegnazione in assegnazioni %}
+
+                    <tr>
+
+
+                        <!-- CONSULENTE -->
+
+                        <td class="table-primary">
+
+                            <div class="entity-cell">
+
+                                <span
+                                    class="entity-icon assignment-entity-icon"
+                                    aria-hidden="true">
+
+                                    <svg>
+                                        <use href="#icon-link"></use>
+                                    </svg>
+
+                                </span>
+
+
+                                <div class="entity-copy">
+
+                                    <strong>
+
+                                        {{ assegnazione.consulente.get_full_name|default:assegnazione.consulente.email }}
+
+                                    </strong>
+
+                                    <span>
+                                        {{ assegnazione.consulente.email }}
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- COMMESSA -->
+
+                        <td>
+
+                            <strong class="table-secondary-strong">
+                                {{ assegnazione.commessa.codice }}
+                            </strong>
+
+                        </td>
+
+
+                        <!-- FASE -->
+
+                        <td>
+
+                            {{ assegnazione.fase.nome }}
+
+                        </td>
+
+
+                        <!-- CLIENTE -->
+
+                        <td>
+
+                            {{ assegnazione.commessa.cliente.ragione_sociale }}
+
+                        </td>
+
+
+                        <!-- RUOLO -->
+
+                        <td>
+
+                            <span class="assignment-role">
+                                {{ assegnazione.get_ruolo_commessa_display }}
+                            </span>
+
+                        </td>
+
+
+                        <!-- ORE -->
+
+                        <td class="table-numeric">
+
+                            <strong>
+                                {{ assegnazione.ore_previste }}
+                            </strong>
+
+                            <span class="table-unit">
+                                h
+                            </span>
+
+                        </td>
+
+
+                        <!-- PERIODO -->
+
+                        <td class="table-date">
+
+                            <div class="period-cell">
+
+                                <span>
+                                    {{ assegnazione.data_inizio|date:"d/m/Y" }}
+                                </span>
+
+                                <span
+                                    class="period-separator"
+                                    aria-hidden="true">
+
+                                    →
+
+                                </span>
+
+                                <span>
+
+                                    {% if assegnazione.data_fine %}
+
+                                        {{ assegnazione.data_fine|date:"d/m/Y" }}
+
+                                    {% else %}
+
+                                        —
+
+                                    {% endif %}
+
+                                </span>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- STATO -->
+
+                        <td class="table-status">
+
+                            <span class="badge badge-{{ assegnazione.stato|lower }}">
+                                {{ assegnazione.get_stato_display }}
+                            </span>
+
+                        </td>
+
+
+                        <!-- AZIONI -->
+
+                        <td class="table-actions">
+
+                            <div class="row-actions">
+
+                                <a
+                                    class="row-action"
+                                    href="{% url 'projects:assegnazione-update' assegnazione.pk %}">
+
+                                    <svg
+                                        class="btn-icon"
+                                        aria-hidden="true">
+
+                                        <use href="#icon-edit"></use>
+
+                                    </svg>
+
+                                    Modifica
+
+                                </a>
+
+
+                                <form
+                                    method="post"
+                                    action="{% url 'projects:assegnazione-toggle-state' assegnazione.pk %}">
+
+                                    {% csrf_token %}
+
+                                    <button
+                                        class="
+                                            row-action
+                                            row-action-state
+                                            {% if assegnazione.stato != 'ATTIVA' %}is-success{% endif %}
+                                        "
+                                        type="submit">
+
+                                        {% if assegnazione.stato == 'ATTIVA' %}
+
+                                            Concludi
+
+                                        {% else %}
+
+                                            Riattiva
+
+                                        {% endif %}
+
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                {% empty %}
+
+                    <tr>
+
+                        <td
+                            colspan="9"
+                            class="empty-state">
+
+                            <div class="table-empty-content">
+
+                                <strong>
+                                    Nessuna assegnazione trovata
+                                </strong>
+
+                                <span>
+                                    Modifica i filtri oppure crea una nuova assegnazione.
+                                </span>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+{% include "common/pagination.html" %}
+
+{% endblock %}

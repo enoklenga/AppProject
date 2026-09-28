@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Elimina attività | LEFTRACK{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/tasks.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="tasks-page confirmation-page">
+
+    <div class="page-header">
+
+        <div>
+            <div class="eyebrow">Attività</div>
+            <h1>Elimina attività</h1>
+        </div>
+
+    </div>
+
+
+    <section class="panel form-panel confirmation-panel">
+
+        <h2>Conferma eliminazione</h2>
+
+        <p>
+            Stai per eliminare l'attività
+            <strong>{{ task.titolo }}</strong>
+            della commessa
+            <strong>{{ task.commessa.codice }}</strong>.
+        </p>
+
+        <p class="muted">
+            Verranno eliminati anche i commenti collegati all'attività.
+        </p>
+
+
+        <form method="post">
+
+            {% csrf_token %}
+
+            <div class="form-actions">
+
+                <button
+                    class="button button-danger"
+                    type="submit">
+                    Elimina definitivamente
+                </button>
+
+                <a
+                    class="button button-ghost"
+                    href="{% url 'tasks:task-detail' task.pk %}">
+                    Annulla
+                </a>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+{% endblock %}

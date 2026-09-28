@@ -1,0 +1,1284 @@
+/* LEF Timesheet Design System — forms and filters. */
+
+
+/* =========================================================
+   FILTER BARS
+   ========================================================= */
+
+.filter-bar {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns:
+        minmax(250px, 2fr)
+        repeat(2, minmax(170px, 1fr))
+        auto;
+
+    align-items: end;
+
+    gap: 14px;
+
+    margin-bottom: 20px;
+    padding: 16px;
+
+    background: var(--lef-surface);
+
+    border:
+        1px solid
+        var(--lef-border);
+
+    border-radius:
+        var(--radius-md);
+
+    box-shadow:
+        var(--shadow-sm);
+}
+
+
+/* Wider filter layout */
+
+.filter-bar-wide {
+    grid-template-columns:
+        repeat(3, minmax(180px, 1fr))
+        auto;
+}
+
+
+/* Dashboard filters */
+
+.dashboard-filter {
+    grid-template-columns:
+        repeat(4, minmax(160px, 1fr))
+        auto;
+}
+
+
+/* =========================================================
+   INPUT BASE
+   ========================================================= */
+
+input,
+select,
+textarea {
+    width: 100%;
+
+    min-height: 42px;
+
+    padding:
+        9px
+        11px;
+
+    color:
+        var(--lef-text);
+
+    background:
+        #fff;
+
+    border:
+        1px solid
+        var(--lef-border-strong);
+
+    border-radius:
+        var(--radius-sm);
+
+    outline: none;
+
+    transition:
+        border-color 0.14s ease,
+        box-shadow 0.14s ease,
+        background 0.14s ease;
+}
+
+
+/* =========================================================
+   INPUT HOVER
+   ========================================================= */
+
+input:hover,
+select:hover,
+textarea:hover {
+    border-color:
+        #9fb3c8;
+}
+
+
+/* =========================================================
+   INPUT FOCUS
+   ========================================================= */
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color:
+        var(--lef-blue-600);
+
+    box-shadow:
+        var(--focus-ring);
+}
+
+
+/* =========================================================
+   PLACEHOLDERS
+   ========================================================= */
+
+input::placeholder,
+textarea::placeholder {
+    color:
+        #829ab1;
+
+    opacity: 1;
+}
+
+
+/* =========================================================
+   TEXTAREA
+   ========================================================= */
+
+textarea {
+    min-height: 112px;
+
+    resize: vertical;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   SELECT
+   ========================================================= */
+
+select {
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   NUMBER / DATE FIELDS
+   ========================================================= */
+
+input[type="number"],
+input[type="date"],
+input[type="month"],
+input[type="time"] {
+    font-variant-numeric:
+        tabular-nums;
+}
+
+
+/* =========================================================
+   CHECKBOX AND RADIO
+   ========================================================= */
+
+input[type="checkbox"],
+input[type="radio"] {
+    width: 17px;
+    height: 17px;
+
+    min-height: 0;
+
+    flex: 0 0 auto;
+
+    margin: 0;
+
+    padding: 0;
+
+    accent-color:
+        var(--lef-blue-700);
+
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   FORM PANEL
+   ========================================================= */
+
+.form-panel {
+    padding: 24px;
+}
+
+.form-panel > h2:first-child {
+    margin-top: 0;
+}
+
+
+/* =========================================================
+   FORM GRID
+   ========================================================= */
+
+.form-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap:
+        20px
+        22px;
+}
+
+
+/* =========================================================
+   FORM STACK
+   ========================================================= */
+
+.form-stack {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 18px;
+}
+
+
+/* =========================================================
+   FIELD
+   ========================================================= */
+
+.field {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 6px;
+}
+
+.field-full {
+    grid-column:
+        1 / -1;
+}
+
+
+/* =========================================================
+   LABELS
+   ========================================================= */
+
+.field label {
+    color:
+        var(--lef-navy-900);
+
+    font-size: 12.5px;
+    font-weight: 750;
+
+    line-height: 1.35;
+}
+
+
+/* =========================================================
+   HELPER TEXT
+   ========================================================= */
+
+.field small,
+.helper-text,
+.muted {
+    color:
+        var(--lef-muted);
+
+    font-size: 11.5px;
+
+    line-height: 1.45;
+}
+
+.field > label + .helper-text {
+    margin-top: -2px;
+}
+
+
+/* =========================================================
+   CHECKBOX FIELD
+   ========================================================= */
+
+.checkbox-field {
+    display: grid;
+
+    grid-template-columns:
+        auto
+        minmax(0, 1fr);
+
+    align-items: center;
+
+    column-gap: 10px;
+    row-gap: 5px;
+
+    min-height: 42px;
+}
+
+.checkbox-field input {
+    grid-column: 1;
+    grid-row: 1;
+
+    width: 17px;
+    height: 17px;
+}
+
+.checkbox-field label {
+    grid-column: 2;
+    grid-row: 1;
+
+    margin: 0;
+
+    cursor: pointer;
+}
+
+.checkbox-field .errorlist,
+.checkbox-field .field-error,
+.checkbox-field small {
+    grid-column:
+        1 / -1;
+}
+
+
+/* =========================================================
+   FORM ACTIONS
+   ========================================================= */
+
+.form-actions {
+    display: flex;
+
+    align-items: center;
+    justify-content: flex-end;
+
+    flex-wrap: wrap;
+
+    gap: 10px;
+
+    margin-top: 4px;
+    padding-top: 20px;
+
+    border-top:
+        1px solid
+        var(--lef-border);
+}
+
+
+/* Form without visual separator */
+
+.form-actions.no-border {
+    border-top: 0;
+
+    padding-top: 14px;
+}
+
+
+/* Split actions */
+
+.form-actions.is-split {
+    justify-content: space-between;
+}
+
+
+/* Prevent buttons from changing height */
+
+.form-actions .button {
+    flex: 0 0 auto;
+}
+
+
+/* =========================================================
+   REQUIRED FIELDS
+   ========================================================= */
+
+.required-marker {
+    margin-left: 3px;
+
+    color:
+        var(--lef-danger);
+
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   DISABLED / READONLY
+   ========================================================= */
+
+input:disabled,
+select:disabled,
+textarea:disabled {
+    color:
+        #60798c;
+
+    background:
+        #f1f5f8;
+
+    border-color:
+        #d9e2ec;
+
+    cursor:
+        not-allowed;
+
+    opacity: 1;
+}
+
+input[readonly],
+textarea[readonly] {
+    color:
+        #526d82;
+
+    background:
+        #f6f8fa;
+
+    border-color:
+        #d9e2ec;
+
+    cursor:
+        default;
+}
+
+
+/* =========================================================
+   ERROR STATES
+   ========================================================= */
+
+input[aria-invalid="true"],
+select[aria-invalid="true"],
+textarea[aria-invalid="true"],
+.field.has-error input,
+.field.has-error select,
+.field.has-error textarea {
+    border-color:
+        var(--lef-danger);
+}
+
+input[aria-invalid="true"]:focus,
+select[aria-invalid="true"]:focus,
+textarea[aria-invalid="true"]:focus,
+.field.has-error input:focus,
+.field.has-error select:focus,
+.field.has-error textarea:focus {
+    border-color:
+        var(--lef-danger);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(166, 27, 27, 0.14);
+}
+
+
+/* Django error list */
+
+.errorlist {
+    margin:
+        2px
+        0
+        0;
+
+    padding: 0;
+
+    color:
+        var(--lef-danger);
+
+    font-size: 12px;
+    font-weight: 600;
+
+    line-height: 1.4;
+
+    list-style: none;
+}
+
+.errorlist li + li {
+    margin-top: 3px;
+}
+
+
+/* Single field error */
+
+.field-error {
+    color:
+        var(--lef-danger);
+
+    font-size: 12px;
+    font-weight: 600;
+
+    line-height: 1.4;
+}
+
+
+/* =========================================================
+   NON FIELD ERRORS
+   ========================================================= */
+
+form > .errorlist {
+    margin-bottom: 16px;
+
+    padding:
+        10px
+        12px;
+
+    color:
+        var(--lef-danger);
+
+    background:
+        var(--lef-danger-soft);
+
+    border:
+        1px solid
+        rgba(166, 27, 27, 0.16);
+
+    border-radius:
+        var(--radius-sm);
+}
+
+
+/* =========================================================
+   FILTER BUTTON
+   ========================================================= */
+
+.filter-bar > .button,
+.filter-bar > button {
+    min-height: 42px;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   FILTER FIELD LABELS
+   ========================================================= */
+
+.filter-bar .field label {
+    font-size: 11.5px;
+
+    text-transform: none;
+}
+
+
+/* =========================================================
+   PROMEMORIA FORMS
+   ========================================================= */
+
+.promemoria-columns {
+    align-items: stretch;
+}
+
+.promemoria-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.promemoria-panel > h2 {
+    margin-top: 0;
+}
+
+.promemoria-panel-form {
+    flex: 1 1 auto;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.promemoria-panel-actions {
+    display: flex;
+
+    align-items: center;
+    justify-content: flex-start;
+
+    margin-top: auto;
+
+    padding-top: 20px;
+}
+
+
+/* =========================================================
+   RESPONSIVE — TABLET
+   ========================================================= */
+
+@media (max-width: 1000px) {
+
+    .dashboard-filter {
+        grid-template-columns:
+            repeat(2, minmax(180px, 1fr));
+    }
+
+    .dashboard-filter > .button,
+    .dashboard-filter > button {
+        justify-self: start;
+    }
+}
+
+
+/* =========================================================
+   RESPONSIVE — SMALL TABLET
+   ========================================================= */
+
+@media (max-width: 820px) {
+
+    .filter-bar,
+    .filter-bar-wide {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .filter-bar > .button,
+    .filter-bar > button {
+        justify-self: start;
+    }
+}
+
+
+/* =========================================================
+   RESPONSIVE — MOBILE
+   ========================================================= */
+
+@media (max-width: 680px) {
+
+    .form-panel {
+        padding: 19px;
+    }
+
+    .form-grid,
+    .filter-bar,
+    .filter-bar-wide,
+    .dashboard-filter {
+        grid-template-columns:
+            minmax(0, 1fr);
+    }
+
+    .form-grid {
+        gap: 17px;
+    }
+
+    .filter-bar {
+        gap: 12px;
+
+        padding: 14px;
+    }
+
+    .filter-bar > .button,
+    .filter-bar > button {
+        width: 100%;
+
+        justify-self: stretch;
+    }
+
+    .form-actions {
+        align-items: stretch;
+
+        flex-direction: column-reverse;
+    }
+
+    .form-actions .button {
+        width: 100%;
+    }
+
+    .form-actions.is-split {
+        align-items: stretch;
+    }
+
+    .promemoria-panel-actions .button {
+        width: 100%;
+    }
+}
+
+/* ==========================================================================
+   LEFTRACK LIST FILTERS 2.0
+   ========================================================================== */
+
+.list-filter-bar {
+    gap: 10px;
+
+    margin-bottom: 14px;
+
+    padding: 12px 14px;
+
+    background: rgba(255,255,255,.92);
+
+    border-color: #e1e8f1;
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 2px 10px rgba(15,38,72,.025);
+}
+
+
+.list-filter-bar input,
+.list-filter-bar select {
+    min-height: 40px;
+
+    background: #fafcff;
+
+    border-color: #dce5ef;
+
+    border-radius: 9px;
+
+    font-size: 12.5px;
+}
+
+
+.list-filter-bar input:focus,
+.list-filter-bar select:focus {
+    background: #fff;
+}
+
+
+.list-filter-bar > .button,
+.list-filter-bar > button {
+    min-height: 40px;
+
+    padding-inline: 15px;
+}
+
+/* ==========================================================================
+   LEFTRACK FORMS 2.0
+   ========================================================================== */
+
+.form-page {
+    display: grid;
+    gap: 18px;
+}
+
+
+/* PANEL */
+
+.form-panel-modern {
+    max-width: 1040px;
+
+    padding: 0;
+
+    overflow: hidden;
+
+    border-radius: 16px;
+
+    box-shadow: var(--shadow-sm);
+}
+
+
+.form-panel-heading {
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+
+    padding:
+        18px
+        22px;
+
+    background: #f8faff;
+
+    border-bottom:
+        1px solid var(--lef-border);
+}
+
+
+.form-panel-icon {
+    width: 40px;
+    height: 40px;
+
+    flex: 0 0 auto;
+
+    display: grid;
+    place-items: center;
+
+    color: var(--lef-blue-700);
+
+    background: var(--lef-accent-soft);
+
+    border-radius: 11px;
+}
+
+
+.form-panel-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+
+.form-panel-heading h2 {
+    margin: 0;
+
+    color: var(--lef-navy-900);
+
+    font-size: 15px;
+    font-weight: 800;
+
+    letter-spacing: -.015em;
+}
+
+
+.form-panel-heading p {
+    margin:
+        4px
+        0
+        0;
+
+    color: var(--lef-muted);
+
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+
+/* FORM BODY */
+
+.modern-form {
+    padding:
+        22px
+        22px
+        0;
+}
+
+
+.modern-form-grid {
+    gap:
+        18px
+        20px;
+}
+
+
+.modern-form .field label {
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: #536b87;
+
+    font-size: 11px;
+    font-weight: 750;
+
+    line-height: 1.25;
+}
+
+
+.modern-form input,
+.modern-form select,
+.modern-form textarea {
+    background: #fbfcfe;
+
+    border-color: #dce5ef;
+
+    border-radius: 9px;
+
+    font-size: 13px;
+}
+
+
+.modern-form input:hover,
+.modern-form select:hover,
+.modern-form textarea:hover {
+    background: #fff;
+}
+
+
+.modern-form input:focus,
+.modern-form select:focus,
+.modern-form textarea:focus {
+    background: #fff;
+}
+
+
+.modern-form select:disabled,
+.modern-form input:disabled {
+    color: #8797aa;
+
+    background: #f3f5f8;
+
+    cursor: not-allowed;
+}
+
+
+/* HELP */
+
+.field-help,
+.modern-form .field small {
+    display: block;
+
+    margin-top: 6px;
+
+    color: #8090a4;
+
+    font-size: 10.5px;
+
+    line-height: 1.4;
+}
+
+
+/* ERRORS */
+
+.form-global-errors {
+    margin-bottom: 18px;
+
+    padding: 12px 14px;
+
+    color: #a72839;
+
+    background: var(--lef-danger-soft);
+
+    border:
+        1px solid #f0cfd3;
+
+    border-radius: 10px;
+
+    font-size: 11.5px;
+}
+
+
+.form-global-errors ul,
+.field-errors ul {
+    margin: 0;
+
+    padding-left: 17px;
+}
+
+
+.field-errors {
+    margin-top: 6px;
+
+    color: #b42335;
+
+    font-size: 10.5px;
+}
+
+
+.field-has-error input,
+.field-has-error select,
+.field-has-error textarea {
+    border-color: #e4a6ae;
+}
+
+
+/* ACTION BAR */
+
+.form-actions-modern {
+    margin:
+        22px
+        -22px
+        0;
+
+    padding:
+        14px
+        22px;
+
+    justify-content: flex-end;
+
+    gap: 8px;
+
+    background: #fafbfd;
+
+    border-top:
+        1px solid var(--lef-border);
+}
+
+
+.form-actions-modern .button-ghost {
+    color: #667a92;
+}
+
+
+/* CONTEXT INFO */
+
+.form-context-note {
+    max-width: 1040px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding:
+        11px
+        14px;
+
+    background: #f5f9ff;
+
+    border:
+        1px solid #dce9f9;
+
+    border-radius: 12px;
+}
+
+
+.form-context-icon {
+    width: 32px;
+    height: 32px;
+
+    flex: 0 0 auto;
+
+    display: grid;
+    place-items: center;
+
+    color: var(--lef-blue-700);
+
+    background: var(--lef-accent-soft);
+
+    border-radius: 9px;
+}
+
+
+.form-context-icon svg {
+    width: 15px;
+    height: 15px;
+}
+
+
+.form-context-note > div {
+    display: flex;
+    flex-direction: column;
+
+    gap: 2px;
+}
+
+
+.form-context-note strong {
+    color: var(--lef-navy-900);
+
+    font-size: 11px;
+}
+
+
+.form-context-note span {
+    color: var(--lef-muted);
+
+    font-size: 10.5px;
+}
+
+
+/* ADMIN CORRECTION */
+
+.admin-correction-field {
+    padding: 14px;
+
+    background: #fff9ee;
+
+    border:
+        1px solid #f0dfbc;
+
+    border-radius: 11px;
+}
+
+
+.admin-correction-heading {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    margin-bottom: 10px;
+}
+
+
+.admin-correction-icon {
+    width: 31px;
+    height: 31px;
+
+    flex: 0 0 auto;
+
+    display: grid;
+    place-items: center;
+
+    color: #986600;
+
+    background: #fff1cf;
+
+    border-radius: 8px;
+}
+
+
+.admin-correction-icon svg {
+    width: 14px;
+    height: 14px;
+}
+
+
+.admin-correction-heading > div {
+    display: flex;
+    flex-direction: column;
+
+    gap: 2px;
+}
+
+
+.admin-correction-heading label {
+    margin: 0 !important;
+
+    color: #6d521b !important;
+}
+
+
+.admin-correction-heading span {
+    color: #8e7545;
+
+    font-size: 10px;
+}
+
+
+.admin-correction-field textarea {
+    background: #fff;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 760px) {
+
+    .form-panel-modern,
+    .form-context-note {
+        max-width: none;
+    }
+
+    .modern-form {
+        padding:
+            18px
+            16px
+            0;
+    }
+
+    .form-panel-heading {
+        padding:
+            16px;
+    }
+
+    .form-actions-modern {
+        margin:
+            20px
+            -16px
+            0;
+
+        padding:
+            14px
+            16px;
+    }
+
+    .form-actions-modern .button {
+        flex: 1 1 auto;
+    }
+}
+
+/* ==========================================================================
+   LEFTRACK FORMS 2.1
+   ========================================================================== */
+
+
+/* SUCCESS CONTEXT */
+
+.form-context-note-success {
+    background: #f2fbf7;
+    border-color: #d4eee2;
+}
+
+.form-context-note-success .form-context-icon {
+    color: var(--lef-success);
+    background: var(--lef-success-soft);
+}
+
+
+/* FILE INPUT */
+
+.modern-form input[type="file"] {
+    min-height: 48px;
+
+    padding:
+        5px
+        6px;
+
+    color: var(--lef-muted);
+
+    background: #fbfcfe;
+}
+
+.modern-form input[type="file"]::file-selector-button {
+    min-height: 36px;
+
+    margin-right: 10px;
+
+    padding:
+        7px
+        12px;
+
+    color: var(--lef-blue-700);
+
+    background: var(--lef-accent-soft);
+
+    border: 0;
+
+    border-radius: 7px;
+
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 750;
+
+    cursor: pointer;
+}
+
+
+/* CHECKBOX CARD */
+
+.modern-checkbox-card {
+    padding: 13px 14px;
+
+    background: #f8faff;
+
+    border:
+        1px solid var(--lef-border);
+
+    border-radius: 11px;
+}
+
+.modern-checkbox-label {
+    display: flex !important;
+    align-items: flex-start;
+
+    gap: 10px;
+
+    margin: 0 !important;
+
+    cursor: pointer;
+}
+
+.modern-checkbox-label input[type="checkbox"] {
+    margin-top: 2px;
+}
+
+.modern-checkbox-label > span {
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+}
+
+.modern-checkbox-label strong {
+    color: var(--lef-navy-900);
+
+    font-size: 11.5px;
+}
+
+.modern-checkbox-label small {
+    margin: 0 !important;
+
+    color: var(--lef-muted);
+
+    font-size: 10.5px;
+    font-weight: 400;
+}
+
+
+/* LONG DESCRIPTIONS */
+
+.modern-form .field-full textarea {
+    min-height: 100px;
+}
+
+
+/* Keep very wide forms readable */
+
+.tasks-page .form-panel-modern,
+.phases-page .form-panel-modern,
+.documents-page .form-panel-modern {
+    width: 100%;
+    max-width: 1040px;
+}
+
+
+/* Small screen action order */
+
+@media (max-width: 560px) {
+
+    .form-actions-modern {
+        flex-direction: column-reverse;
+    }
+
+    .form-actions-modern .button {
+        width: 100%;
+    }
+}

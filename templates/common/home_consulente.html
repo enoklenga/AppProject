@@ -1,0 +1,486 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Home | LEFTRACK{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+
+{% block content %}
+
+<div class="dashboard-page dashboard-consultant-page">
+
+
+    <section class="dashboard-hero">
+
+        <div class="dashboard-hero-copy">
+
+            <span class="dashboard-kicker">
+                Riepilogo personale
+            </span>
+
+            <h1>
+                Il tuo mese
+            </h1>
+
+        </div>
+
+
+        <div class="dashboard-hero-actions">
+
+            <a
+                class="button button-primary"
+                href="{% url 'timesheets:ore-create' %}">
+
+                <svg class="btn-icon" aria-hidden="true">
+                    <use href="#icon-clock"></use>
+                </svg>
+
+                Inserisci ore
+
+            </a>
+
+
+            <a
+                class="button button-secondary"
+                href="{% url 'timesheets:spesa-create' %}">
+
+                <svg class="btn-icon" aria-hidden="true">
+                    <use href="#icon-receipt"></use>
+                </svg>
+
+                Inserisci spesa
+
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <form
+        class="dashboard-period-bar"
+        method="get">
+
+        <div class="dashboard-period-field">
+
+            <div class="dashboard-period-icon">
+
+                <svg aria-hidden="true">
+                    <use href="#icon-calendar"></use>
+                </svg>
+
+            </div>
+
+
+            <div class="dashboard-period-control">
+
+                <label for="id_mese">
+                    Periodo
+                </label>
+
+                <input
+                    id="id_mese"
+                    type="month"
+                    name="mese"
+                    value="{{ mese_selezionato }}">
+
+            </div>
+
+        </div>
+
+
+        <button
+            class="button button-secondary"
+            type="submit">
+
+            <svg class="btn-icon" aria-hidden="true">
+                <use href="#icon-refresh"></use>
+            </svg>
+
+            Aggiorna
+
+        </button>
+
+    </form>
+
+
+    <section
+        class="dashboard-kpi-strip"
+        aria-label="Indicatori personali">
+
+
+        <article class="dashboard-kpi">
+
+            <span class="dashboard-kpi-label">
+                Ore
+            </span>
+
+            <strong class="dashboard-kpi-value">
+                {{ dashboard.totale_ore_periodo }}
+            </strong>
+
+        </article>
+
+
+        <article class="dashboard-kpi">
+
+            <span class="dashboard-kpi-label">
+                Spese
+            </span>
+
+            <strong class="dashboard-kpi-value">
+                € {{ dashboard.totale_spese_periodo|floatformat:2 }}
+            </strong>
+
+        </article>
+
+
+        <article class="dashboard-kpi">
+
+            <span class="dashboard-kpi-label">
+                Giorni compilati
+            </span>
+
+            <strong class="dashboard-kpi-value">
+                {{ dashboard.giorni_compilati }}
+            </strong>
+
+        </article>
+
+
+        <article
+            class="dashboard-kpi"
+            data-tone="success">
+
+            <span class="dashboard-kpi-label">
+                Commesse
+            </span>
+
+            <strong class="dashboard-kpi-value">
+                {{ dashboard.assegnazioni_attive|length }}
+            </strong>
+
+        </article>
+
+
+        <article
+            class="dashboard-kpi dashboard-kpi-period"
+            data-tone="{% if dashboard.modificabile %}success{% else %}warning{% endif %}">
+
+            <span class="dashboard-kpi-label">
+                Periodo
+            </span>
+
+            <strong class="dashboard-kpi-state">
+                {{ dashboard.stato_periodo }}
+            </strong>
+
+            <span class="dashboard-kpi-meta">
+
+                {% if dashboard.modificabile %}
+                    modificabile
+                {% else %}
+                    chiuso
+                {% endif %}
+
+            </span>
+
+        </article>
+
+    </section>
+
+
+    {{ dashboard.chart_ore_giornaliere|json_script:"chart-consultant-daily-data" }}
+    {{ dashboard.chart_ore_commessa|json_script:"chart-consultant-project-data" }}
+
+
+    <div class="dashboard-chart-grid">
+
+        <section class="chart-card dashboard-chart-card">
+
+            <div class="chart-card-header">
+
+                <div>
+
+                    <span class="dashboard-kicker">
+                        Consuntivazione
+                    </span>
+
+                    <h2>
+                        Andamento ore
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="dashboard-chart"
+                data-dashboard-chart
+                data-chart-type="line"
+                data-source="chart-consultant-daily-data"
+                aria-label="Grafico andamento ore personali">
+            </div>
+
+        </section>
+
+
+        <section class="chart-card dashboard-chart-card">
+
+            <div class="chart-card-header">
+
+                <div>
+
+                    <span class="dashboard-kicker">
+                        Distribuzione
+                    </span>
+
+                    <h2>
+                        Ore per commessa
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="dashboard-chart"
+                data-dashboard-chart
+                data-chart-type="bar"
+                data-source="chart-consultant-project-data"
+                aria-label="Grafico ore per commessa">
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <section class="panel dashboard-projects-panel">
+
+        <div class="panel-heading">
+
+            <div>
+
+                <span class="dashboard-kicker">
+                    Commesse
+                </span>
+
+                <h2>
+                    Avanzamento delle tue commesse
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="dashboard-project-list">
+
+            {% for voce in dashboard.assegnazioni_attive %}
+
+                <article
+                    class="dashboard-project-card {% if voce.superamento %}is-over{% endif %}">
+
+
+                    <div class="dashboard-project-header">
+
+                        <div>
+
+                            <strong class="dashboard-project-code">
+                                {{ voce.assegnazione.commessa.codice }}
+                            </strong>
+
+                            <div class="dashboard-project-meta">
+
+                                <span>
+                                    {{ voce.assegnazione.commessa.cliente }}
+                                </span>
+
+                                <span class="dashboard-meta-separator">
+                                    ·
+                                </span>
+
+                                <span>
+                                    {% if voce.assegnazione.fase.sistema %}
+                                        Predefinita
+                                    {% else %}
+                                        {{ voce.assegnazione.fase.nome }}
+                                    {% endif %}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <span class="dashboard-role-badge">
+                            {{ voce.assegnazione.get_ruolo_commessa_display }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="dashboard-project-progress-heading">
+
+                        <span>
+                            {{ voce.ore_consuntivate }} h consuntivate
+                        </span>
+
+                        <strong>
+                            {{ voce.ore_previste }} h previste
+                        </strong>
+
+                    </div>
+
+
+                    <div
+                        class="progress-track"
+                        role="progressbar"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        aria-valuenow="{{ voce.percentuale }}"
+                        aria-label="Avanzamento {{ voce.assegnazione.commessa.codice }}"
+                        aria-valuetext="{{ voce.ore_consuntivate }} ore consuntivate su {{ voce.ore_previste }} previste">
+
+                        <div
+                            class="progress-value"
+                            style="width: {{ voce.percentuale }}%">
+                        </div>
+
+                    </div>
+
+
+                    <div class="dashboard-project-footer">
+
+                        <div class="dashboard-project-stats">
+
+                            <span>
+                                <strong>{{ voce.ore_periodo }}</strong>
+                                h nel mese
+                            </span>
+
+                            <span>
+                                <strong>{{ voce.ore_residue }}</strong>
+                                h residue
+                            </span>
+
+                        </div>
+
+
+                        <a
+                            class="row-action row-action-primary dashboard-project-teamwork"
+                            href="{% url 'projects:commessa-teamwork' voce.assegnazione.commessa_id %}">
+
+                            Apri Teamwork
+
+                            <svg class="btn-icon" aria-hidden="true">
+                                <use href="#icon-arrow-right"></use>
+                            </svg>
+
+                        </a>
+                    </div>
+
+                </article>
+
+
+            {% empty %}
+
+                <div class="dashboard-empty-state">
+
+                    <strong>
+                        Nessuna commessa attiva
+                    </strong>
+
+                    <p>
+                        Non risultano assegnazioni attive per questo periodo.
+                    </p>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+
+    <section class="dashboard-quick-grid">
+
+
+        <a
+            class="dashboard-quick-card"
+            href="{% url 'timesheets:ore-list' %}">
+
+            <span class="dashboard-quick-icon">
+
+                <svg aria-hidden="true">
+                    <use href="#icon-clock"></use>
+                </svg>
+
+            </span>
+
+            <div>
+
+                <span class="dashboard-kicker">
+                    Consuntivazione
+                </span>
+
+                <h2>
+                    Le mie ore
+                </h2>
+
+            </div>
+
+            <svg class="dashboard-quick-arrow" aria-hidden="true">
+                <use href="#icon-arrow-right"></use>
+            </svg>
+
+        </a>
+
+
+        <a
+            class="dashboard-quick-card"
+            href="{% url 'timesheets:spesa-list' %}">
+
+            <span class="dashboard-quick-icon">
+
+                <svg aria-hidden="true">
+                    <use href="#icon-receipt"></use>
+                </svg>
+
+            </span>
+
+            <div>
+
+                <span class="dashboard-kicker">
+                    Trasferte
+                </span>
+
+                <h2>
+                    Le mie spese
+                </h2>
+
+            </div>
+
+            <svg class="dashboard-quick-arrow" aria-hidden="true">
+                <use href="#icon-arrow-right"></use>
+            </svg>
+
+        </a>
+
+    </section>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_script %}
+<script defer src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}

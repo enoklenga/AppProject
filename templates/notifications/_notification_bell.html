@@ -1,0 +1,131 @@
+<div class="notification-bell">
+
+    <details class="notification-dropdown">
+
+        <summary
+            class="notification-bell-button"
+            aria-label="Notifiche">
+
+            <svg
+                class="notification-bell-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true">
+
+                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+
+            </svg>
+
+            {% if unread_count %}
+
+                <span class="notification-badge">
+                    {% if unread_count > 99 %}
+                        99+
+                    {% else %}
+                        {{ unread_count }}
+                    {% endif %}
+                </span>
+
+            {% endif %}
+
+        </summary>
+
+
+        <div class="notification-menu">
+
+            <div class="notification-menu-header">
+
+                <div>
+                    <strong>Notifiche</strong>
+
+                    {% if unread_count %}
+                        <span>
+                            {{ unread_count }} non
+                            {% if unread_count == 1 %}
+                                letta
+                            {% else %}
+                                lette
+                            {% endif %}
+                        </span>
+                    {% endif %}
+                </div>
+
+                <a href="{% url 'notifications:notification-list' %}">
+                    Vedi tutte
+                </a>
+
+            </div>
+
+
+            <div class="notification-menu-list">
+
+                {% for notification in notifications %}
+
+                    <a
+                        class="notification-menu-item{% if not notification.letta %} is-unread{% endif %}"
+                        href="{% url 'notifications:notification-open' notification.pk %}">
+
+                        <span class="notification-dot"></span>
+
+                        <span class="notification-menu-content">
+
+                            <strong>
+                                {{ notification.titolo }}
+                            </strong>
+
+                            {% if notification.messaggio %}
+                                <span>
+                                    {{ notification.messaggio|truncatechars:115 }}
+                                </span>
+                            {% endif %}
+
+                            <time>
+                                {{ notification.created_at|date:"d/m/Y H:i" }}
+                            </time>
+
+                        </span>
+
+                    </a>
+
+                {% empty %}
+
+                    <div class="notification-menu-empty">
+                        Nessuna notifica.
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+
+            {% if unread_count %}
+
+                <form
+                    method="post"
+                    class="notification-menu-footer"
+                    action="{% url 'notifications:notification-mark-all-read' %}">
+
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                        class="notification-mark-all">
+
+                        Segna tutte come lette
+
+                    </button>
+
+                </form>
+
+            {% endif %}
+
+        </div>
+
+    </details>
+
+</div>

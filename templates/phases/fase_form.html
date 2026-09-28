@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ titolo }} | LEFTRACK{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/phases.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="phases-page form-page">
+
+    <div class="page-header">
+
+        <div>
+            <div class="eyebrow">Fasi</div>
+
+            <h1>{{ titolo }}</h1>
+
+        </div>
+
+    </div>
+
+
+    <section class="panel form-panel form-panel-modern">
+
+        <div class="form-panel-heading">
+
+            <span class="form-panel-icon" aria-hidden="true">
+                <svg>
+                    <use href="#icon-layers"></use>
+                </svg>
+            </span>
+
+            <div>
+                <h2>Dati della fase</h2>
+
+            </div>
+
+        </div>
+
+
+        <form method="post" class="modern-form">
+
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="form-global-errors">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+
+            <div class="form-grid modern-form-grid">
+
+                <div class="field field-full {% if form.commessa.errors %}field-has-error{% endif %}">
+
+                    {{ form.commessa.label_tag }}
+                    {{ form.commessa }}
+
+                    {% if form.commessa.help_text %}
+                        <div class="field-help">
+                            {{ form.commessa.help_text }}
+                        </div>
+                    {% endif %}
+
+                    {% if form.commessa.errors %}
+                        <div class="field-errors">
+                            {{ form.commessa.errors }}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+
+                <div class="field field-full {% if form.nome.errors %}field-has-error{% endif %}">
+
+                    {{ form.nome.label_tag }}
+                    {{ form.nome }}
+
+                    {% if form.nome.errors %}
+                        <div class="field-errors">
+                            {{ form.nome.errors }}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+
+                <div class="field {% if form.stato.errors %}field-has-error{% endif %}">
+
+                    {{ form.stato.label_tag }}
+                    {{ form.stato }}
+
+                    {% if form.stato.errors %}
+                        <div class="field-errors">
+                            {{ form.stato.errors }}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+
+                <div class="field {% if form.ordine.errors %}field-has-error{% endif %}">
+
+                    {{ form.ordine.label_tag }}
+                    {{ form.ordine }}
+
+                    {% if form.ordine.help_text %}
+                        <div class="field-help">
+                            {{ form.ordine.help_text }}
+                        </div>
+                    {% endif %}
+
+                    {% if form.ordine.errors %}
+                        <div class="field-errors">
+                            {{ form.ordine.errors }}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+
+                <div class="field {% if form.data_inizio.errors %}field-has-error{% endif %}">
+
+                    {{ form.data_inizio.label_tag }}
+                    {{ form.data_inizio }}
+
+                    {% if form.data_inizio.errors %}
+                        <div class="field-errors">
+                            {{ form.data_inizio.errors }}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+
+                <div class="field {% if form.data_fine_prevista.errors %}field-has-error{% endif %}">
+
+                    {{ form.data_fine_prevista.label_tag }}
+                    {{ form.data_fine_prevista }}
+
+                    {% if form.data_fine_prevista.errors %}
+                        <div class="field-errors">
+                            {{ form.data_fine_prevista.errors }}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+
+                <div class="field field-full {% if form.descrizione.errors %}field-has-error{% endif %}">
+
+                    {{ form.descrizione.label_tag }}
+                    {{ form.descrizione }}
+
+                    {% if form.descrizione.errors %}
+                        <div class="field-errors">
+                            {{ form.descrizione.errors }}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="form-actions form-actions-modern">
+
+                <a
+                    class="button button-ghost"
+                    href="{% url 'phases:fase-list' %}{% if fase %}?commessa={{ fase.commessa_id }}{% endif %}">
+
+                    Annulla
+
+                </a>
+
+                <button
+                    class="button button-primary"
+                    type="submit">
+
+                    <svg class="btn-icon" aria-hidden="true">
+                        <use href="#icon-check"></use>
+                    </svg>
+
+                    {% if is_update %}
+                        Salva modifiche
+                    {% else %}
+                        Crea fase
+                    {% endif %}
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}{{ titolo }} | LEFTRACK{% endblock %}
+
+{% block content %}
+
+<div class="form-page">
+
+    <div class="page-header">
+
+        <div>
+            <div class="eyebrow">Pianificazione</div>
+
+            <h1>{{ titolo }}</h1>
+
+        </div>
+
+    </div>
+
+
+    {% if congelata and user.is_admin_lef %}
+
+        <div class="form-context-note planning-frozen-note">
+
+            <span class="form-context-icon" aria-hidden="true">
+                <svg>
+                    <use href="#icon-calendar"></use>
+                </svg>
+            </span>
+
+            <div>
+                <strong>Pianificazione congelata</strong>
+
+                <span>
+                    La data è già trascorsa. Come Admin puoi comunque
+                    effettuare una correzione.
+                </span>
+            </div>
+
+        </div>
+
+    {% endif %}
+
+
+    <section class="panel form-panel form-panel-modern">
+
+        <div class="form-panel-heading">
+
+            <span class="form-panel-icon" aria-hidden="true">
+                <svg>
+                    <use href="#icon-calendar"></use>
+                </svg>
+            </span>
+
+            <div>
+                <h2>Dati della pianificazione</h2>
+
+            </div>
+
+        </div>
+
+
+        <form method="post" class="modern-form">
+
+            {% csrf_token %}
+
+
+            {% if form.non_field_errors %}
+                <div class="form-global-errors">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+
+            <div class="form-grid modern-form-grid">
+
+                {% for field in form.visible_fields %}
+
+                    <div class="
+                        field
+                        {% if field.errors %}field-has-error{% endif %}
+                    ">
+
+                        {{ field.label_tag }}
+
+                        {{ field }}
+
+                        {% if field.help_text %}
+                            <div class="field-help">
+                                {{ field.help_text }}
+                            </div>
+                        {% endif %}
+
+                        {% if field.errors %}
+                            <div class="field-errors">
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+
+            <div class="form-actions form-actions-modern">
+
+                <a
+                    class="button button-ghost"
+                    href="{% url 'planning:pianificazione-list' %}">
+
+                    Annulla
+
+                </a>
+
+                <button
+                    class="button button-primary"
+                    type="submit">
+
+                    <svg class="btn-icon" aria-hidden="true">
+                        <use href="#icon-check"></use>
+                    </svg>
+
+                    {% if is_update %}
+                        Salva modifiche
+                    {% else %}
+                        Salva pianificazione
+                    {% endif %}
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,94 @@
+services:
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    env_file:
+      - .env.staging
+    volumes:
+      - postgres_staging_data:/var/lib/postgresql
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  init_permissions:
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile
+    user: "0:0"
+    command: >
+      sh -c "mkdir -p /app/staticfiles /app/media /app/private_media &&
+      chown -R 10001:10001 /app/staticfiles /app/media /app/private_media"
+    volumes:
+      - static_staging_data:/app/staticfiles
+      - media_staging_data:/app/media
+      - private_media_staging_data:/app/private_media
+    restart: "no"
+
+  web:
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env.staging
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+      python manage.py collectstatic --noinput &&
+      gunicorn config.wsgi:application
+      --bind 0.0.0.0:8000
+      --workers $${GUNICORN_WORKERS:-2}
+      --timeout $${GUNICORN_TIMEOUT:-60}
+      --access-logfile -
+      --error-logfile -"
+    expose:
+      - "8000"
+    volumes:
+      - static_staging_data:/app/staticfiles
+      - media_staging_data:/app/media
+      - private_media_staging_data:/app/private_media
+    depends_on:
+      db:
+        condition: service_healthy
+      init_permissions:
+        condition: service_completed_successfully
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env.staging
+    command: >
+      sh -c "while true; do
+      python manage.py invia_promemoria_timesheet;
+      sleep 60;
+      done"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "${STAGING_HTTP_PORT:-8081}:80"
+    volumes:
+      - ./deploy/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - static_staging_data:/static:ro
+      - media_staging_data:/media:ro
+    depends_on:
+      web:
+        condition: service_started
+
+volumes:
+  postgres_staging_data:
+  static_staging_data:
+  media_staging_data:
+  private_media_staging_data:

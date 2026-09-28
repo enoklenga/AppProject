@@ -1,0 +1,8 @@
+{% if stato == "APPROVATA" %}
+    <span class="badge badge-completata"><svg class="btn-icon" aria-hidden="true"><use href="#icon-check"></use></svg>Approvata</span>
+{% elif stato == "RIFIUTATA" %}
+    <span class="badge badge-danger"><svg class="btn-icon" aria-hidden="true"><use href="#icon-x"></use></svg>Rifiutata</span>
+    {% if nota %}<div class="muted approvazione-nota">{{ nota }}</div>{% endif %}
+{% else %}
+    <span class="badge badge-in-attesa">Da approvare</span>
+{% endif %}

@@ -1,0 +1,356 @@
+/* LEF Timesheet — UX operativa e rifiniture finali. */
+
+/* Loading / duplicate-submit protection */
+form[aria-busy="true"] {
+    cursor: progress;
+}
+
+.button.is-loading,
+button.is-loading,
+input[type="submit"].is-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.78;
+}
+
+.button.is-loading::after,
+button.is-loading::after {
+    content: "";
+    width: 15px;
+    height: 15px;
+    flex: 0 0 auto;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: ux-spin 0.72s linear infinite;
+}
+
+@keyframes ux-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Form feedback */
+.field.has-error {
+    padding-left: 11px;
+    border-left: 3px solid var(--lef-danger);
+}
+
+.field.has-error > label {
+    color: var(--lef-danger);
+}
+
+.ux-unsaved-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 8px;
+    color: var(--lef-warning);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+}
+
+.ux-unsaved-indicator::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+/* Empty states: make no-data conditions feel intentional. */
+.empty-state,
+.empty-panel {
+    color: #526d82;
+}
+
+.empty-state::before,
+.empty-panel::before {
+    content: "—";
+    display: block;
+    margin-bottom: 7px;
+    color: #829ab1;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+td.empty-state::before {
+    display: inline-block;
+    margin: 0 8px 0 0;
+    vertical-align: -2px;
+}
+
+/* Native dialog upgraded to match the design system. */
+.ux-dialog {
+    width: min(520px, calc(100vw - 32px));
+    padding: 0;
+    color: var(--lef-text);
+    background: transparent;
+    border: 0;
+}
+
+.ux-dialog::backdrop {
+    background: rgba(16, 42, 67, 0.48);
+    backdrop-filter: blur(2px);
+}
+
+.ux-dialog-card {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 16px;
+    padding: 22px;
+    background: var(--lef-surface);
+    border: 1px solid var(--lef-border);
+    border-radius: var(--radius-lg, 14px);
+    box-shadow: var(--shadow-lg, 0 18px 48px rgba(16, 42, 67, 0.24));
+}
+
+.ux-dialog-icon {
+    width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--lef-danger);
+    background: var(--lef-danger-soft);
+    border-radius: 50%;
+    font-weight: 900;
+}
+
+.ux-dialog-copy h2 {
+    margin: 0 0 6px;
+    color: var(--lef-navy-900);
+    font-size: 20px;
+}
+
+.ux-dialog-copy p {
+    margin: 0;
+    color: var(--lef-muted);
+}
+
+.ux-dialog-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 4px;
+}
+
+/* Progressive enhancement: while a filter refresh is in progress. */
+.filter-bar[aria-busy="true"],
+.dashboard-filter[aria-busy="true"] {
+    opacity: 0.82;
+}
+
+/* Better operational emphasis for primary page actions. */
+.page-header .header-actions,
+.page-header > .button {
+    flex: 0 0 auto;
+}
+
+/* Avoid accidental double clicks looking interactive while request is leaving. */
+[data-ux-submitting="true"] .button,
+[data-ux-submitting="true"] button[type="submit"] {
+    cursor: progress;
+}
+
+@media (max-width: 560px) {
+    .ux-dialog-card {
+        grid-template-columns: 1fr;
+        padding: 19px;
+    }
+
+    .ux-dialog-icon {
+        width: 38px;
+        height: 38px;
+    }
+
+    .ux-dialog-actions {
+        grid-column: auto;
+        flex-direction: column-reverse;
+    }
+
+    .ux-dialog-actions .button {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .button.is-loading::after,
+    button.is-loading::after {
+        animation-duration: 1.5s;
+    }
+}
+
+/* ==========================================================================
+   UI/UX REFINEMENT — 2026-09-24 / pass 02
+   Reduce redundant page-title emphasis, tighten forms and remove overlapping
+   row actions in dense operational tables.
+   ========================================================================== */
+
+.app-topbar {
+    min-height: 74px;
+}
+
+.topbar-context {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+}
+
+.topbar-context span {
+    display: inline-flex;
+    margin: 0;
+    color: #7b8ca5;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.topbar-context strong {
+    margin: 0;
+    color: var(--lef-navy-900);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.15;
+}
+
+.page-header {
+    align-items: flex-end;
+}
+
+.page-header .eyebrow {
+    margin-bottom: 6px;
+}
+
+.page-header h1 {
+    margin-bottom: 8px;
+}
+
+.page-header p {
+    max-width: 760px;
+}
+
+/* More compact and better-focused management forms. */
+.form-page.teamwork-management-page {
+    width: min(100%, 960px);
+}
+
+.teamwork-management-page .page-header {
+    margin-bottom: 16px;
+}
+
+.teamwork-management-panel .form-panel-heading {
+    padding-bottom: 14px;
+}
+
+.teamwork-management-panel .form-panel-heading h2 {
+    margin-bottom: 0;
+}
+
+.teamwork-management-panel .modern-form {
+    padding-top: 12px;
+}
+
+.teamwork-management-panel .modern-form-grid {
+    gap: 16px;
+}
+
+.teamwork-management-panel textarea {
+    min-height: 120px;
+}
+
+.teamwork-management-panel .form-actions {
+    margin-top: 18px;
+}
+
+.teamwork-management-panel .form-context-note {
+    margin-top: 12px;
+}
+
+.teamwork-check-row {
+    padding: 12px 14px;
+}
+
+.teamwork-check-copy strong {
+    font-size: 13px;
+}
+
+/* Teamwork KPI cards should fill the row cleanly and stay visually balanced. */
+.teamwork-progress-grid {
+    align-items: stretch;
+}
+
+.teamwork-progress-grid .metric-card {
+    min-height: 164px;
+}
+
+/* Commessa list: make agenda progress easier to scan. */
+.commesse-table th:nth-child(7),
+.commesse-table td:nth-child(7) {
+    min-width: 188px;
+}
+
+.commesse-table .table-stack span {
+    line-height: 1.35;
+}
+
+/* Planning registered table: more room for status + actions and cleaner actions. */
+.planning-main-table {
+    min-width: 1120px;
+}
+
+.planning-main-table th:nth-child(5),
+.planning-main-table td:nth-child(5) { width: 14%; }
+
+.planning-main-table th:nth-child(7),
+.planning-main-table td:nth-child(7) { width: 9%; }
+
+.planning-main-table th:nth-child(8),
+.planning-main-table td:nth-child(8) { width: 14%; }
+
+.planning-main-table th:nth-child(9),
+.planning-main-table td:nth-child(9) { width: 12%; }
+
+.planning-main-table .table-actions {
+    padding-right: 16px;
+}
+
+.planning-main-table .row-actions {
+    gap: 6px;
+}
+
+.planning-main-table .planning-action-confirm {
+    padding: 5px 10px;
+    border-radius: 999px;
+}
+
+.planning-main-table .planning-action-icon {
+    border-radius: 999px;
+}
+
+.planning-main-table .readonly-label {
+    white-space: nowrap;
+}
+
+/* Avoid heavy helper copy in operative panels. */
+.panel-heading p:empty,
+.form-panel-heading p:empty {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    .topbar-context span {
+        font-size: 10px;
+    }
+
+    .topbar-context strong {
+        font-size: 16px;
+    }
+
+    .form-page.teamwork-management-page {
+        width: 100%;
+    }
+}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Handover — {{ commessa.codice }} | LEFTRACK{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/teamwork.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-page teamwork-management-page">
+    <div class="page-header">
+        <div>
+            <div class="eyebrow">Presa in carico PM</div>
+            <h1>Handover {{ commessa.codice }}</h1>
+            <p>{{ commessa.cliente.ragione_sociale }}</p>
+        </div>
+    </div>
+
+    <section class="panel form-panel form-panel-modern teamwork-management-panel">
+        <div class="form-panel-heading">
+            <span class="form-panel-icon" aria-hidden="true"><svg><use href="#icon-briefcase"></use></svg></span>
+            <div>
+                <h2>Handover commerciale</h2>
+            </div>
+        </div>
+
+        <form method="post" class="modern-form">
+            {% csrf_token %}
+            {% if form.non_field_errors %}<div class="form-global-errors">{{ form.non_field_errors }}</div>{% endif %}
+            <div class="form-grid modern-form-grid">
+                {% for field in form %}
+                    {% if field.name == 'handover_completato' %}
+                        <div class="field field-full teamwork-confirm-field {% if field.errors %}field-has-error{% endif %}">
+                            <label class="teamwork-check-row" for="{{ field.id_for_label }}">
+                                {{ field }}
+                                <span class="teamwork-check-copy">
+                                    <strong>{{ field.label }}</strong>
+                                </span>
+                            </label>
+                            {% if field.errors %}<div class="field-errors">{{ field.errors }}</div>{% endif %}
+                        </div>
+                    {% else %}
+                        <div class="field field-full {% if field.errors %}field-has-error{% endif %}">
+                            {{ field.label_tag }}
+                            {{ field }}
+                            {% if field.help_text %}<div class="field-help">{{ field.help_text }}</div>{% endif %}
+                            {% if field.errors %}<div class="field-errors">{{ field.errors }}</div>{% endif %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {% if commessa.handover_completato_il %}
+                <div class="form-context-note">
+                    <span>Ultima presa in carico: {{ commessa.handover_completato_il|date:"d/m/Y H:i" }}{% if commessa.handover_completato_da %} · {{ commessa.handover_completato_da }}{% endif %}</span>
+                </div>
+            {% endif %}
+            <div class="form-actions form-actions-modern">
+                <a class="button button-ghost" href="{% url 'projects:commessa-teamwork' commessa.pk %}">Annulla</a>
+                <button class="button button-primary" type="submit">Salva handover</button>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}
