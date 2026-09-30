@@ -9,16 +9,29 @@ from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView
 
+from apps.common.request_security import safe_internal_redirect
 from apps.common.mixins import (
-    AdminRequiredMixin,
+    AssignmentsManagementRequiredMixin,
     ClientManagementRequiredMixin,
+    ManagementRequiredMixin,
     FinanceManagementRequiredMixin,
-    PortfolioReadRequiredMixin,
+    ReferencePortfolioReadRequiredMixin,
+    AssignmentsRegisterReadRequiredMixin,
     ProjectManagementRequiredMixin,
 )
 from apps.accounts.access import (
+    business_units_in_scope,
+    can_edit_commessa_anagrafica,
+    can_manage_assignments,
+    can_manage_clients,
+    can_manage_commessa,
+    can_manage_projects,
     can_view_tasks_portfolio,
     can_view_teamwork_without_assignment,
+    commesse_in_scope,
+    commesse_visibili,
+    is_manager,
+    uuid_valido,
 )
 from apps.operations.models import AuditLog
 from apps.phases.models import FaseCommessa
@@ -52,7 +65,46 @@ from .services import (
 )
 
 
-class ClienteListView(PortfolioReadRequiredMixin, ListView):
+def _return_to_origin_url(request, instance=None):
+    """Ritorno controllato alla schermata da cui è partita un'azione.
+
+    Preferisce ``return_to`` quando è un URL interno validato: così vengono
+    preservati anche filtri e mese selezionato. Mantiene i token legacy ``bu``
+    e ``home-responsabile`` come fallback compatibile.
+    """
+    return_to = safe_internal_redirect(
+        request, request.POST.get("return_to") or request.GET.get("return_to")
+    )
+    if return_to:
+        return return_to
+
+    token = (request.POST.get("next") or request.GET.get("next") or "").strip()
+    if token == "home-responsabile":
+        return reverse("home")
+    if token != "bu":
+        return None
+
+    # Se il form nasce da un cruscotto BU, il contesto esplicito di origine
+    # ha priorita anche se l'oggetto viene riclassificato durante l'azione.
+    bu_id = uuid_valido(
+        request.POST.get("return_bu")
+        or request.GET.get("return_bu")
+        or request.GET.get("business_unit")
+    )
+    if bu_id and business_units_in_scope(request.user).filter(pk=bu_id).exists():
+        return reverse("accounts:business-unit-detail", args=[bu_id])
+
+    if instance is not None:
+        bu_id = getattr(instance, "business_unit_id", None)
+        if bu_id is None:
+            commessa = getattr(instance, "commessa", None)
+            bu_id = getattr(commessa, "business_unit_id", None)
+    if bu_id and business_units_in_scope(request.user).filter(pk=bu_id).exists():
+        return reverse("accounts:business-unit-detail", args=[bu_id])
+    return None
+
+
+class ClienteListView(ReferencePortfolioReadRequiredMixin, ListView):
     model = Cliente
     template_name = "projects/cliente_list.html"
     context_object_name = "clienti"
@@ -78,9 +130,7 @@ class ClienteListView(PortfolioReadRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["puo_modificare"] = bool(
-            self.request.user.is_admin_lef or self.request.user.is_commerciale
-        )
+        context["puo_modificare"] = can_manage_clients(self.request.user)
         return context
 
 
@@ -116,7 +166,7 @@ class ClienteToggleActiveView(ClientManagementRequiredMixin, View):
         return HttpResponseRedirect(reverse("projects:cliente-list"))
 
 
-class CommessaListView(PortfolioReadRequiredMixin, ListView):
+class CommessaListView(ReferencePortfolioReadRequiredMixin, ListView):
     model = Commessa
     template_name = "projects/commessa_list.html"
     context_object_name = "commesse"
@@ -124,7 +174,7 @@ class CommessaListView(PortfolioReadRequiredMixin, ListView):
 
     def get_queryset(self):
         queryset = (
-            Commessa.objects.select_related("cliente")
+            commesse_visibili(self.request.user).select_related("cliente", "business_unit")
             .annotate(
                 assegnazioni_attive=Count(
                     "assegnazioni",
@@ -141,6 +191,16 @@ class CommessaListView(PortfolioReadRequiredMixin, ListView):
         stato = self.request.GET.get("stato", "").strip()
         cliente_id = self.request.GET.get("cliente", "").strip()
         workflow = self.request.GET.get("workflow", "").strip()
+        business_unit = self.request.GET.get("bu", "").strip()
+        if business_unit == "nessuna":
+            queryset = queryset.filter(business_unit__isnull=True)
+        elif business_unit:
+            business_unit = uuid_valido(business_unit)
+            queryset = (
+                queryset.filter(business_unit_id=business_unit)
+                if business_unit
+                else queryset.none()
+            )
         if query:
             queryset = queryset.filter(
                 Q(codice__icontains=query)
@@ -159,20 +219,46 @@ class CommessaListView(PortfolioReadRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["clienti_filtro"] = Cliente.objects.order_by("ragione_sociale")
         context["workflow_stati"] = Commessa.WorkflowStato.choices
+        user = self.request.user
+        context["business_units_filtro"] = business_units_in_scope(user).order_by("nome")
         for commessa in context["commesse"]:
             commessa.agenda_progress = agenda_progress(commessa)
-        context["puo_modificare"] = bool(
-            self.request.user.is_admin_lef or self.request.user.is_commerciale
-        )
-        context["puo_cambiare_stato"] = self.request.user.is_admin_lef
+            commessa.riga_modificabile = can_edit_commessa_anagrafica(user, commessa)
+            commessa.riga_stato_modificabile = can_manage_commessa(user, commessa)
+        context["puo_modificare"] = can_manage_projects(user)
+        context["puo_cambiare_stato"] = is_manager(user)
         return context
 
 
-class CommessaCreateView(ProjectManagementRequiredMixin, CreateView):
+class _CommessaFormUserMixin:
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["cancel_url"] = safe_internal_redirect(
+            self.request, self.request.GET.get("return_to")
+        )
+        return context
+
+
+class CommessaCreateView(ProjectManagementRequiredMixin, _CommessaFormUserMixin, CreateView):
     model = Commessa
     form_class = CommessaForm
     template_name = "projects/commessa_form.html"
     success_url = reverse_lazy("projects:commessa-list")
+
+    def get_success_url(self):
+        return _return_to_origin_url(self.request, self.object) or str(self.success_url)
+
+    def get_initial(self):
+        initial = super().get_initial()
+        bu_id = uuid_valido(self.request.GET.get("business_unit"))
+        if bu_id and business_units_in_scope(self.request.user).filter(pk=bu_id).exists():
+            initial["business_unit"] = bu_id
+        return initial
 
     def form_valid(self, form):
         # Workflow e handover non sono mutabili dal form anagrafico: seguono
@@ -181,11 +267,21 @@ class CommessaCreateView(ProjectManagementRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class CommessaUpdateView(ProjectManagementRequiredMixin, UpdateView):
+class CommessaUpdateView(ProjectManagementRequiredMixin, _CommessaFormUserMixin, UpdateView):
     model = Commessa
     form_class = CommessaForm
     template_name = "projects/commessa_form.html"
     success_url = reverse_lazy("projects:commessa-list")
+
+    def get_success_url(self):
+        return _return_to_origin_url(self.request, self.object) or str(self.success_url)
+
+    def get_queryset(self):
+        user = self.request.user
+        if getattr(user, "is_commerciale", False):
+            return Commessa.objects.all()
+        # Responsabile BU: solo le commesse della propria Business Unit.
+        return commesse_in_scope(user)
 
     @transaction.atomic
     def form_valid(self, form):
@@ -204,7 +300,9 @@ class CommessaUpdateView(ProjectManagementRequiredMixin, UpdateView):
             .values_list("pk", flat=True)
         )
 
-        locked_form = self.form_class(self.request.POST, instance=commessa)
+        locked_form = self.form_class(
+            self.request.POST, instance=commessa, user=self.request.user
+        )
         if not locked_form.is_valid():
             return self.form_invalid(locked_form)
 
@@ -216,10 +314,10 @@ class CommessaUpdateView(ProjectManagementRequiredMixin, UpdateView):
         return response
 
 
-class CommessaToggleStateView(AdminRequiredMixin, View):
+class CommessaToggleStateView(ManagementRequiredMixin, View):
     @transaction.atomic
     def post(self, request, pk):
-        commessa = get_object_or_404(Commessa, pk=pk)
+        commessa = get_object_or_404(commesse_in_scope(request.user), pk=pk)
         try:
             if commessa.stato == Commessa.Stato.APERTA:
                 chiudi_commessa(attore=request.user, commessa=commessa)
@@ -237,17 +335,20 @@ class CommessaToggleStateView(AdminRequiredMixin, View):
         return HttpResponseRedirect(reverse("projects:commessa-list"))
 
 
-class AssegnazioneListView(AdminRequiredMixin, ListView):
+class AssegnazioneListView(AssignmentsRegisterReadRequiredMixin, ListView):
     model = Assegnazione
     template_name = "projects/assegnazione_list.html"
     context_object_name = "assegnazioni"
     paginate_by = 30
 
     def get_queryset(self):
-        queryset = Assegnazione.objects.select_related(
+        queryset = Assegnazione.objects.filter(
+            commessa__in=commesse_in_scope(self.request.user)
+        ).select_related(
             "consulente",
             "commessa",
             "commessa__cliente",
+            "commessa__business_unit",
             "fase",
         ).order_by("commessa__codice", "fase__ordine", "fase__nome", "consulente__last_name")
         query = self.request.GET.get("q", "").strip()
@@ -263,24 +364,29 @@ class AssegnazioneListView(AdminRequiredMixin, ListView):
         if stato in {Assegnazione.Stato.ATTIVA, Assegnazione.Stato.CONCLUSA}:
             queryset = queryset.filter(stato=stato)
         if commessa_id:
-            queryset = queryset.filter(commessa_id=commessa_id)
+            commessa_id = uuid_valido(commessa_id)
+            queryset = queryset.filter(commessa_id=commessa_id) if commessa_id else queryset.none()
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["commesse_filtro"] = Commessa.objects.order_by("codice")
+        context["commesse_filtro"] = commesse_in_scope(self.request.user).order_by("codice")
+        context["puo_modificare"] = can_manage_assignments(self.request.user)
         return context
 
-class FasiPerCommessaView(AdminRequiredMixin, View):
+class FasiPerCommessaView(ManagementRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        commessa_id = request.GET.get("commessa")
+        commessa_id = uuid_valido(request.GET.get("commessa"))
 
         if not commessa_id:
             return JsonResponse({"fasi": []})
 
         fasi = (
             FaseCommessa.objects
-            .filter(commessa_id=commessa_id)
+            .filter(
+                commessa_id=commessa_id,
+                commessa__in=commesse_in_scope(request.user),
+            )
             .order_by("ordine", "nome")
         )
 
@@ -296,11 +402,35 @@ class FasiPerCommessaView(AdminRequiredMixin, View):
             }
         )
 
-class AssegnazioneCreateView(AdminRequiredMixin, CreateView):
+class _AssegnazioneFormUserMixin:
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["cancel_url"] = safe_internal_redirect(
+            self.request, self.request.GET.get("return_to")
+        )
+        return context
+
+
+class AssegnazioneCreateView(AssignmentsManagementRequiredMixin, _AssegnazioneFormUserMixin, CreateView):
     model = Assegnazione
     form_class = AssegnazioneForm
     template_name = "projects/assegnazione_form.html"
     success_url = reverse_lazy("projects:assegnazione-list")
+
+    def get_success_url(self):
+        return _return_to_origin_url(self.request, self.object) or str(self.success_url)
+
+    def get_initial(self):
+        initial = super().get_initial()
+        commessa_id = uuid_valido(self.request.GET.get("commessa"))
+        if commessa_id and commesse_in_scope(self.request.user).filter(pk=commessa_id).exists():
+            initial["commessa"] = commessa_id
+        return initial
 
     @transaction.atomic
     def form_valid(self, form):
@@ -316,7 +446,7 @@ class AssegnazioneCreateView(AdminRequiredMixin, CreateView):
 
         # Il primo is_valid() è avvenuto prima dei lock. Ripetiamo la validazione
         # nella stessa transazione per coprire modifiche concorrenti di Commessa/Fase.
-        locked_form = self.form_class(self.request.POST)
+        locked_form = self.form_class(self.request.POST, user=self.request.user)
         if not locked_form.is_valid():
             return self.form_invalid(locked_form)
 
@@ -334,11 +464,17 @@ class AssegnazioneCreateView(AdminRequiredMixin, CreateView):
         return response
 
 
-class AssegnazioneUpdateView(AdminRequiredMixin, UpdateView):
+class AssegnazioneUpdateView(AssignmentsManagementRequiredMixin, _AssegnazioneFormUserMixin, UpdateView):
     model = Assegnazione
     form_class = AssegnazioneForm
     template_name = "projects/assegnazione_form.html"
     success_url = reverse_lazy("projects:assegnazione-list")
+
+    def get_success_url(self):
+        return _return_to_origin_url(self.request, self.object) or str(self.success_url)
+
+    def get_queryset(self):
+        return Assegnazione.objects.filter(commessa__in=commesse_in_scope(self.request.user))
 
     @transaction.atomic
     def form_valid(self, form):
@@ -389,7 +525,9 @@ class AssegnazioneUpdateView(AdminRequiredMixin, UpdateView):
             return self.form_invalid(form)
 
         precedente = assegnazione_snapshot(assegnazione)
-        locked_form = self.form_class(self.request.POST, instance=assegnazione)
+        locked_form = self.form_class(
+            self.request.POST, instance=assegnazione, user=self.request.user
+        )
         if not locked_form.is_valid():
             return self.form_invalid(locked_form)
 
@@ -409,9 +547,12 @@ class AssegnazioneUpdateView(AdminRequiredMixin, UpdateView):
         return response
 
 
-class AssegnazioneToggleStateView(AdminRequiredMixin, View):
+class AssegnazioneToggleStateView(AssignmentsManagementRequiredMixin, View):
     def post(self, request, pk):
-        assegnazione = get_object_or_404(Assegnazione, pk=pk)
+        assegnazione = get_object_or_404(
+            Assegnazione.objects.filter(commessa__in=commesse_in_scope(request.user)),
+            pk=pk,
+        )
         nuovo_stato = (
             Assegnazione.Stato.CONCLUSA
             if assegnazione.stato == Assegnazione.Stato.ATTIVA
@@ -451,7 +592,9 @@ class TariffaListView(FinanceManagementRequiredMixin, ListView):
     paginate_by = 40
 
     def get_queryset(self):
-        queryset = TariffaAssegnazione.objects.select_related(
+        queryset = TariffaAssegnazione.objects.filter(
+            assegnazione__commessa__in=commesse_in_scope(self.request.user)
+        ).select_related(
             "assegnazione",
             "assegnazione__consulente",
             "assegnazione__commessa",
@@ -494,7 +637,7 @@ class TariffaListView(FinanceManagementRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["commesse_filtro"] = Commessa.objects.order_by("codice")
+        context["commesse_filtro"] = commesse_in_scope(self.request.user).order_by("codice")
         context["tipi_attivita"] = (
             TariffaAssegnazione.TipoAttivita.choices
         )
@@ -505,6 +648,12 @@ class TariffaCreateView(FinanceManagementRequiredMixin, CreateView):
     model = TariffaAssegnazione
     form_class = TariffaAssegnazioneForm
     template_name = "projects/tariffa_form.html"
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
     def get_success_url(self):
         mese = self.request.GET.get("mese")
 
@@ -596,7 +745,8 @@ def commessa_handover(request, pk):
 
     from apps.projects.permissions import is_active_pm
 
-    if not request.user.is_admin_lef and not is_active_pm(request.user, commessa):
+    # is_active_pm include la supervisione (Admin, Amministrazione, Resp. BU).
+    if not is_active_pm(request.user, commessa):
         raise PermissionDenied(
             "La presa in carico dell'handover è riservata al PM della commessa."
         )
@@ -634,8 +784,11 @@ def commessa_workflow(request, pk):
     commessa = get_object_or_404(Commessa.objects.select_related("cliente"), pk=pk)
     from apps.projects.permissions import is_active_pm
 
-    if not request.user.is_admin_lef and not is_active_pm(request.user, commessa):
-        raise PermissionDenied("La gestione del workflow è riservata al PM o a un Admin LEF.")
+    if not is_active_pm(request.user, commessa):
+        raise PermissionDenied(
+            "La gestione del workflow è riservata al PM della commessa e alla gestione "
+            "(Admin, Amministrazione, Responsabile della Business Unit)."
+        )
 
     if request.method == "POST":
         form = WorkflowCommessaForm(request.POST)
@@ -689,12 +842,13 @@ def commessa_teamwork(request, pk):
         stato=Assegnazione.Stato.ATTIVA,
     ).exists()
 
+    gestore = can_manage_commessa(request.user, commessa)
     accesso_portafoglio = can_view_teamwork_without_assignment(request.user)
     accesso_portafoglio_sola_lettura = bool(
-        accesso_portafoglio and not request.user.is_admin_lef and not e_membro
+        accesso_portafoglio and not gestore and not e_membro
     )
 
-    if not request.user.is_admin_lef and not e_membro and not accesso_portafoglio:
+    if not gestore and not e_membro and not accesso_portafoglio:
         raise PermissionDenied(
             "Non appartieni al Teamwork di questa commessa."
         )
@@ -714,7 +868,7 @@ def commessa_teamwork(request, pk):
 
     fasi_queryset = FaseCommessa.objects.filter(commessa=commessa)
 
-    if not request.user.is_admin_lef and not pm_sulla_commessa and not accesso_portafoglio:
+    if not gestore and not pm_sulla_commessa and not accesso_portafoglio:
         fasi_queryset = fasi_queryset.filter(
             pk__in=Assegnazione.objects.filter(
                 consulente=request.user,
@@ -789,8 +943,9 @@ def commessa_teamwork(request, pk):
             "fasi_totali": fasi_totali,
             "documenti_totali": documenti_totali,
             "agenda_progress": agenda_progress(commessa),
-            "puo_gestire_handover": request.user.is_admin_lef or pm_sulla_commessa,
-            "puo_gestire_workflow": request.user.is_admin_lef or pm_sulla_commessa,
+            "puo_gestire_handover": gestore or pm_sulla_commessa,
+            "puo_gestire_workflow": gestore or pm_sulla_commessa,
+            "puo_gestire_team": gestore,
             "accesso_portafoglio": accesso_portafoglio_sola_lettura,
             "puo_vedere_pianificazione": not accesso_portafoglio_sola_lettura,
             "puo_vedere_attivita": (

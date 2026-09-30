@@ -1,5 +1,11 @@
 from apps.projects.models import Assegnazione, Commessa
-from apps.accounts.access import can_view_portfolio
+from django.db.models import Q
+
+from apps.accounts.access import (
+    can_view_portfolio,
+    is_global_manager,
+    managed_business_unit_ids,
+)
 
 from .models import FaseCommessa
 
@@ -10,7 +16,7 @@ def visible_commesse_for_user(user):
     if not user.is_authenticated:
         return Commessa.objects.none()
 
-    if user.is_admin_lef or can_view_portfolio(user):
+    if is_global_manager(user) or can_view_portfolio(user):
         return Commessa.objects.all()
 
     commesse_ids = (
@@ -18,8 +24,11 @@ def visible_commesse_for_user(user):
         .filter(consulente=user, stato=Assegnazione.Stato.ATTIVA)
         .values_list("commessa_id", flat=True)
     )
-
-    return Commessa.objects.filter(pk__in=commesse_ids)
+    filtro = Q(pk__in=commesse_ids)
+    bu_gestite = managed_business_unit_ids(user)
+    if bu_gestite:
+        filtro |= Q(business_unit_id__in=bu_gestite)
+    return Commessa.objects.filter(filtro).distinct()
 
 
 def fasi_for_commessa(*, user, commessa):
@@ -39,7 +48,7 @@ def manageable_commesse_for_phases(user):
     if not user.is_authenticated:
         return Commessa.objects.none()
 
-    if user.is_admin_lef:
+    if is_global_manager(user):
         return Commessa.objects.filter(stato=Commessa.Stato.APERTA)
 
     commesse_pm = (
@@ -52,7 +61,8 @@ def manageable_commesse_for_phases(user):
         .values_list("commessa_id", flat=True)
     )
 
-    return Commessa.objects.filter(
-        pk__in=commesse_pm,
-        stato=Commessa.Stato.APERTA,
-    )
+    filtro = Q(pk__in=commesse_pm)
+    bu_gestite = managed_business_unit_ids(user)
+    if bu_gestite:
+        filtro |= Q(business_unit_id__in=bu_gestite)
+    return Commessa.objects.filter(filtro, stato=Commessa.Stato.APERTA).distinct()

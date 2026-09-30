@@ -151,9 +151,9 @@ def _validate_assignee(
             "L'utente selezionato non è attivo."
         )
 
-    # Gli Admin LEF possono ricevere task
-    # indipendentemente dall'assegnazione sulla commessa.
-    if assegnato_a.is_admin_lef:
+    # Chi gestisce la commessa (Admin, Amministrazione, Resp. BU) può
+    # ricevere task indipendentemente dall'assegnazione sulla commessa.
+    if assegnato_a.puo_gestire_commessa(commessa):
         return
 
     assegnazione_esistente = (
@@ -250,9 +250,9 @@ def create_task(
 
     if fase.commessa_id != commessa.id:
         raise ValidationError("La fase non appartiene alla commessa.")
+    # is_active_pm include la supervisione di chi gestisce la commessa.
     if (
-        not getattr(user, "is_admin_lef", False)
-        and not is_active_pm(user, commessa)
+        not is_active_pm(user, commessa)
         and not is_active_phase_member(user, fase)
     ):
         raise PermissionDenied("Non puoi creare attività su questa fase.")
@@ -392,8 +392,7 @@ def update_task(
             "Non puoi spostare o modificare un'attività su una fase completata o sospesa."
         )
     if (
-        not getattr(user, "is_admin_lef", False)
-        and not is_active_pm(user, commessa)
+        not is_active_pm(user, commessa)
         and not is_active_phase_member(user, fase)
     ):
         raise PermissionDenied("Non puoi spostare l'attività su questa fase.")

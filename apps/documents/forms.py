@@ -66,10 +66,11 @@ class DocumentoUploadForm(forms.Form):
 
         self.user = user
 
-        # Solo un Admin LEF può marcare un documento come privato: per
-        # chiunque altro il campo non viene nemmeno mostrato nel form,
-        # così non può essere valorizzato via richiesta manipolata.
-        if not getattr(user, "is_admin_lef", False):
+        # Solo la gestione (Admin, Amministrazione, Resp. BU) può marcare un
+        # documento come privato: per chiunque altro il campo non viene
+        # nemmeno mostrato, così non può essere valorizzato via richiesta
+        # manipolata. Il servizio ricontrolla sulla singola commessa.
+        if not getattr(user, "is_gestore", False):
             del self.fields["privato"]
 
         commesse_queryset = (

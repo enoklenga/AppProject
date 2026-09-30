@@ -30,7 +30,7 @@ from .dashboard_serializers import (
     ReportSpesaSerializer,
 )
 from .dashboard_services import dashboard_personale
-from .permissions import IsAdminLEF, IsProjectManager
+from .permissions import IsGlobalManager, IsProjectManager
 from .throttles import (
     ExportRateThrottle,
     UserBurstRateThrottle,
@@ -71,7 +71,7 @@ class DashboardPersonaleView(APIView):
     },
 )
 class DashboardAdminAPIView(APIView):
-    permission_classes = [IsAdminLEF]
+    permission_classes = [IsGlobalManager]
 
     def get(self, request):
         filtri = _validated_query(
@@ -141,7 +141,7 @@ class DashboardPMAPIView(APIView):
     },
 )
 class ReportMensileAPIView(APIView):
-    permission_classes = [IsAdminLEF]
+    permission_classes = [IsGlobalManager]
 
     def get(self, request):
         parametri = _validated_query(ReportQuerySerializer, request)
@@ -193,7 +193,7 @@ class ReportMensileExcelAPIView(APIView):
         UserSustainedRateThrottle,
         ExportRateThrottle,
     ]
-    permission_classes = [IsAdminLEF]
+    permission_classes = [IsGlobalManager]
 
     def get(self, request):
         parametri = _validated_query(ReportQuerySerializer, request)

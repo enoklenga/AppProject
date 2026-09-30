@@ -13,14 +13,21 @@ from django.views import View
 from django.views.generic import FormView, ListView
 
 from apps.accounts.models import User
-from apps.accounts.access import can_view_finance_ledger
+from apps.accounts.access import (
+    can_manage_commessa,
+    can_view_finance_ledger,
+    commesse_in_scope,
+    is_global_manager,
+    is_manager,
+    persone_in_scope,
+)
 from apps.common.mixins import (
     FinanceManagementRequiredMixin,
     OperationalRequiredMixin,
     TimesheetReadRequiredMixin,
 )
 from apps.common.request_security import safe_internal_redirect
-from apps.projects.models import Assegnazione, Commessa
+from apps.projects.models import Assegnazione
 from .forms import ApprovazioneForm, RigaOreForm, SpesaTrasfertaForm
 from .models import RigaOre, SpesaTrasferta
 from .services import (
@@ -66,6 +73,53 @@ def _applica_validation_error(form, exc: ValidationError) -> None:
             form.add_error(None, errore)
 
 
+def _perimetro_consuntivi(queryset, user):
+    """Righe visibili: proprie + quelle delle commesse gestite."""
+    if is_global_manager(user):
+        return queryset
+    return queryset.filter(
+        Q(assegnazione__consulente=user)
+        | Q(assegnazione__commessa__in=commesse_in_scope(user))
+    )
+
+
+def _contesto_consuntivi(request, periodo_e_chiuso: bool) -> dict:
+    user = request.user
+    can_write = bool(is_manager(user) or getattr(user, "is_risorsa_ingaggiabile", False))
+    return {
+        "can_view_all": can_view_finance_ledger(user),
+        "is_admin": is_manager(user),
+        "can_write": can_write,
+        "can_manage_finance": is_manager(user),
+    }
+
+
+def _marca_righe_modificabili(oggetti, user, can_write: bool, periodo_e_chiuso: bool) -> None:
+    """Calcola per ogni riga se l'utente corrente può modificarla/eliminarla."""
+    cache: dict = {}
+    for oggetto in oggetti:
+        commessa = oggetto.assegnazione.commessa
+        if commessa.pk not in cache:
+            cache[commessa.pk] = can_manage_commessa(user, commessa)
+        propria = oggetto.assegnazione.consulente_id == user.id
+        supervisione = cache[commessa.pk] and not propria
+        oggetto.modificabile = bool(
+            can_write
+            and not periodo_e_chiuso
+            and (supervisione or (propria and not oggetto.bloccata_per_consulente))
+        )
+        oggetto.approvabile = bool(supervisione and not periodo_e_chiuso)
+
+
+def _filtri_consuntivi(user) -> dict:
+    return {
+        "consulenti_filtro": persone_in_scope(user).filter(
+            ruolo__in=(User.Ruolo.CONSULENTE, User.Ruolo.RESPONSABILE_CONSULENZA)
+        ).order_by("last_name", "first_name", "email"),
+        "commesse_filtro": commesse_in_scope(user).order_by("codice"),
+    }
+
+
 class RigaOreListView(TimesheetReadRequiredMixin, ListView):
     model = RigaOre
     template_name = "timesheets/riga_ore_list.html"
@@ -89,6 +143,7 @@ class RigaOreListView(TimesheetReadRequiredMixin, ListView):
                 assegnazione__consulente=self.request.user
             )
         else:
+            queryset = _perimetro_consuntivi(queryset, self.request.user)
             consulente_id = self.request.GET.get("consulente", "").strip()
             commessa_id = self.request.GET.get("commessa", "").strip()
             if consulente_id:
@@ -112,26 +167,20 @@ class RigaOreListView(TimesheetReadRequiredMixin, ListView):
                 "totale_ore": (
                     queryset_non_paginato.aggregate(t=Sum("ore"))["t"] or 0
                 ),
-                "can_view_all": can_view_finance_ledger(self.request.user),
-                "is_admin": getattr(self.request.user, "is_admin_lef", False),
-                "can_write": bool(
-                    getattr(self.request.user, "is_admin_lef", False)
-                    or getattr(self.request.user, "is_risorsa_ingaggiabile", False)
-                ),
-                "can_manage_finance": bool(
-                    getattr(self.request.user, "is_admin_lef", False)
-                    or getattr(self.request.user, "is_amministrazione", False)
-                ),
             }
         )
+        context.update(_contesto_consuntivi(self.request, context["periodo_chiuso"]))
         context["mostra_azioni"] = bool(
             context["can_write"] and not context["periodo_chiuso"]
         )
+        _marca_righe_modificabili(
+            context["object_list"],
+            self.request.user,
+            context["can_write"],
+            context["periodo_chiuso"],
+        )
         if context["can_view_all"]:
-            context["consulenti_filtro"] = User.objects.filter(
-                ruolo__in=(User.Ruolo.CONSULENTE, User.Ruolo.RESPONSABILE_CONSULENZA)
-            ).order_by("last_name", "first_name", "email")
-            context["commesse_filtro"] = Commessa.objects.order_by("codice")
+            context.update(_filtri_consuntivi(self.request.user))
         return context
 
 
@@ -180,7 +229,7 @@ class RigaOreCreateView(OperationalRequiredMixin, FormView):
         if esito.limite_giornaliero_superato:
             messages.warning(
                 self.request,
-                "Eccezione Admin: il totale giornaliero supera 8 ore.",
+                "Eccezione autorizzata: il totale giornaliero supera 8 ore.",
             )
         return HttpResponseRedirect(
             f"{reverse('timesheets:ore-list')}?mese={dati['data']:%Y-%m}"
@@ -195,13 +244,14 @@ class RigaOreUpdateView(OperationalRequiredMixin, View):
             RigaOre.objects.select_related(
                 "assegnazione",
                 "assegnazione__consulente",
+                "assegnazione__commessa",
                 "assegnazione__fase",
             ),
             pk=self.kwargs["pk"],
         )
         if (
-            not getattr(self.request.user, "is_admin_lef", False)
-            and riga.assegnazione.consulente_id != self.request.user.id
+            riga.assegnazione.consulente_id != self.request.user.id
+            and not can_manage_commessa(self.request.user, riga.assegnazione.commessa)
         ):
             raise PermissionDenied
         return riga
@@ -251,7 +301,7 @@ class RigaOreUpdateView(OperationalRequiredMixin, View):
                 if esito.limite_giornaliero_superato:
                     messages.warning(
                         request,
-                        "Eccezione Admin: il totale giornaliero supera 8 ore.",
+                        "Eccezione autorizzata: il totale giornaliero supera 8 ore.",
                     )
                 return HttpResponseRedirect(
                     f"{reverse('timesheets:ore-list')}?mese={dati['data']:%Y-%m}"
@@ -305,6 +355,7 @@ class SpesaListView(TimesheetReadRequiredMixin, ListView):
                 assegnazione__consulente=self.request.user
             )
         else:
+            queryset = _perimetro_consuntivi(queryset, self.request.user)
             consulente_id = self.request.GET.get("consulente", "").strip()
             commessa_id = self.request.GET.get("commessa", "").strip()
             if consulente_id:
@@ -329,26 +380,20 @@ class SpesaListView(TimesheetReadRequiredMixin, ListView):
                     queryset_non_paginato.aggregate(t=Sum("importo"))["t"]
                     or Decimal("0.00")
                 ),
-                "can_view_all": can_view_finance_ledger(self.request.user),
-                "is_admin": getattr(self.request.user, "is_admin_lef", False),
-                "can_write": bool(
-                    getattr(self.request.user, "is_admin_lef", False)
-                    or getattr(self.request.user, "is_risorsa_ingaggiabile", False)
-                ),
-                "can_manage_finance": bool(
-                    getattr(self.request.user, "is_admin_lef", False)
-                    or getattr(self.request.user, "is_amministrazione", False)
-                ),
             }
         )
+        context.update(_contesto_consuntivi(self.request, context["periodo_chiuso"]))
         context["mostra_azioni"] = bool(
             context["can_write"] and not context["periodo_chiuso"]
         )
+        _marca_righe_modificabili(
+            context["object_list"],
+            self.request.user,
+            context["can_write"],
+            context["periodo_chiuso"],
+        )
         if context["can_view_all"]:
-            context["consulenti_filtro"] = User.objects.filter(
-                ruolo__in=(User.Ruolo.CONSULENTE, User.Ruolo.RESPONSABILE_CONSULENZA)
-            ).order_by("last_name", "first_name", "email")
-            context["commesse_filtro"] = Commessa.objects.order_by("codice")
+            context.update(_filtri_consuntivi(self.request.user))
         return context
 
 
@@ -401,13 +446,14 @@ class SpesaUpdateView(OperationalRequiredMixin, View):
             SpesaTrasferta.objects.select_related(
                 "assegnazione",
                 "assegnazione__consulente",
+                "assegnazione__commessa",
                 "assegnazione__fase",
             ),
             pk=self.kwargs["pk"],
         )
         if (
-            not getattr(self.request.user, "is_admin_lef", False)
-            and spesa.assegnazione.consulente_id != self.request.user.id
+            spesa.assegnazione.consulente_id != self.request.user.id
+            and not can_manage_commessa(self.request.user, spesa.assegnazione.commessa)
         ):
             raise PermissionDenied
         return spesa

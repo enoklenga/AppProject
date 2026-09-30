@@ -14,12 +14,23 @@
     <section class="dashboard-hero">
 
         <div class="dashboard-hero-copy">
-            <span class="dashboard-kicker">Panoramica operativa</span>
+            <span class="dashboard-kicker">{% if is_platform_admin %}Admin LEF · piattaforma e gestione{% else %}Amministrazione · gestione aziendale{% endif %}</span>
 
-            <h1>Gestione LEFTRACK</h1>
+            <h1>{% if is_platform_admin %}Gestione LEFTRACK{% else %}Amministrazione{% endif %}</h1>
         </div>
 
         <div class="dashboard-hero-actions">
+
+            <a
+                class="button button-secondary"
+                href="{% url 'operations:periodo-detail' %}?mese={{ mese_selezionato }}">
+
+                <svg class="btn-icon" aria-hidden="true">
+                    <use href="#icon-calendar-lock"></use>
+                </svg>
+
+                Chiusura mese
+            </a>
 
             <a
                 class="button button-primary"
@@ -184,6 +195,68 @@
     </section>
 
 
+    <section
+        class="admin-overview-grid"
+        aria-label="Controllo del mese">
+
+        <a class="overview-card" data-tone="{% if da_approvare %}amber{% else %}green{% endif %}" href="{% url 'operations:periodo-detail' %}?mese={{ mese_selezionato }}">
+            <div class="overview-card-top"><span class="overview-icon"><svg aria-hidden="true"><use href="#icon-check"></use></svg></span><svg class="overview-arrow" aria-hidden="true"><use href="#icon-arrow-right"></use></svg></div>
+            <div class="overview-card-content"><span class="overview-label">Ore e spese da approvare</span><strong class="overview-value">{{ da_approvare }}</strong></div>
+        </a>
+
+        <a class="overview-card" data-tone="{% if senza_tariffa %}amber{% else %}green{% endif %}" href="{% url 'projects:tariffa-list' %}">
+            <div class="overview-card-top"><span class="overview-icon"><svg aria-hidden="true"><use href="#icon-tag"></use></svg></span><svg class="overview-arrow" aria-hidden="true"><use href="#icon-arrow-right"></use></svg></div>
+            <div class="overview-card-content"><span class="overview-label">Righe senza tariffa</span><strong class="overview-value">{{ senza_tariffa }}</strong></div>
+        </a>
+
+        <a class="overview-card" data-tone="blue" href="{% url 'operations:report-mensile' %}?mese={{ mese_selezionato }}">
+            <div class="overview-card-top"><span class="overview-icon"><svg aria-hidden="true"><use href="#icon-chart"></use></svg></span><svg class="overview-arrow" aria-hidden="true"><use href="#icon-arrow-right"></use></svg></div>
+            <div class="overview-card-content"><span class="overview-label">Valore del mese</span><strong class="overview-value">€&nbsp;{{ riepilogo.totale_fatturabile|floatformat:"2g" }}</strong></div>
+        </a>
+
+        <a class="overview-card" data-tone="{% if periodo_chiuso %}green{% else %}blue{% endif %}" href="{% url 'operations:periodo-detail' %}?mese={{ mese_selezionato }}">
+            <div class="overview-card-top"><span class="overview-icon"><svg aria-hidden="true"><use href="#icon-calendar-lock"></use></svg></span><svg class="overview-arrow" aria-hidden="true"><use href="#icon-arrow-right"></use></svg></div>
+            <div class="overview-card-content"><span class="overview-label">Mese {{ mese_selezionato|slice:"5:7" }}/{{ mese_selezionato|slice:":4" }}</span><strong class="overview-value">{% if periodo_chiuso %}Chiuso{% else %}Aperto{% endif %}</strong></div>
+        </a>
+
+    </section>
+
+
+    <section class="panel dashboard-list-panel">
+
+        <div class="panel-heading">
+            <div>
+                <span class="dashboard-kicker">Organizzazione</span>
+                <h2>Business Unit</h2>
+            </div>
+            <a class="button button-secondary" href="{% url 'accounts:business-unit-list' %}">
+                Gestisci
+                <svg class="btn-icon" aria-hidden="true"><use href="#icon-arrow-right"></use></svg>
+            </a>
+        </div>
+
+        <div class="bu-panel-body">
+
+        {% if commesse_senza_bu %}
+            <div class="bu-note" role="note">
+                <span aria-hidden="true">!</span>
+                <span>{{ commesse_senza_bu }} commess{{ commesse_senza_bu|pluralize:"a aperta non è,e aperte non sono" }} ancora classificat{{ commesse_senza_bu|pluralize:"a,e" }} in una Business Unit: <a href="{% url 'projects:commessa-list' %}?bu=nessuna">assegnale</a> perché il Responsabile possa gestirle.</span>
+            </div>
+        {% endif %}
+
+        <div class="bu-card-grid">
+            {% for scheda in schede_bu %}
+                {% include "accounts/partials/_bu_card.html" %}
+            {% empty %}
+                <p class="empty-state">Nessuna Business Unit attiva. <a href="{% url 'accounts:business-unit-create' %}">Crea la prima Business Unit</a>.</p>
+            {% endfor %}
+        </div>
+
+        </div>
+
+    </section>
+
+
     <section class="panel dashboard-list-panel">
 
         <div class="panel-heading">
@@ -223,6 +296,7 @@
 
                     <tr>
                         <th scope="col">Codice</th>
+                        <th scope="col">Business Unit</th>
                         <th scope="col">Cliente</th>
                         <th scope="col">Stato</th>
                         <th scope="col">Consulenti</th>
@@ -241,12 +315,16 @@
 
                                 <a
                                     class="dashboard-table-link"
-                                    href="{% url 'projects:commessa-update' commessa.pk %}">
+                                    href="{% url 'projects:commessa-teamwork' commessa.pk %}">
 
                                     {{ commessa.codice }}
 
                                 </a>
 
+                            </td>
+
+                            <td>
+                                {% if commessa.business_unit %}{{ commessa.business_unit.nome }}{% else %}<span class="badge badge-warning">Da classificare</span>{% endif %}
                             </td>
 
                             <td>
@@ -275,7 +353,7 @@
 
                         <tr>
 
-                            <td colspan="5" class="empty-state">
+                            <td colspan="6" class="empty-state">
                                 Non sono ancora presenti commesse.
                             </td>
 

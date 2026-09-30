@@ -1,7 +1,4 @@
-/* ==========================================================================
-   Branding LEF asset-ready
-   Asset atteso: images/branding/lef-logo.png
-   ========================================================================== */
+/* ==========================================================================\n   Branding LEFTRACK definitivo\n   - riquadro bianco con logo LEF completo\n   - LEF bianco + TRACK blu\n   ========================================================================== */
 
 .brand-logo-slot {
     position: relative;
@@ -11,8 +8,8 @@
     overflow: hidden;
     flex: 0 0 auto;
     background: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.32);
-    box-shadow: 0 4px 16px rgba(7, 33, 52, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.34);
+    box-shadow: 0 4px 16px rgba(7, 33, 52, 0.18);
 }
 
 .brand-logo-image {
@@ -21,24 +18,41 @@
     height: 100%;
     object-fit: contain;
     object-position: center;
-    background: #ffffff;
+    background: transparent;
 }
 
-.brand-logo-slot-sidebar {
-    width: 62px;
-    height: 46px;
-    padding: 4px;
-    border-radius: 10px;
-}
-
+/* Il logo LEF completo ha bisogno di un riquadro leggermente piu ampio. */
+.brand-logo-slot-sidebar,
 .brand-logo-slot-guest {
-    width: 62px;
-    height: 46px;
-    padding: 4px;
-    border-radius: 10px;
+    width: 58px;
+    height: 58px;
+    padding: 6px;
+    border-radius: 14px;
 }
 
 .brand-logo-slot-sidebar .brand-logo-image,
 .brand-logo-slot-guest .brand-logo-image {
-    border-radius: 6px;
+    border-radius: 5px;
+}
+
+.brand-copy-leftrack {
+    justify-content: center;
+}
+
+.brand-copy-leftrack strong {
+    display: inline-flex;
+    align-items: baseline;
+    white-space: nowrap;
+    font-size: 19px;
+    font-weight: 850;
+    letter-spacing: -0.035em;
+    line-height: 1;
+}
+
+.brand-word-lef {
+    color: #ffffff;
+}
+
+.brand-word-track {
+    color: #3298ff;
 }

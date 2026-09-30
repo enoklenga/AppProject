@@ -1,5 +1,6 @@
 from django.utils import timezone
 
+from apps.accounts.access import is_global_manager
 from apps.projects.models import Assegnazione
 from apps.projects.permissions import is_active_phase_member, is_active_pm
 from apps.projects.workflow import (
@@ -12,13 +13,16 @@ from .models import GiornoPianificato
 
 
 def _can_supervise_assignment(user, assegnazione: Assegnazione, cache=None) -> bool:
-    """Admin e PM supervisionano trasversalmente; gli altri restano phase-scoped.
+    """Gestione e PM supervisionano trasversalmente; gli altri restano phase-scoped.
+
+    ``is_active_pm`` include la supervisione di Amministrazione e del
+    Responsabile della Business Unit della commessa.
 
     ``cache`` (facoltativo) è un dizionario condiviso all'interno di una
     singola richiesta: evita di ripetere le stesse query per ogni evento del
     calendario (stessa commessa/fase => stesso esito).
     """
-    if getattr(user, "is_admin_lef", False):
+    if is_global_manager(user):
         return True
     chiave = (assegnazione.commessa_id, assegnazione.fase_id)
     if cache is not None and chiave in cache:

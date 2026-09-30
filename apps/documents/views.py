@@ -4,7 +4,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
-from apps.projects.models import Assegnazione
+from apps.projects.models import Assegnazione, Commessa
 from apps.phases.models import FaseCommessa
 
 from .forms import DocumentoUploadForm
@@ -18,12 +18,22 @@ from .selectors import (
 from .services import delete_document, upload_document
 
 
+def _uuid_or_none(valore):
+    """Parametri GET non validi vengono ignorati invece di generare un errore 500."""
+    import uuid
+
+    try:
+        return str(uuid.UUID(str(valore))) if valore else None
+    except (TypeError, ValueError):
+        return None
+
+
 @login_required
 def document_list(request):
     queryset = visible_documents_for_user(request.user)
 
-    commessa_id = request.GET.get("commessa")
-    fase_id = request.GET.get("fase")
+    commessa_id = _uuid_or_none(request.GET.get("commessa"))
+    fase_id = _uuid_or_none(request.GET.get("fase"))
     categoria = request.GET.get("categoria")
 
     if commessa_id:
@@ -38,7 +48,11 @@ def document_list(request):
     if commessa_id:
         fasi = FaseCommessa.objects.filter(commessa_id=commessa_id)
         from apps.accounts.access import can_view_all_documents
-        if not request.user.is_admin_lef and not can_view_all_documents(request.user):
+        commessa_filtro = Commessa.objects.filter(pk=commessa_id).first()
+        if (
+            not request.user.puo_gestire_commessa(commessa_filtro)
+            and not can_view_all_documents(request.user)
+        ):
             fasi = fasi.filter(
                 assegnazioni__consulente=request.user,
                 assegnazioni__stato=Assegnazione.Stato.ATTIVA,

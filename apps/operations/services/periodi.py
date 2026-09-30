@@ -62,12 +62,12 @@ class RiepilogoPeriodo:
 
 
 def _verifica_admin(attore) -> None:
-    if not (
-        getattr(attore, "is_admin_lef", False)
-        or getattr(attore, "is_amministrazione", False)
-    ):
+    """Chiusura/riapertura del mese: operazione aziendale, non per BU."""
+    from apps.accounts.access import can_close_periods
+
+    if not can_close_periods(attore):
         raise PermissionDenied(
-            "Questa operazione è riservata ad Admin LEF e Amministrazione."
+            "La chiusura del mese è riservata ad Admin LEF e Amministrazione."
         )
 
 
@@ -120,11 +120,16 @@ def tariffa_vigente(riga: RigaOre) -> TariffaAssegnazione | None:
     return tariffa
 
 
-def valorizza_periodo(anno: int, mese: int) -> RiepilogoPeriodo:
+def valorizza_periodo(anno: int, mese: int, business_unit_ids=None) -> RiepilogoPeriodo:
+    """Valorizza il mese; ``business_unit_ids`` limita al perimetro di una o più BU."""
+    filtro_bu = {}
+    if business_unit_ids is not None:
+        filtro_bu["assegnazione__commessa__business_unit_id__in"] = list(business_unit_ids)
     righe = list(
         RigaOre.objects.filter(
             data__year=anno,
             data__month=mese,
+            **filtro_bu,
         )
         .select_related(
             "assegnazione",
@@ -174,6 +179,7 @@ def valorizza_periodo(anno: int, mese: int) -> RiepilogoPeriodo:
         SpesaTrasferta.objects.filter(
             data__year=anno,
             data__month=mese,
+            **filtro_bu,
         )
         .select_related(
             "assegnazione",

@@ -3,7 +3,12 @@ from datetime import timedelta
 from django.db.models import Q, Sum
 
 from apps.projects.models import Assegnazione
-from apps.accounts.access import can_view_planning_portfolio
+from apps.accounts.access import (
+    has_org_role,
+    is_global_manager,
+    managed_business_unit_ids,
+)
+from apps.accounts.models import User
 
 from .models import GiornoPianificato
 
@@ -48,6 +53,11 @@ def is_consultant_available(*, consulente, giorno, ore_richieste=1, exclude_plan
     return disponibilita["ore_disponibili"] >= ore_richieste
 
 
+def _vista_globale(user) -> bool:
+    """Admin, Amministrazione e Direzione Generale leggono tutto il planning."""
+    return is_global_manager(user) or has_org_role(user, User.Ruolo.DIREZIONE_GENERALE)
+
+
 def visible_assignments_for_user(user):
     """
     Assegnazioni appartenenti al perimetro visibile dall'utente.
@@ -78,7 +88,7 @@ def visible_assignments_for_user(user):
     if not user.is_authenticated:
         return queryset.none()
 
-    if user.is_admin_lef or can_view_planning_portfolio(user):
+    if _vista_globale(user):
         return queryset
 
     commesse_pm = Assegnazione.objects.filter(
@@ -93,15 +103,52 @@ def visible_assignments_for_user(user):
         stato=Assegnazione.Stato.ATTIVA,
     ).values_list("fase_id", flat=True)
 
-    return (
-        queryset
-        .filter(
-            Q(commessa_id__in=commesse_pm)
-            | Q(fase_id__in=fasi_del_team)
-            | Q(consulente=user)
-        )
-        .distinct()
+    filtro = (
+        Q(commessa_id__in=commesse_pm)
+        | Q(fase_id__in=fasi_del_team)
+        | Q(consulente=user)
     )
+    bu_gestite = managed_business_unit_ids(user)
+    if bu_gestite:
+        filtro |= Q(commessa__business_unit_id__in=bu_gestite)
+    return queryset.filter(filtro).distinct()
+
+
+def plannable_assignments_for_user(user):
+    """Assegnazioni che l'utente può realmente selezionare in creazione.
+
+    La vista di portafoglio (Responsabile consulenza/DG) non deve trasformarsi
+    automaticamente in potere di pianificazione: PM, consulente e Responsabile
+    selezionano solo commesse/fasi di cui fanno parte. L'Admin mantiene il
+    perimetro globale.
+    """
+    queryset = Assegnazione.objects.select_related(
+        "consulente", "commessa", "commessa__cliente", "fase"
+    )
+    if not getattr(user, "is_authenticated", False):
+        return queryset.none()
+    if is_global_manager(user):
+        return queryset
+
+    commesse_pm = Assegnazione.objects.filter(
+        consulente=user,
+        ruolo_commessa=Assegnazione.Ruolo.PROJECT_MANAGER,
+        stato=Assegnazione.Stato.ATTIVA,
+    ).values_list("commessa_id", flat=True)
+    fasi_membro = Assegnazione.objects.filter(
+        consulente=user,
+        stato=Assegnazione.Stato.ATTIVA,
+    ).values_list("fase_id", flat=True)
+    filtro = (
+        Q(commessa_id__in=commesse_pm)
+        | Q(fase_id__in=fasi_membro)
+        | Q(consulente=user)
+    )
+    # Il Responsabile BU pianifica le risorse di tutte le commesse della BU.
+    bu_gestite = managed_business_unit_ids(user)
+    if bu_gestite:
+        filtro |= Q(commessa__business_unit_id__in=bu_gestite)
+    return queryset.filter(filtro).distinct()
 
 
 def visible_planning_for_user(user):
@@ -133,7 +180,7 @@ def visible_planning_for_user(user):
     if not user.is_authenticated:
         return queryset.none()
 
-    if user.is_admin_lef or can_view_planning_portfolio(user):
+    if _vista_globale(user):
         return queryset
 
     commesse_pm = (
@@ -155,15 +202,15 @@ def visible_planning_for_user(user):
         .values_list("fase_id", flat=True)
     )
 
-    return (
-        queryset
-        .filter(
-            Q(assegnazione__commessa_id__in=commesse_pm)
-            | Q(assegnazione__fase_id__in=fasi_del_team)
-            | Q(assegnazione__consulente_id=user.id)
-        )
-        .distinct()
+    filtro = (
+        Q(assegnazione__commessa_id__in=commesse_pm)
+        | Q(assegnazione__fase_id__in=fasi_del_team)
+        | Q(assegnazione__consulente_id=user.id)
     )
+    bu_gestite = managed_business_unit_ids(user)
+    if bu_gestite:
+        filtro |= Q(assegnazione__commessa__business_unit_id__in=bu_gestite)
+    return queryset.filter(filtro).distinct()
 
 
 def planning_for_consultant(

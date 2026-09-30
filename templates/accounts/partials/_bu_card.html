@@ -1,0 +1,26 @@
+{# Scheda sintetica di una Business Unit. Richiede: scheda (business_unit, responsabili, indicatori). #}
+{% with bu=scheda.business_unit ind=scheda.indicatori %}
+<article class="bu-card{% if not bu.attiva %} is-inactive{% endif %}">
+  <div class="bu-card-head">
+    <div>
+      <h3><a href="{% url 'accounts:business-unit-detail' bu.pk %}">{{ bu.nome }}</a></h3>
+      {% if scheda.responsabili %}
+        <div class="bu-card-owner">Responsabile: {% for r in scheda.responsabili %}{{ r }}{% if not forloop.last %}, {% endif %}{% endfor %}</div>
+      {% else %}
+        <div class="bu-card-owner is-missing">Nessun Responsabile nominato</div>
+      {% endif %}
+    </div>
+    <span class="bu-code">{{ bu.codice }}</span>
+  </div>
+  <dl class="bu-card-stats">
+    <div><dt>Persone</dt><dd>{{ ind.membri_attivi }}</dd></div>
+    <div><dt>Commesse aperte</dt><dd>{{ ind.commesse_aperte }}</dd></div>
+    <div><dt>Ore mese</dt><dd>{{ ind.ore_consuntivate_mese }}</dd></div>
+  </dl>
+  <div class="bu-card-foot">
+    {% if ind.commesse_senza_pm %}<span class="badge badge-warning">{{ ind.commesse_senza_pm }} senza PM</span>{% endif %}
+    {% if ind.ore_da_approvare or ind.spese_da_approvare %}<span class="badge badge-in-attesa">{{ ind.ore_da_approvare|add:ind.spese_da_approvare }} da approvare</span>{% endif %}
+    {% if not ind.commesse_senza_pm and not ind.ore_da_approvare and not ind.spese_da_approvare %}<span class="badge badge-success">Tutto in ordine</span>{% endif %}
+  </div>
+</article>
+{% endwith %}

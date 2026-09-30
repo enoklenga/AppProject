@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Appartenenze Business Unit | LEFTRACK{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="eyebrow">Organizzazione</div>
+    <h1>Appartenenze Business Unit</h1>
+    <p class="page-subtitle">Una persona può appartenere a più Business Unit, con abilitazioni diverse in ognuna.</p>
+  </div>
+  <div class="page-header-actions">
+    <a class="button button-secondary" href="{% url 'accounts:business-unit-list' %}">Business Unit</a>
+    <a class="button button-primary" href="{% url 'accounts:user-business-unit-create' %}">
+      <svg class="btn-icon" aria-hidden="true"><use href="#icon-plus"></use></svg>
+      Nuova appartenenza
+    </a>
+  </div>
+</div>
+{% if business_units_filtro|length > 1 %}
+<form class="filter-bar list-filter-bar" method="get">
+  <select name="business_unit" aria-label="Filtra per Business Unit">
+    <option value="">Tutte le Business Unit</option>
+    {% for bu in business_units_filtro %}<option value="{{ bu.pk }}" {% if request.GET.business_unit == bu.pk|stringformat:'s' %}selected{% endif %}>{{ bu.nome }}</option>{% endfor %}
+  </select>
+  <button class="button button-secondary" type="submit">
+    <svg class="btn-icon" aria-hidden="true"><use href="#icon-filter"></use></svg>
+    Applica filtri
+  </button>
+</form>
+{% endif %}
+<section class="panel data-panel">
+  <div class="table-wrapper">
+    <table class="data-table">
+      <thead><tr><th scope="col">Persona</th><th scope="col">Business Unit</th><th scope="col">Abilitazioni</th><th scope="col">Periodo</th><th scope="col">Stato</th><th scope="col" class="actions-column">Azioni</th></tr></thead>
+      <tbody>
+      {% for item in membership %}
+        <tr>
+          <td class="table-primary"><strong>{{ item.utente }}</strong><span class="muted">{{ item.utente.email }}</span></td>
+          <td><a href="{% url 'accounts:business-unit-detail' item.business_unit_id %}">{{ item.business_unit }}</a></td>
+          <td>
+            <div class="bu-flags">
+              {% if item.responsabile %}<span class="badge badge-info">Responsabile</span>{% endif %}
+              {% if item.puo_essere_pm %}<span class="badge badge-success">PM abilitato</span>{% endif %}
+              {% if not item.responsabile and not item.puo_essere_pm %}<span class="badge badge-neutral">Membro</span>{% endif %}
+            </div>
+          </td>
+          <td>{% if item.data_inizio %}{{ item.data_inizio|date:"d/m/Y" }}{% else %}—{% endif %}{% if item.data_fine %} → {{ item.data_fine|date:"d/m/Y" }}{% endif %}</td>
+          <td>{% if item.attiva %}<span class="badge badge-attiva">Attiva</span>{% else %}<span class="badge badge-chiusa">Conclusa</span>{% endif %}</td>
+          <td class="table-actions">
+            {% if item.modificabile %}
+              <a class="row-action" href="{% url 'accounts:user-business-unit-update' item.pk %}">
+                <svg class="btn-icon" aria-hidden="true"><use href="#icon-edit"></use></svg>Modifica
+              </a>
+            {% else %}
+              <span class="muted" title="La nomina del Responsabile è gestita dall'Admin LEF">Gestita dall'Admin</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6" class="empty-state">Nessuna appartenenza configurata.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% include "common/pagination.html" %}
+{% endblock %}

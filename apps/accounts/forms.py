@@ -1,7 +1,10 @@
 from django import forms
+from django.db.models import Q
+
+from apps.common.widgets import DateInput
 from django.contrib.auth.forms import AuthenticationForm
 
-from .models import Skill, User, UserSkill
+from .models import BusinessUnit, Skill, User, UserBusinessUnit, UserSkill
 
 
 class NokihubAuthenticationForm(AuthenticationForm):
@@ -102,7 +105,7 @@ class ConsulenteUpdateForm(_RuoloUtenteMixin, forms.ModelForm):
             User.Ruolo.CONSULENTE,
             User.Ruolo.RESPONSABILE_CONSULENZA,
         }
-        if self.instance.pk and ruolo not in ruoli_ingaggiabili:
+        if not self.instance._state.adding and ruolo not in ruoli_ingaggiabili:
             from apps.projects.models import Assegnazione
 
             if Assegnazione.objects.filter(
@@ -119,7 +122,7 @@ class ConsulenteUpdateForm(_RuoloUtenteMixin, forms.ModelForm):
         # nel mezzo dell'operazione. Inoltre va sempre preservato almeno un
         # Admin attivo nel sistema.
         if (
-            self.instance.pk
+            not self.instance._state.adding
             and self.instance.ruolo == User.Ruolo.ADMIN
             and ruolo != User.Ruolo.ADMIN
         ):
@@ -136,6 +139,23 @@ class ConsulenteUpdateForm(_RuoloUtenteMixin, forms.ModelForm):
                     raise forms.ValidationError(
                         "Deve rimanere almeno un Admin LEF attivo nel sistema."
                     )
+        if (
+            not self.instance._state.adding
+            and self.instance.ruolo == User.Ruolo.RESPONSABILE_CONSULENZA
+            and ruolo != User.Ruolo.RESPONSABILE_CONSULENZA
+        ):
+            from .access import membership_current_q
+
+            if UserBusinessUnit.objects.filter(
+                membership_current_q(),
+                utente=self.instance,
+                responsabile=True,
+                business_unit__attiva=True,
+            ).exists():
+                raise forms.ValidationError(
+                    "Revoca prima le responsabilità attive sulle Business Unit: "
+                    "il cambio di ruolo non può lasciare deleghe organizzative sospese."
+                )
         return ruolo
 
 
@@ -230,3 +250,96 @@ class UserProfileForm(forms.ModelForm):
                 }
             )
         }
+
+
+class BusinessUnitForm(forms.ModelForm):
+    class Meta:
+        model = BusinessUnit
+        fields = ("nome", "codice", "descrizione", "attiva")
+        labels = {
+            "nome": "Business Unit",
+            "codice": "Codice",
+            "descrizione": "Descrizione",
+            "attiva": "Business Unit attiva",
+        }
+        widgets = {"descrizione": forms.Textarea(attrs={"rows": 3})}
+
+    def clean_nome(self):
+        return self.cleaned_data["nome"].strip()
+
+    def clean_codice(self):
+        return self.cleaned_data["codice"].strip().upper()
+
+
+class UserBusinessUnitForm(forms.ModelForm):
+    class Meta:
+        model = UserBusinessUnit
+        fields = (
+            "utente",
+            "business_unit",
+            "responsabile",
+            "puo_essere_pm",
+            "attiva",
+            "data_inizio",
+            "data_fine",
+        )
+        labels = {
+            "utente": "Persona",
+            "business_unit": "Business Unit",
+            "responsabile": "Responsabile della Business Unit",
+            "puo_essere_pm": "Abilitato come Project Manager",
+            "attiva": "Appartenenza attiva",
+            "data_inizio": "Data inizio",
+            "data_fine": "Data fine",
+        }
+
+        widgets = {
+            "data_inizio": DateInput(),
+            "data_fine": DateInput(),
+        }
+
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        from .access import can_designate_bu_managers, is_global_manager, managed_business_unit_ids
+
+        self.user = user
+        current_user_id = getattr(self.instance, "utente_id", None)
+        current_bu_id = getattr(self.instance, "business_unit_id", None)
+        utenti = User.objects.filter(Q(is_active=True) | Q(pk=current_user_id))
+        business_units = BusinessUnit.objects.filter(Q(attiva=True) | Q(pk=current_bu_id))
+        if user is not None and not is_global_manager(user):
+            # Responsabile BU: compone il team della propria BU con risorse operative.
+            utenti = utenti.filter(
+                ruolo__in=(User.Ruolo.CONSULENTE, User.Ruolo.RESPONSABILE_CONSULENZA)
+            )
+            business_units = business_units.filter(pk__in=managed_business_unit_ids(user))
+            self.fields["business_unit"].empty_label = None
+        self.fields["utente"].queryset = utenti.order_by("last_name", "first_name", "email")
+        self.fields["business_unit"].queryset = business_units.order_by("nome")
+        self.fields["responsabile"].help_text = (
+            "Conferisce il governo della BU (interfaccia di gestione limitata alla BU). "
+            "Richiede il ruolo 'Responsabile Business Unit'; non rende automaticamente "
+            "PM di tutte le commesse."
+        )
+        self.fields["puo_essere_pm"].help_text = (
+            "Consente alla persona di essere nominata PM sulle commesse di questa BU."
+        )
+        # Nominare un Responsabile concede poteri di gestione: è una funzione
+        # di piattaforma riservata all'Admin LEF.
+        if user is not None and not can_designate_bu_managers(user):
+            self.fields["responsabile"].disabled = True
+            self.fields["responsabile"].help_text = (
+                "La nomina del Responsabile della Business Unit è gestita dall'Admin LEF."
+            )
+
+    def clean(self):
+        cleaned = super().clean()
+        utente = cleaned.get("utente")
+        if cleaned.get("responsabile") and utente is not None:
+            if utente.ruolo != User.Ruolo.RESPONSABILE_CONSULENZA:
+                self.add_error(
+                    "responsabile",
+                    "Per nominarla Responsabile, la persona deve avere il ruolo "
+                    "'Responsabile Business Unit' (Persone e ruoli).",
+                )
+        return cleaned

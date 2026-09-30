@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Modifica Business Unit{% else %}Nuova Business Unit{% endif %} | LEFTRACK{% endblock %}
+{% block content %}
+<div class="form-page"><div class="page-header"><div><div class="eyebrow">Organizzazione</div><h1>{% if object %}Modifica Business Unit{% else %}Nuova Business Unit{% endif %}</h1></div></div>
+<section class="panel form-panel form-panel-modern"><form method="post" class="modern-form">{% csrf_token %}
+{% if form.non_field_errors %}<div class="form-global-errors">{{ form.non_field_errors }}</div>{% endif %}
+<div class="form-grid modern-form-grid">{% for field in form %}<div class="field {% if field.name == 'descrizione' %}field-full{% endif %} {% if field.errors %}field-has-error{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<div class="field-help">{{ field.help_text }}</div>{% endif %}{% if field.errors %}<div class="field-errors">{{ field.errors }}</div>{% endif %}</div>{% endfor %}</div>
+<div class="form-actions form-actions-modern"><a class="button button-ghost" href="{% url 'accounts:business-unit-list' %}">Annulla</a><button class="button button-primary" type="submit">{% if object %}Salva modifiche{% else %}Crea Business Unit{% endif %}</button></div>
+</form></section></div>
+{% endblock %}

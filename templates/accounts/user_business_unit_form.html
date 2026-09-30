@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Modifica appartenenza{% else %}Nuova appartenenza{% endif %} | LEFTRACK{% endblock %}
+{% block content %}
+<div class="form-page">
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">Business Unit</div>
+      <h1>{% if object %}Modifica appartenenza{% else %}Aggiungi persona alla Business Unit{% endif %}</h1>
+      <p class="page-subtitle">Appartenenza organizzativa alla Business Unit, abilitazione a Project Manager e periodo di validità. Non è un'assegnazione a una commessa.</p>
+    </div>
+  </div>
+  <section class="panel form-panel form-panel-modern">
+    <form method="post" class="modern-form">
+      {% csrf_token %}
+      {% if request.GET.next %}<input type="hidden" name="next" value="{{ request.GET.next }}">{% endif %}
+      {% if request.GET.return_bu %}<input type="hidden" name="return_bu" value="{{ request.GET.return_bu }}">{% endif %}
+      {% if request.GET.return_to %}<input type="hidden" name="return_to" value="{{ request.GET.return_to }}">{% endif %}
+      {% if form.non_field_errors %}<div class="form-global-errors">{{ form.non_field_errors }}</div>{% endif %}
+      <div class="form-grid modern-form-grid">
+        {% for field in form %}
+          <div class="field {% if field.errors %}field-has-error{% endif %}">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<div class="field-help">{{ field.help_text }}</div>{% endif %}
+            {% if field.errors %}<div class="field-errors">{{ field.errors }}</div>{% endif %}
+          </div>
+        {% endfor %}
+      </div>
+      <div class="form-actions form-actions-modern">
+        {% if cancel_url %}
+          <a class="button button-ghost" href="{{ cancel_url }}">Annulla</a>
+        {% elif request.GET.next == 'bu' and request.GET.return_bu %}
+          <a class="button button-ghost" href="{% url 'accounts:business-unit-detail' request.GET.return_bu %}">Annulla</a>
+        {% elif request.GET.next == 'bu' and object %}
+          <a class="button button-ghost" href="{% url 'accounts:business-unit-detail' object.business_unit_id %}">Annulla</a>
+        {% elif request.GET.next == 'bu' and request.GET.business_unit %}
+          <a class="button button-ghost" href="{% url 'accounts:business-unit-detail' request.GET.business_unit %}">Annulla</a>
+        {% else %}
+          <a class="button button-ghost" href="{% url 'accounts:user-business-unit-list' %}">Annulla</a>
+        {% endif %}
+        <button class="button button-primary" type="submit">{% if object %}Salva modifiche{% else %}Aggiungi alla Business Unit{% endif %}</button>
+      </div>
+    </form>
+  </section>
+</div>
+{% endblock %}

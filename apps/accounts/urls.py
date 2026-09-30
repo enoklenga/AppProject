@@ -1,6 +1,10 @@
 from django.urls import path
 
 from .views import (
+    BusinessUnitCreateView,
+    BusinessUnitDetailView,
+    BusinessUnitListView,
+    BusinessUnitUpdateView,
     ConsulenteCreateView,
     ConsulenteListView,
     ConsulenteResendInviteView,
@@ -11,12 +15,22 @@ from .views import (
     SkillMatrixUserUpdateView,
     SkillMatrixView,
     SkillUpdateView,
+    UserBusinessUnitCreateView,
+    UserBusinessUnitListView,
+    UserBusinessUnitUpdateView,
     UserProfileUpdateView,
 )
 
 app_name = "accounts"
 
 urlpatterns = [
+    path("business-unit/", BusinessUnitListView.as_view(), name="business-unit-list"),
+    path("business-unit/nuova/", BusinessUnitCreateView.as_view(), name="business-unit-create"),
+    path("business-unit/<uuid:pk>/", BusinessUnitDetailView.as_view(), name="business-unit-detail"),
+    path("business-unit/<uuid:pk>/modifica/", BusinessUnitUpdateView.as_view(), name="business-unit-update"),
+    path("business-unit/appartenenze/", UserBusinessUnitListView.as_view(), name="user-business-unit-list"),
+    path("business-unit/appartenenze/nuova/", UserBusinessUnitCreateView.as_view(), name="user-business-unit-create"),
+    path("business-unit/appartenenze/<uuid:pk>/modifica/", UserBusinessUnitUpdateView.as_view(), name="user-business-unit-update"),
     path("profilo/", UserProfileUpdateView.as_view(), name="profile"),
     path("", ConsulenteListView.as_view(), name="consulente-list"),
     path("nuovo/", ConsulenteCreateView.as_view(), name="consulente-create"),

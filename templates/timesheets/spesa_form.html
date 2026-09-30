@@ -99,7 +99,7 @@
                 {% endfor %}
 
 
-                {% if object and user.is_admin_lef %}
+                {% if object and object.assegnazione.consulente_id != user.id and user.is_gestore %}
 
                     <div class="field field-full admin-correction-field">
 

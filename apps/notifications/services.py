@@ -65,7 +65,9 @@ def _task_recipient_has_current_access(*, task, destinatario) -> bool:
     if destinatario is None or not destinatario.is_active:
         return False
 
-    if getattr(destinatario, "is_admin_lef", False):
+    # Chi gestisce la commessa (Admin, Amministrazione, Resp. BU) mantiene
+    # l'accesso anche senza una propria assegnazione.
+    if destinatario.puo_gestire_commessa(task.commessa):
         return True
 
     if not task.fase_id:

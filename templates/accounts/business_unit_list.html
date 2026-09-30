@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Business Unit | LEFTRACK{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="eyebrow">Organizzazione</div>
+    <h1>Business Unit</h1>
+  </div>
+  <div class="page-header-actions">
+    {% if puo_gestire_membri %}
+      <a class="button button-secondary" href="{% url 'accounts:user-business-unit-list' %}">
+        <svg class="btn-icon" aria-hidden="true"><use href="#icon-users"></use></svg>
+        Appartenenze
+      </a>
+    {% endif %}
+    {% if puo_creare %}
+      <a class="button button-primary" href="{% url 'accounts:business-unit-create' %}">
+        <svg class="btn-icon" aria-hidden="true"><use href="#icon-plus"></use></svg>
+        Nuova Business Unit
+      </a>
+    {% endif %}
+  </div>
+</div>
+<form class="filter-bar list-filter-bar" method="get">
+  <input type="search" name="q" value="{{ request.GET.q }}" placeholder="Cerca Business Unit o codice" aria-label="Cerca Business Unit">
+  <button class="button button-secondary" type="submit">
+    <svg class="btn-icon" aria-hidden="true"><use href="#icon-filter"></use></svg>
+    Applica filtri
+  </button>
+</form>
+<section class="panel data-panel">
+  <div class="table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th scope="col">Business Unit</th>
+          <th scope="col">Codice</th>
+          <th scope="col" class="table-numeric">Persone</th>
+          <th scope="col" class="table-numeric">Commesse aperte</th>
+          <th scope="col">Responsabile</th>
+          <th scope="col">Stato</th>
+          <th scope="col" class="actions-column">Azioni</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for bu in business_units %}
+        <tr>
+          <td class="table-primary">
+            <div class="entity-cell">
+              <span class="entity-icon" aria-hidden="true"><svg><use href="#icon-building"></use></svg></span>
+              <div class="entity-copy">
+                <strong><a href="{% url 'accounts:business-unit-detail' bu.pk %}">{{ bu.nome }}</a></strong>
+                {% if bu.descrizione %}<span class="muted">{{ bu.descrizione|truncatechars:90 }}</span>{% endif %}
+              </div>
+            </div>
+          </td>
+          <td><span class="bu-code">{{ bu.codice }}</span></td>
+          <td class="table-numeric">{{ bu.numero_membri }}</td>
+          <td class="table-numeric">{{ bu.numero_commesse_aperte }}</td>
+          <td>{% if bu.numero_responsabili %}<span class="badge badge-info">{{ bu.numero_responsabili }} nominat{{ bu.numero_responsabili|pluralize:"o,i" }}</span>{% else %}<span class="badge badge-warning">Da nominare</span>{% endif %}</td>
+          <td><span class="badge {% if bu.attiva %}badge-attiva{% else %}badge-chiusa{% endif %}">{% if bu.attiva %}Attiva{% else %}Disattivata{% endif %}</span></td>
+          <td class="table-actions">
+            <div class="row-actions">
+              <a class="row-action" href="{% url 'accounts:business-unit-detail' bu.pk %}">
+                <svg class="btn-icon" aria-hidden="true"><use href="#icon-eye"></use></svg>Apri
+              </a>
+              {% if puo_creare %}
+                <a class="row-action" href="{% url 'accounts:business-unit-update' bu.pk %}">
+                  <svg class="btn-icon" aria-hidden="true"><use href="#icon-edit"></use></svg>Modifica
+                </a>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="7" class="empty-state">Nessuna Business Unit configurata.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% include "common/pagination.html" %}
+{% endblock %}

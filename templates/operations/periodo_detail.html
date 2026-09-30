@@ -21,7 +21,11 @@
         <div>
             <div class="eyebrow">Controllo mensile</div>
 
-            <h1>Chiusura e valorizzazione</h1>
+            <h1>{% if puo_chiudere %}Chiusura e valorizzazione{% else %}Consuntivi e approvazioni{% endif %}</h1>
+
+            {% if perimetro_nomi %}
+                <p class="page-subtitle">Perimetro: {{ perimetro_nomi|join:", " }}{% if puo_chiudere %} · la chiusura del mese resta aziendale{% endif %}</p>
+            {% endif %}
 
         </div>
 
@@ -49,6 +53,18 @@
                 value="{{ mese_selezionato }}">
 
         </div>
+
+        {% if business_units_filtro|length > 1 %}
+            <div class="field">
+                <label for="id_bu">Business Unit</label>
+                <select id="id_bu" name="bu">
+                    <option value="">{% if puo_chiudere %}Tutte le Business Unit{% else %}Tutte le mie Business Unit{% endif %}</option>
+                    {% for bu in business_units_filtro %}
+                        <option value="{{ bu.pk }}" {% if bu_selezionata == bu.pk|stringformat:'s' %}selected{% endif %}>{{ bu.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        {% endif %}
 
         <button
             class="button button-secondary"
@@ -777,7 +793,11 @@
 
                                 <td class="table-actions">
 
+                                    {% if elemento.riga.assegnazione.consulente_id != user.id %}
                                     {% include "operations/partials/approvazione_azioni.html" with approva_url_name="timesheets:ore-approva" rifiuta_url_name="timesheets:ore-rifiuta" oggetto_id=elemento.riga.id %}
+                                    {% else %}
+                                    <span class="muted">Tua riga</span>
+                                    {% endif %}
 
                                 </td>
 
@@ -926,7 +946,11 @@
 
                                 <td class="table-actions">
 
+                                    {% if spesa.assegnazione.consulente_id != user.id %}
                                     {% include "operations/partials/approvazione_azioni.html" with approva_url_name="timesheets:spesa-approva" rifiuta_url_name="timesheets:spesa-rifiuta" oggetto_id=spesa.id %}
+                                    {% else %}
+                                    <span class="muted">Tua spesa</span>
+                                    {% endif %}
 
                                 </td>
 
@@ -971,9 +995,10 @@
 
 
     <!-- =====================================================
-         CHIUSURA / RIAPERTURA
+         CHIUSURA / RIAPERTURA (aziendale: Admin e Amministrazione)
          ===================================================== -->
 
+    {% if puo_chiudere %}
     {% if stato_chiuso %}
 
         <section class="panel period-action-panel period-action-panel-reopen">
@@ -1250,6 +1275,7 @@
 
         </section>
 
+    {% endif %}
     {% endif %}
 
 </div>

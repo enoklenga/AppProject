@@ -58,7 +58,7 @@ class NavigationTests(SimpleTestCase):
         match = resolve(reverse("operations:dashboard-pm"))
         data = build_navigation_data(match)
 
-        self.assertEqual(data["section"], "dashboard")
+        self.assertEqual(data["section"], "dashboard-pm")
         self.assertEqual(data["back_url"], reverse("home"))
         self.assertEqual(data["back_label"], "Torna alla Home")
 

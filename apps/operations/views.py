@@ -16,9 +16,15 @@ from django.db.models import Q
 from django.conf import settings
 
 from apps.common.export_security import spreadsheet_safe_row
-from apps.accounts.models import User
+from apps.accounts.access import (
+    business_units_in_scope,
+    can_close_periods,
+    can_manage_finance,
+    perimetro_business_unit,
+)
+from apps.accounts.models import BusinessUnit, User
 from apps.common.mixins import (
-    AdminRequiredMixin,
+    BackofficeControlRequiredMixin,
     AuditReadRequiredMixin,
     ExecutiveDashboardRequiredMixin,
     FinanceManagementRequiredMixin,
@@ -161,7 +167,10 @@ class PeriodoDetailView(FinanceManagementRequiredMixin, View):
         form_chiusura=None,
         form_riapertura=None,
     ):
-        riepilogo = valorizza_periodo(anno, mese)
+        user = request.user
+        bu_richiesta = request.GET.get("bu") or request.POST.get("bu") or None
+        perimetro = perimetro_business_unit(user, bu_richiesta)
+        riepilogo = valorizza_periodo(anno, mese, business_unit_ids=perimetro)
         periodo = PeriodoMensile.objects.filter(
             anno=anno,
             mese=mese,
@@ -185,6 +194,13 @@ class PeriodoDetailView(FinanceManagementRequiredMixin, View):
             "form_riapertura": (
                 form_riapertura or RiaperturaPeriodoForm()
             ),
+            "puo_chiudere": can_close_periods(user),
+            "business_units_filtro": business_units_in_scope(user).filter(attiva=True).order_by("nome"),
+            "bu_selezionata": str(perimetro[0]) if perimetro and len(perimetro) == 1 and bu_richiesta else "",
+            "perimetro_nomi": (
+                list(BusinessUnit.objects.filter(pk__in=perimetro).order_by("nome").values_list("nome", flat=True))
+                if perimetro is not None else []
+            ),
         }
         return render(request, self.template_name, context)
 
@@ -200,8 +216,11 @@ class DashboardAdminView(ExecutiveDashboardRequiredMixin, View):
         commessa_id = request.GET.get("commessa", "").strip() or None
         consulente_id = (request.GET.get("consulente", "").strip() or None)
         fase_id = (request.GET.get("fase", "").strip() or None)
+        bu_richiesta = request.GET.get("bu", "").strip() or None
+        perimetro = perimetro_business_unit(request.user, bu_richiesta)
 
         dati = dashboard_admin(
+            business_unit_ids=perimetro,
             anno=anno,
             mese=mese,
             cliente_id=cliente_id,
@@ -211,6 +230,7 @@ class DashboardAdminView(ExecutiveDashboardRequiredMixin, View):
         )
 
         visuals = admin_visuals(
+            business_unit_ids=perimetro,
             dashboard=dati,
             anno=anno,
             mese=mese,
@@ -221,22 +241,41 @@ class DashboardAdminView(ExecutiveDashboardRequiredMixin, View):
         )
 
         from apps.phases.models import FaseCommessa
-        fasi_filtro = FaseCommessa.objects.select_related("commessa").order_by("commessa__codice", "ordine", "nome")
+
+        commesse_perimetro = Commessa.objects.all()
+        if perimetro is not None:
+            commesse_perimetro = commesse_perimetro.filter(business_unit_id__in=perimetro)
+        fasi_filtro = FaseCommessa.objects.filter(
+            commessa__in=commesse_perimetro
+        ).select_related("commessa").order_by("commessa__codice", "ordine", "nome")
+        consulenti_filtro = User.objects.filter(
+            ruolo__in=(User.Ruolo.CONSULENTE, User.Ruolo.RESPONSABILE_CONSULENZA)
+        )
+        if perimetro is not None:
+            consulenti_filtro = consulenti_filtro.filter(
+                assegnazioni__commessa__in=commesse_perimetro
+            ).distinct()
 
         context = {
             "dashboard": dati,
             "visuals": visuals,
-            "puo_gestire_controllo": request.user.is_admin_lef,
+            "puo_gestire_controllo": can_manage_finance(request.user),
             "mese_selezionato": valore_mese,
             "clienti_filtro": Cliente.objects.order_by(
                 "ragione_sociale"
             ),
-            "commesse_filtro": Commessa.objects.select_related(
+            "commesse_filtro": commesse_perimetro.select_related(
                 "cliente"
             ).order_by("codice"),
-            "consulenti_filtro": User.objects.filter(ruolo__in=(User.Ruolo.CONSULENTE, User.Ruolo.RESPONSABILE_CONSULENZA)).order_by("last_name", "first_name", "email"),
+            "consulenti_filtro": consulenti_filtro.order_by("last_name", "first_name", "email"),
             "fasi_filtro": fasi_filtro,
             "fase_selezionata": fase_id,
+            "business_units_filtro": business_units_in_scope(request.user).filter(attiva=True).order_by("nome"),
+            "bu_selezionata": bu_richiesta or "",
+            "perimetro_nomi": (
+                list(BusinessUnit.objects.filter(pk__in=perimetro).order_by("nome").values_list("nome", flat=True))
+                if perimetro is not None else []
+            ),
         }
         return render(request, self.template_name, context)
 
@@ -277,7 +316,7 @@ class DashboardPMView(LoginRequiredMixin, View):
 
 
 
-class PromemoriaView(AdminRequiredMixin, View):
+class PromemoriaView(BackofficeControlRequiredMixin, View):
     template_name = "operations/promemoria.html"
 
     def get(self, request):
@@ -441,7 +480,7 @@ class PromemoriaView(AdminRequiredMixin, View):
 
 
 
-class ImportazioneListView(AdminRequiredMixin, View):
+class ImportazioneListView(BackofficeControlRequiredMixin, View):
     template_name = "operations/importazione_list.html"
 
     def get(self, request):
@@ -459,7 +498,7 @@ class ImportazioneListView(AdminRequiredMixin, View):
         )
 
 
-class ImportazioneCreateView(AdminRequiredMixin, View):
+class ImportazioneCreateView(BackofficeControlRequiredMixin, View):
     template_name = "operations/importazione_form.html"
 
     def get(self, request):
@@ -519,7 +558,7 @@ class ImportazioneCreateView(AdminRequiredMixin, View):
         )
 
 
-class ImportazioneDetailView(AdminRequiredMixin, View):
+class ImportazioneDetailView(BackofficeControlRequiredMixin, View):
     template_name = "operations/importazione_detail.html"
 
     def get(self, request, pk):
@@ -547,7 +586,7 @@ class ImportazioneDetailView(AdminRequiredMixin, View):
         )
 
 
-class ImportazioneCommitView(AdminRequiredMixin, View):
+class ImportazioneCommitView(BackofficeControlRequiredMixin, View):
     def post(self, request, pk):
         importazione = get_object_or_404(Importazione, pk=pk)
         chiave_sessione = f"importazione_{importazione.id}"
@@ -597,7 +636,7 @@ class ImportazioneCommitView(AdminRequiredMixin, View):
         )
 
 
-class ImportazioneTemplateView(AdminRequiredMixin, View):
+class ImportazioneTemplateView(BackofficeControlRequiredMixin, View):
     def get(self, request, tipo):
         tipo = tipo.upper()
         from .import_services import crea_template_xlsx
@@ -620,7 +659,7 @@ class ImportazioneTemplateView(AdminRequiredMixin, View):
         return response
 
 
-class ImportazioneErroriCsvView(AdminRequiredMixin, View):
+class ImportazioneErroriCsvView(BackofficeControlRequiredMixin, View):
     def get(self, request, pk):
         importazione = get_object_or_404(Importazione, pk=pk)
         response = HttpResponse(

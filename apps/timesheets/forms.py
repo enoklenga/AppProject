@@ -3,6 +3,7 @@ from django import forms
 from apps.common.widgets import DateInput
 from django.db.models import Q
 
+from apps.accounts.access import commesse_in_scope, is_manager
 from apps.projects.models import Assegnazione
 from .models import RigaOre, SpesaTrasferta
 
@@ -42,7 +43,14 @@ class BaseConsuntivoForm(forms.ModelForm):
             Q(stato=Assegnazione.Stato.ATTIVA) | Q(pk=current_id),
         )
 
-        if not getattr(attore, "is_admin_lef", False):
+        # Chi gestisce (Admin, Amministrazione, Resp. BU) può registrare anche
+        # per le persone delle commesse nel proprio perimetro; tutti possono
+        # sempre usare le proprie assegnazioni.
+        if is_manager(attore):
+            queryset = queryset.filter(
+                Q(consulente=attore) | Q(commessa__in=commesse_in_scope(attore))
+            )
+        else:
             queryset = queryset.filter(consulente=attore)
 
         self.fields["assegnazione"].queryset = queryset.order_by(
@@ -67,7 +75,7 @@ class BaseConsuntivoForm(forms.ModelForm):
         assegnazione = cleaned.get("assegnazione")
         giorno = cleaned.get("data")
 
-        if assegnazione and not getattr(self.attore, "is_admin_lef", False):
+        if assegnazione and not self.attore.puo_gestire_commessa(assegnazione.commessa):
             if assegnazione.consulente_id != self.attore.id:
                 self.add_error(
                     "assegnazione",
@@ -91,15 +99,15 @@ class BaseConsuntivoForm(forms.ModelForm):
 
 class RigaOreForm(BaseConsuntivoForm):
     motivazione = forms.CharField(
-        label="Motivazione eccezione Admin",
+        label="Motivazione eccezione (gestione)",
         required=False,
         widget=forms.Textarea(attrs={"rows": 2}),
-        help_text="Obbligatoria solo se un Admin porta il totale giornaliero oltre 8 ore.",
+        help_text="Obbligatoria solo se chi gestisce la commessa porta il totale giornaliero di un consulente oltre 8 ore.",
     )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if not getattr(self.attore, "is_admin_lef", False):
+        if not is_manager(self.attore):
             self.fields.pop("motivazione", None)
 
     class Meta:

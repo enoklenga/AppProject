@@ -21,6 +21,10 @@
     <div class="overview-card-top"><span class="overview-icon"><svg aria-hidden="true"><use href="#icon-clock"></use></svg></span><svg class="overview-arrow" aria-hidden="true"><use href="#icon-arrow-right"></use></svg></div>
     <div class="overview-card-content"><span class="overview-label">Ore registrate</span><strong class="overview-value">{{ riepilogo.totale_ore }}</strong></div>
   </a>
+  <a class="overview-card" data-tone="green" href="{% url 'operations:report-mensile' %}?mese={{ mese_selezionato }}">
+    <div class="overview-card-top"><span class="overview-icon"><svg aria-hidden="true"><use href="#icon-chart"></use></svg></span><svg class="overview-arrow" aria-hidden="true"><use href="#icon-arrow-right"></use></svg></div>
+    <div class="overview-card-content"><span class="overview-label">Valore ore</span><strong class="overview-value">€&nbsp;{{ riepilogo.totale_importo_ore|floatformat:"2g" }}</strong></div>
+  </a>
   <a class="overview-card" data-tone="blue" href="{% url 'timesheets:spesa-list' %}?mese={{ mese_selezionato }}">
     <div class="overview-card-top"><span class="overview-icon"><svg aria-hidden="true"><use href="#icon-receipt"></use></svg></span><svg class="overview-arrow" aria-hidden="true"><use href="#icon-arrow-right"></use></svg></div>
     <div class="overview-card-content"><span class="overview-label">Spese</span><strong class="overview-value">€&nbsp;{{ riepilogo.totale_spese|floatformat:"2g" }}</strong></div>

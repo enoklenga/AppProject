@@ -14,7 +14,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.accounts.access import can_view_operational_details
-from apps.accounts.access import can_view_planning_portfolio
+from apps.accounts.access import can_view_planning_portfolio, is_manager
 from apps.projects.models import Assegnazione, Commessa
 from apps.phases.models import FaseCommessa
 
@@ -304,12 +304,12 @@ def pianificazione_list(request):
         assegnazioni_visibili = assegnazioni_visibili.filter(fase_id=fase_id)
 
     mostra_consulente = (
-        request.user.is_admin_lef
+        is_manager(request.user)
         or consulenti_filtro.count() > 1
     )
 
     puo_pianificare = (
-        request.user.is_admin_lef
+        is_manager(request.user)
         or Assegnazione.objects
         .filter(
             consulente=request.user,

@@ -4,6 +4,7 @@ from django.db import transaction
 from django.db.models import Count, Q, Sum
 from django.utils import timezone
 
+from apps.accounts.access import can_manage_commessa
 from apps.operations.models import AuditLog
 
 from .models import Assegnazione, Commessa
@@ -116,9 +117,10 @@ def set_assegnazione_stato(
     nuovo_stato: str,
 ) -> Assegnazione:
     """Conclude/riattiva un'assegnazione applicando tutte le invarianti."""
-    if not getattr(attore, "is_admin_lef", False):
+    if not can_manage_commessa(attore, assegnazione.commessa):
         raise PermissionDenied(
-            "Questa operazione è riservata agli Admin LEF."
+            "Questa operazione è riservata alla gestione della commessa "
+            "(Admin, Amministrazione o Responsabile della Business Unit)."
         )
 
     if nuovo_stato not in {
@@ -283,7 +285,7 @@ def verifica_tariffa_periodi_aperti(
 
 
 def _can_manage_commessa_lifecycle(attore, commessa: Commessa) -> bool:
-    if getattr(attore, "is_admin_lef", False):
+    if can_manage_commessa(attore, commessa):
         return True
     from .permissions import is_active_pm
     return is_active_pm(attore, commessa)
@@ -540,8 +542,11 @@ def _commessa_snapshot(commessa: Commessa) -> dict:
 @transaction.atomic
 def chiudi_commessa(*, attore, commessa: Commessa) -> Commessa:
     """Chiude la commessa solo quando tutte le sessioni agenda sono confermate."""
-    if not getattr(attore, "is_admin_lef", False):
-        raise PermissionDenied("Questa operazione è riservata agli Admin LEF.")
+    if not can_manage_commessa(attore, commessa):
+        raise PermissionDenied(
+            "Questa operazione è riservata alla gestione della commessa "
+            "(Admin, Amministrazione o Responsabile della Business Unit)."
+        )
 
     commessa = Commessa.objects.select_for_update().get(pk=commessa.pk)
     if commessa.stato == Commessa.Stato.CHIUSA:
@@ -584,8 +589,11 @@ def chiudi_commessa(*, attore, commessa: Commessa) -> Commessa:
 
 @transaction.atomic
 def riapri_commessa(*, attore, commessa: Commessa) -> Commessa:
-    if not getattr(attore, "is_admin_lef", False):
-        raise PermissionDenied("Questa operazione è riservata agli Admin LEF.")
+    if not can_manage_commessa(attore, commessa):
+        raise PermissionDenied(
+            "Questa operazione è riservata alla gestione della commessa "
+            "(Admin, Amministrazione o Responsabile della Business Unit)."
+        )
 
     commessa = Commessa.objects.select_for_update().get(pk=commessa.pk)
     if commessa.stato == Commessa.Stato.APERTA:

@@ -4,7 +4,7 @@ from apps.common.widgets import DateInput
 from django.utils import timezone
 
 from apps.projects.models import Assegnazione, TariffaAssegnazione
-from .selectors import visible_assignments_for_user
+from .selectors import plannable_assignments_for_user
 
 from .models import GiornoPianificato
 
@@ -100,7 +100,7 @@ class PianificazioneForm(forms.Form):
             # Un solo selector governa il perimetro: il PM vede e gestisce tutte
             # le fasi della propria commessa, il consulente resta phase-scoped.
             queryset = (
-                visible_assignments_for_user(user)
+                plannable_assignments_for_user(user)
                 .select_related(
                     "commessa",
                     "commessa__cliente",

@@ -2,29 +2,57 @@ import logging
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Prefetch, Q
-from django.db import transaction
+from django.db import models, transaction
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView
 
+from apps.common.request_security import safe_internal_redirect
 from apps.common.mixins import (
     AdminRequiredMixin,
+    BusinessUnitEditRequiredMixin,
+    BusinessUnitReadRequiredMixin,
+    ManagementRequiredMixin,
     PeopleReadRequiredMixin,
+    SkillCatalogRequiredMixin,
     SkillMatrixReadRequiredMixin,
 )
-from apps.operations.models import AuditLog
+from .access import (
+    business_units_in_scope,
+    can_designate_bu_managers,
+    can_edit_business_units,
+    can_manage_business_unit,
+    can_manage_skill_catalog,
+    can_manage_skill_matrix,
+    can_manage_users,
+    is_global_manager,
+    managed_business_unit_ids,
+    membership_current_q,
+    persone_in_scope,
+    uuid_valido,
+)
+from .business_units import (
+    capacita_mensile,
+    carichi_membri,
+    commesse_business_unit,
+    indicatori_business_unit,
+    responsabili_business_unit,
+)
+from apps.operations.models import AuditLog, PeriodoMensile
 from .forms import (
+    BusinessUnitForm,
     ConsulenteCreateForm,
     ConsulenteUpdateForm,
     SkillForm,
     SkillMatrixUserForm,
+    UserBusinessUnitForm,
     UserProfileForm,
 )
-from .models import Skill, User, UserSkill
+from .models import BusinessUnit, Skill, User, UserBusinessUnit, UserSkill
 from .services import send_account_activation_email, set_user_active
 
 logger = logging.getLogger(__name__)
@@ -72,12 +100,14 @@ class ConsulenteListView(PeopleReadRequiredMixin, ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        queryset = User.objects.order_by(
+        # Gestione globale: tutte le persone; Responsabile BU: i membri delle
+        # proprie Business Unit.
+        queryset = persone_in_scope(self.request.user).order_by(
             "last_name",
             "first_name",
             "email",
         )
-        if self.request.user.is_responsabile_consulenza:
+        if not is_global_manager(self.request.user):
             queryset = queryset.filter(
                 ruolo__in=(
                     User.Ruolo.CONSULENTE,
@@ -111,7 +141,7 @@ class ConsulenteListView(PeopleReadRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.request.user.is_responsabile_consulenza:
+        if not is_global_manager(self.request.user):
             context["ruoli_filtro"] = [
                 choice
                 for choice in User.Ruolo.choices
@@ -123,7 +153,7 @@ class ConsulenteListView(PeopleReadRequiredMixin, ListView):
             ]
         else:
             context["ruoli_filtro"] = list(User.Ruolo.choices)
-        context["puo_gestire_utenti"] = self.request.user.is_admin_lef
+        context["puo_gestire_utenti"] = can_manage_users(self.request.user)
         return context
 
 
@@ -304,7 +334,7 @@ class ConsulenteResendInviteView(AdminRequiredMixin, View):
         return HttpResponseRedirect(reverse("accounts:consulente-list"))
 
 
-class SkillListView(AdminRequiredMixin, ListView):
+class SkillListView(SkillCatalogRequiredMixin, ListView):
     model = Skill
     template_name = "accounts/skill_list.html"
     context_object_name = "skills"
@@ -322,7 +352,7 @@ class SkillListView(AdminRequiredMixin, ListView):
         return queryset
 
 
-class SkillCreateView(AdminRequiredMixin, CreateView):
+class SkillCreateView(SkillCatalogRequiredMixin, CreateView):
     model = Skill
     form_class = SkillForm
     template_name = "accounts/skill_form.html"
@@ -333,7 +363,7 @@ class SkillCreateView(AdminRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class SkillUpdateView(AdminRequiredMixin, UpdateView):
+class SkillUpdateView(SkillCatalogRequiredMixin, UpdateView):
     model = Skill
     form_class = SkillForm
     template_name = "accounts/skill_form.html"
@@ -366,6 +396,11 @@ class SkillMatrixView(SkillMatrixReadRequiredMixin, View):
             .order_by("last_name", "first_name", "email")
         )
 
+        # Lettura su tutte le risorse (serve a comporre i team); modifica
+        # solo sulle persone nel proprio perimetro.
+        modificabili = set(
+            persone_in_scope(request.user).values_list("pk", flat=True)
+        ) if can_manage_skill_matrix(request.user) else set()
         righe = []
         for risorsa in risorse:
             livelli = {
@@ -375,6 +410,7 @@ class SkillMatrixView(SkillMatrixReadRequiredMixin, View):
                 {
                     "risorsa": risorsa,
                     "celle": [livelli.get(skill.pk) for skill in skills],
+                    "modificabile": risorsa.pk in modificabili,
                 }
             )
 
@@ -384,17 +420,18 @@ class SkillMatrixView(SkillMatrixReadRequiredMixin, View):
             {
                 "skills": skills,
                 "righe": righe,
-                "puo_modificare": request.user.is_admin_lef,
+                "puo_modificare": bool(modificabili),
+                "puo_gestire_catalogo": can_manage_skill_catalog(request.user),
             },
         )
 
 
-class SkillMatrixUserUpdateView(AdminRequiredMixin, View):
+class SkillMatrixUserUpdateView(ManagementRequiredMixin, View):
     template_name = "accounts/skill_matrix_user_form.html"
 
     def _utente(self, pk):
         return get_object_or_404(
-            User,
+            persone_in_scope(self.request.user),
             pk=pk,
             ruolo__in=(
                 User.Ruolo.CONSULENTE,
@@ -415,3 +452,235 @@ class SkillMatrixUserUpdateView(AdminRequiredMixin, View):
             messages.success(request, f"Skill matrix aggiornata per {utente}.")
             return HttpResponseRedirect(reverse("accounts:skill-matrix"))
         return render(request, self.template_name, {"form": form, "utente": utente})
+
+
+def _mese_corrente(request):
+    from django.utils import timezone
+
+    valore = request.GET.get("mese", "")
+    try:
+        anno_str, mese_str = valore.split("-", 1)
+        anno, mese = int(anno_str), int(mese_str)
+        if 1 <= mese <= 12:
+            return anno, mese, f"{anno:04d}-{mese:02d}"
+    except (TypeError, ValueError):
+        pass
+    oggi = timezone.localdate()
+    return oggi.year, oggi.month, f"{oggi.year:04d}-{oggi.month:02d}"
+
+
+class BusinessUnitListView(BusinessUnitReadRequiredMixin, ListView):
+    """Elenco BU: tutte per la gestione globale e la DG, le proprie per il Resp. BU."""
+
+    model = BusinessUnit
+    template_name = "accounts/business_unit_list.html"
+    context_object_name = "business_units"
+    paginate_by = 30
+
+    def get_queryset(self):
+        queryset = business_units_in_scope(self.request.user).annotate(
+            numero_membri=models.Count(
+                "membership",
+                filter=membership_current_q("membership__"),
+                distinct=True,
+            ),
+            numero_responsabili=models.Count(
+                "membership",
+                filter=(
+                    membership_current_q("membership__")
+                    & Q(
+                        membership__responsabile=True,
+                        membership__utente__ruolo=User.Ruolo.RESPONSABILE_CONSULENZA,
+                    )
+                ),
+                distinct=True,
+            ),
+            numero_commesse_aperte=models.Count(
+                "commesse",
+                filter=Q(commesse__stato="APERTA"),
+                distinct=True,
+            ),
+        ).order_by("-attiva", "nome")
+        query = self.request.GET.get("q", "").strip()
+        if query:
+            queryset = queryset.filter(Q(nome__icontains=query) | Q(codice__icontains=query))
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context["puo_creare"] = can_edit_business_units(user)
+        context["puo_gestire_membri"] = bool(
+            is_global_manager(user) or managed_business_unit_ids(user)
+        )
+        gestite = managed_business_unit_ids(user)
+        for bu in context["business_units"]:
+            bu.gestibile = is_global_manager(user) or bu.pk in gestite
+        return context
+
+
+class BusinessUnitDetailView(BusinessUnitReadRequiredMixin, View):
+    """Cruscotto della Business Unit: persone, carichi, commesse e azioni."""
+
+    template_name = "accounts/business_unit_detail.html"
+
+    def get(self, request, pk):
+        business_unit = get_object_or_404(business_units_in_scope(request.user), pk=pk)
+        anno, mese, valore_mese = _mese_corrente(request)
+        puo_gestire = can_manage_business_unit(request.user, business_unit)
+        membri = carichi_membri([business_unit.pk], anno, mese)
+        capacita = capacita_mensile(anno, mese)
+        for voce in membri:
+            voce["percentuale"] = round(voce["ore_pianificate"] * 100 / capacita) if capacita else 0
+        periodo = PeriodoMensile.objects.filter(anno=anno, mese=mese).first()
+        return render(
+            request,
+            self.template_name,
+            {
+                "business_unit": business_unit,
+                "mese_selezionato": valore_mese,
+                "periodo": periodo,
+                "periodo_chiuso": bool(
+                    periodo and periodo.stato == PeriodoMensile.Stato.CHIUSO
+                ),
+                "periodo_stato": periodo.get_stato_display() if periodo else "Aperto",
+                "indicatori": indicatori_business_unit([business_unit.pk], anno, mese),
+                "responsabili": responsabili_business_unit(business_unit),
+                "membri": membri,
+                "capacita_mese": capacita,
+                "commesse": commesse_business_unit([business_unit.pk]),
+                "puo_gestire": puo_gestire,
+                "puo_modificare_anagrafica": can_edit_business_units(request.user),
+                "puo_nominare_responsabili": can_designate_bu_managers(request.user),
+            },
+        )
+
+
+class BusinessUnitCreateView(BusinessUnitEditRequiredMixin, CreateView):
+    model = BusinessUnit
+    form_class = BusinessUnitForm
+    template_name = "accounts/business_unit_form.html"
+
+    def get_success_url(self):
+        return reverse("accounts:business-unit-detail", args=[self.object.pk])
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, "Business Unit creata correttamente.")
+        return response
+
+
+class BusinessUnitUpdateView(BusinessUnitEditRequiredMixin, UpdateView):
+    model = BusinessUnit
+    form_class = BusinessUnitForm
+    template_name = "accounts/business_unit_form.html"
+
+    def get_success_url(self):
+        return reverse("accounts:business-unit-detail", args=[self.object.pk])
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, "Business Unit aggiornata correttamente.")
+        return response
+
+
+def _appartenenze_in_scope(user):
+    queryset = UserBusinessUnit.objects.select_related("utente", "business_unit")
+    if is_global_manager(user):
+        return queryset
+    return queryset.filter(business_unit_id__in=managed_business_unit_ids(user))
+
+
+class UserBusinessUnitListView(ManagementRequiredMixin, ListView):
+    model = UserBusinessUnit
+    template_name = "accounts/user_business_unit_list.html"
+    context_object_name = "membership"
+    paginate_by = 40
+
+    def get_queryset(self):
+        queryset = _appartenenze_in_scope(self.request.user).order_by(
+            "business_unit__nome", "utente__last_name", "utente__first_name"
+        )
+        bu_id = self.request.GET.get("business_unit", "").strip()
+        if bu_id:
+            bu_id = uuid_valido(bu_id)
+            queryset = queryset.filter(business_unit_id=bu_id) if bu_id else queryset.none()
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context["business_units_filtro"] = business_units_in_scope(user).order_by("nome")
+        puo_nominare = can_designate_bu_managers(user)
+        for voce in context["membership"]:
+            # Le appartenenze da Responsabile sono modificabili solo dall'Admin.
+            voce.modificabile = puo_nominare or not voce.responsabile
+        return context
+
+
+class _UserBusinessUnitFormMixin:
+    model = UserBusinessUnit
+    form_class = UserBusinessUnitForm
+    template_name = "accounts/user_business_unit_form.html"
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["cancel_url"] = safe_internal_redirect(
+            self.request, self.request.GET.get("return_to")
+        )
+        return context
+
+    def get_success_url(self):
+        return_to = safe_internal_redirect(
+            self.request,
+            self.request.POST.get("return_to") or self.request.GET.get("return_to"),
+        )
+        if return_to:
+            return return_to
+
+        destinazione = self.request.GET.get("next") or self.request.POST.get("next")
+        if destinazione == "bu":
+            return_bu = uuid_valido(
+                self.request.POST.get("return_bu")
+                or self.request.GET.get("return_bu")
+            )
+            if return_bu and business_units_in_scope(self.request.user).filter(pk=return_bu).exists():
+                return reverse("accounts:business-unit-detail", args=[return_bu])
+            return reverse("accounts:business-unit-detail", args=[self.object.business_unit_id])
+        return reverse("accounts:user-business-unit-list")
+
+
+class UserBusinessUnitCreateView(ManagementRequiredMixin, _UserBusinessUnitFormMixin, CreateView):
+    def get_initial(self):
+        initial = super().get_initial()
+        bu_id = uuid_valido(self.request.GET.get("business_unit"))
+        if bu_id and business_units_in_scope(self.request.user).filter(pk=bu_id).exists():
+            initial["business_unit"] = bu_id
+        return initial
+
+    def form_valid(self, form):
+        if not can_manage_business_unit(self.request.user, form.cleaned_data["business_unit"]):
+            raise PermissionDenied("Non gestisci questa Business Unit.")
+        response = super().form_valid(form)
+        messages.success(self.request, "Appartenenza alla Business Unit salvata.")
+        return response
+
+
+class UserBusinessUnitUpdateView(ManagementRequiredMixin, _UserBusinessUnitFormMixin, UpdateView):
+    def get_queryset(self):
+        queryset = _appartenenze_in_scope(self.request.user)
+        if not can_designate_bu_managers(self.request.user):
+            queryset = queryset.filter(responsabile=False)
+        return queryset
+
+    def form_valid(self, form):
+        if not can_manage_business_unit(self.request.user, form.cleaned_data["business_unit"]):
+            raise PermissionDenied("Non gestisci questa Business Unit.")
+        response = super().form_valid(form)
+        messages.success(self.request, "Appartenenza alla Business Unit aggiornata.")
+        return response

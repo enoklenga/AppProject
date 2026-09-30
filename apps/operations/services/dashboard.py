@@ -90,8 +90,14 @@ def _filtra_query_periodo(
     commessa_id=None,
     consulente_id=None,
     fase_id=None,
+    business_unit_ids=None,
 ):
     queryset = queryset.filter(data__year=anno, data__month=mese)
+    if business_unit_ids is not None:
+        # Perimetro Business Unit (Responsabile BU o filtro esplicito).
+        queryset = queryset.filter(
+            assegnazione__commessa__business_unit_id__in=list(business_unit_ids)
+        )
     if cliente_id:
         queryset = queryset.filter(
             assegnazione__commessa__cliente_id=cliente_id
@@ -171,6 +177,7 @@ def dashboard_admin(
     commessa_id=None,
     consulente_id=None,
     fase_id=None,
+    business_unit_ids=None,
 ) -> DashboardAdminData:
     righe_qs = RigaOre.objects.select_related(
         "assegnazione",
@@ -187,6 +194,7 @@ def dashboard_admin(
         commessa_id=commessa_id,
         consulente_id=consulente_id,
         fase_id=fase_id,
+        business_unit_ids=business_unit_ids,
     )
     righe = list(righe_qs.order_by("data", "created_at"))
     precarica_tariffe(righe)
@@ -206,6 +214,7 @@ def dashboard_admin(
         commessa_id=commessa_id,
         consulente_id=consulente_id,
         fase_id=fase_id,
+        business_unit_ids=business_unit_ids,
     )
     spese = list(spese_qs.order_by("data", "created_at"))
 
@@ -406,14 +415,31 @@ def dashboard_admin(
 
 
 def commesse_gestite_da_pm(utente):
-    return (
-        Commessa.objects.filter(
-            assegnazioni__consulente=utente,
-            assegnazioni__ruolo_commessa=(
-                Assegnazione.Ruolo.PROJECT_MANAGER
-            ),
-            assegnazioni__stato=Assegnazione.Stato.ATTIVA,
+    """Commesse della dashboard di progetto.
+
+    PM: le commesse con assegnazione PM attiva. Responsabile BU: anche tutte
+    le commesse della propria BU. Admin/Amministrazione: tutte le aperte.
+    """
+    from django.db.models import Q
+
+    from apps.accounts.access import is_global_manager, managed_business_unit_ids
+
+    if is_global_manager(utente):
+        return (
+            Commessa.objects.filter(stato=Commessa.Stato.APERTA)
+            .select_related("cliente")
+            .order_by("codice")
         )
+    filtro = Q(
+        assegnazioni__consulente=utente,
+        assegnazioni__ruolo_commessa=Assegnazione.Ruolo.PROJECT_MANAGER,
+        assegnazioni__stato=Assegnazione.Stato.ATTIVA,
+    )
+    bu_gestite = managed_business_unit_ids(utente)
+    if bu_gestite:
+        filtro |= Q(business_unit_id__in=bu_gestite)
+    return (
+        Commessa.objects.filter(filtro)
         .select_related("cliente")
         .distinct()
         .order_by("codice")
@@ -427,17 +453,9 @@ def dashboard_pm(
     anno: int,
     mese: int,
 ) -> DashboardPMData:
-    if getattr(utente, "is_admin_lef", False):
-        raise PermissionDenied(
-            "La dashboard PM è riservata ai consulenti con ruolo PM."
-        )
-
-    autorizzata = Assegnazione.objects.filter(
-        consulente=utente,
-        commessa_id=commessa_id,
-        ruolo_commessa=Assegnazione.Ruolo.PROJECT_MANAGER,
-        stato=Assegnazione.Stato.ATTIVA,
-    ).exists()
+    # Dashboard di progetto: PM della commessa e chi la gestisce
+    # (Admin, Amministrazione, Responsabile della Business Unit).
+    autorizzata = commesse_gestite_da_pm(utente).filter(pk=commessa_id).exists()
 
     if not autorizzata:
         raise PermissionDenied(

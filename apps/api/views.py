@@ -298,7 +298,7 @@ class ClienteViewSet(BaseReadOnlyViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
         user = self.request.user
-        if user.is_admin_lef:
+        if user.is_gestore_globale:
             return queryset
 
         return queryset.filter(
@@ -331,7 +331,7 @@ class CommessaViewSet(BaseReadOnlyViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
         user = self.request.user
-        if user.is_admin_lef:
+        if user.is_gestore_globale:
             return queryset
 
         return queryset.filter(
@@ -370,7 +370,7 @@ class AssegnazioneViewSet(BaseReadOnlyViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
         user = self.request.user
-        if user.is_admin_lef:
+        if user.is_gestore_globale:
             return queryset
         return queryset.filter(
             filtro_visibilita_assegnazioni(user)
@@ -475,7 +475,7 @@ class RigaOreViewSet(BaseTimesheetWriteViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
         user = self.request.user
-        if user.is_admin_lef:
+        if user.is_gestore_globale:
             return queryset
         return queryset.filter(
             filtro_visibilita_timesheet(user)
@@ -672,7 +672,7 @@ class SpesaTrasfertaViewSet(BaseTimesheetWriteViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
         user = self.request.user
-        if user.is_admin_lef:
+        if user.is_gestore_globale:
             return queryset
         return queryset.filter(
             filtro_visibilita_timesheet(user)

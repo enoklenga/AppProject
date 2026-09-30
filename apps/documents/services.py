@@ -86,9 +86,9 @@ def upload_document(
     if fase is not None and fase.commessa_id != commessa.id:
         raise ValidationError("La fase non appartiene alla commessa selezionata.")
 
-    # Rete di sicurezza: solo un Admin LEF può marcare un documento come
-    # privato, indipendentemente da come è stato chiamato questo servizio.
-    privato = bool(privato) and getattr(user, "is_admin_lef", False)
+    # Rete di sicurezza: solo chi gestisce la commessa (Admin, Amministrazione,
+    # Resp. BU) può marcare un documento come privato.
+    privato = bool(privato) and user.puo_gestire_commessa(commessa)
 
     documento = DocumentoCommessa.objects.create(
         commessa=commessa,

@@ -93,7 +93,8 @@ class AuthenticatedLayoutTests(TestCase):
         html = self.render_base(self.admin)
 
         self.assertIn('id="app-sidebar"', html)
-        self.assertIn("Gestione", html)
+        self.assertIn("Portafoglio", html)
+        self.assertIn("Organizzazione", html)
         self.assertIn("Controllo", html)
         self.assertIn("Dashboard", html)
         self.assertIn('data-sidebar-toggle', html)

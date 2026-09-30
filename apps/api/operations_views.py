@@ -52,7 +52,7 @@ from .operations_serializers import (
     InvioPromemoriaSerializer,
     PeriodoPromemoriaQuerySerializer,
 )
-from .permissions import IsAdminLEF
+from .permissions import IsGlobalManager
 from .throttles import (
     ExportRateThrottle,
     ImportRateThrottle,
@@ -121,7 +121,7 @@ class ConfigurazionePromemoriaAPIView(APIView):
         UserSustainedRateThrottle,
         SensitiveOperationThrottle,
     ]
-    permission_classes = [IsAdminLEF]
+    permission_classes = [IsGlobalManager]
 
     def get_object(self, request):
         configurazione = configurazione_promemoria_corrente()
@@ -159,7 +159,7 @@ class ConfigurazionePromemoriaAPIView(APIView):
     responses={200: AnteprimaPromemoriaSerializer},
 )
 class AnteprimaPromemoriaAPIView(APIView):
-    permission_classes = [IsAdminLEF]
+    permission_classes = [IsGlobalManager]
 
     def get(self, request):
         filtri = _validated(
@@ -190,7 +190,7 @@ class InviaPromemoriaAPIView(APIView):
         UserSustainedRateThrottle,
         SensitiveOperationThrottle,
     ]
-    permission_classes = [IsAdminLEF]
+    permission_classes = [IsGlobalManager]
 
     def post(self, request):
         dati = _validated(
@@ -217,7 +217,7 @@ class InviaPromemoriaAPIView(APIView):
     parameters=[InvioPromemoriaFilterSerializer],
 )
 class InvioPromemoriaListAPIView(ListAPIView):
-    permission_classes = [IsAdminLEF]
+    permission_classes = [IsGlobalManager]
     serializer_class = InvioPromemoriaSerializer
 
     def get_queryset(self):
@@ -249,7 +249,7 @@ class InvioPromemoriaListAPIView(ListAPIView):
     parameters=[ImportazioneFilterSerializer],
 )
 class ImportazioneListAPIView(ListAPIView):
-    permission_classes = [IsAdminLEF]
+    permission_classes = [IsGlobalManager]
     serializer_class = ImportazioneSerializer
 
     def get_queryset(self):
@@ -281,7 +281,7 @@ class ImportazioneListAPIView(ListAPIView):
 
 @extend_schema(tags=["Importazioni Admin"])
 class ImportazioneDetailAPIView(RetrieveAPIView):
-    permission_classes = [IsAdminLEF]
+    permission_classes = [IsGlobalManager]
     serializer_class = ImportazioneSerializer
     lookup_field = "pk"
 
@@ -309,7 +309,7 @@ class ImportazioneUploadAPIView(APIView):
         UserSustainedRateThrottle,
         ImportRateThrottle,
     ]
-    permission_classes = [IsAdminLEF]
+    permission_classes = [IsGlobalManager]
     parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request):
@@ -371,7 +371,7 @@ class ImportazioneConfermaAPIView(APIView):
         UserSustainedRateThrottle,
         SensitiveOperationThrottle,
     ]
-    permission_classes = [IsAdminLEF]
+    permission_classes = [IsGlobalManager]
 
     def post(self, request, pk):
         _validated(ImportazioneConfermaSerializer, request.data)
@@ -424,7 +424,7 @@ class ImportazioneTemplateAPIView(APIView):
         UserSustainedRateThrottle,
         ExportRateThrottle,
     ]
-    permission_classes = [IsAdminLEF]
+    permission_classes = [IsGlobalManager]
 
     def get(self, request, tipo):
         tipo = tipo.upper()
@@ -461,7 +461,7 @@ class ImportazioneErroriCsvAPIView(APIView):
         UserSustainedRateThrottle,
         ExportRateThrottle,
     ]
-    permission_classes = [IsAdminLEF]
+    permission_classes = [IsGlobalManager]
 
     def get(self, request, pk):
         importazione = get_object_or_404(
@@ -509,7 +509,7 @@ class ImportazioneErroriCsvAPIView(APIView):
     parameters=[AuditLogFilterSerializer],
 )
 class AuditLogListAPIView(ListAPIView):
-    permission_classes = [IsAdminLEF]
+    permission_classes = [IsGlobalManager]
     serializer_class = AuditLogSerializer
 
     def get_queryset(self):
@@ -518,7 +518,7 @@ class AuditLogListAPIView(ListAPIView):
 
 @extend_schema(tags=["Audit Admin"])
 class AuditLogDetailAPIView(RetrieveAPIView):
-    permission_classes = [IsAdminLEF]
+    permission_classes = [IsGlobalManager]
     serializer_class = AuditLogSerializer
     queryset = AuditLog.objects.select_related("utente")
     lookup_field = "pk"
@@ -539,7 +539,7 @@ class AuditLogCsvAPIView(APIView):
         UserSustainedRateThrottle,
         ExportRateThrottle,
     ]
-    permission_classes = [IsAdminLEF]
+    permission_classes = [IsGlobalManager]
 
     def get(self, request):
         queryset = _audit_queryset(request.query_params)

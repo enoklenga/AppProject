@@ -13,7 +13,12 @@ from django.db.models import (
 from django.utils import timezone
 
 from apps.projects.models import Assegnazione, Commessa
-from apps.accounts.access import can_view_tasks_portfolio
+from apps.accounts.access import (
+    can_manage_fase,
+    has_org_role,
+    is_global_manager,
+    managed_business_unit_ids,
+)
 
 from .models import Task
 
@@ -95,13 +100,17 @@ def visible_tasks_for_user(user):
     if not user or not getattr(user, "is_authenticated", False):
         return queryset.none()
 
-    if user.is_admin_lef or can_view_tasks_portfolio(user):
+    if is_global_manager(user) or has_org_role(user, User.Ruolo.DIREZIONE_GENERALE):
         return _ordered_tasks(queryset)
 
     fasi_team = Assegnazione.objects.filter(
         consulente=user, stato=Assegnazione.Stato.ATTIVA
     ).values_list("fase_id", flat=True)
-    return _ordered_tasks(queryset.filter(fase_id__in=fasi_team).distinct())
+    filtro = Q(fase_id__in=fasi_team)
+    bu_gestite = managed_business_unit_ids(user)
+    if bu_gestite:
+        filtro |= Q(commessa__business_unit_id__in=bu_gestite)
+    return _ordered_tasks(queryset.filter(filtro).distinct())
 
 def manageable_projects_for_user(user):
     """
@@ -135,7 +144,7 @@ def manageable_projects_for_user(user):
     ):
         return queryset.none()
 
-    if user.is_admin_lef:
+    if is_global_manager(user):
         return queryset.order_by(
             "codice"
         )
@@ -152,11 +161,13 @@ def manageable_projects_for_user(user):
         )
     )
 
+    filtro = Q(pk__in=commesse_assegnate)
+    bu_gestite = managed_business_unit_ids(user)
+    if bu_gestite:
+        filtro |= Q(business_unit_id__in=bu_gestite)
     return (
         queryset
-        .filter(
-            pk__in=commesse_assegnate,
-        )
+        .filter(filtro)
         .distinct()
         .order_by(
             "codice"
@@ -206,6 +217,13 @@ def assignable_users_for_project(
             )
             | Q(
             ruolo=User.Ruolo.ADMIN,
+            )
+            | Q(
+                # Responsabile della BU della commessa.
+                ruolo=User.Ruolo.RESPONSABILE_CONSULENZA,
+                membership_business_unit__business_unit_id=commessa.business_unit_id,
+                membership_business_unit__responsabile=True,
+                membership_business_unit__attiva=True,
             )
         )
         .distinct()
@@ -416,16 +434,24 @@ def manageable_phases_for_user(user):
     qs = FaseCommessa.objects.select_related("commessa", "commessa__cliente").filter(commessa__stato=Commessa.Stato.APERTA)
     if not user or not getattr(user, "is_authenticated", False):
         return qs.none()
-    if user.is_admin_lef:
+    if is_global_manager(user):
         return qs.order_by("commessa__codice", "ordine", "nome")
     ids = Assegnazione.objects.filter(consulente=user, stato=Assegnazione.Stato.ATTIVA).values_list("fase_id", flat=True)
-    return qs.filter(pk__in=ids).distinct().order_by("commessa__codice", "ordine", "nome")
+    filtro = Q(pk__in=ids)
+    bu_gestite = managed_business_unit_ids(user)
+    if bu_gestite:
+        filtro |= Q(commessa__business_unit_id__in=bu_gestite)
+    return qs.filter(filtro).distinct().order_by("commessa__codice", "ordine", "nome")
 
 def assignable_users_for_phase(*, user, fase):
     if not user or not getattr(user, "is_authenticated", False):
         return User.objects.none()
-    if user.is_admin_lef:
-        return User.objects.filter(is_active=True).order_by("last_name", "first_name", "email")
+    if can_manage_fase(user, fase):
+        return User.objects.filter(
+            Q(ruolo=User.Ruolo.ADMIN)
+            | Q(assegnazioni__fase=fase, assegnazioni__stato=Assegnazione.Stato.ATTIVA),
+            is_active=True,
+        ).distinct().order_by("last_name", "first_name", "email")
     if not Assegnazione.objects.filter(consulente=user, fase=fase, ruolo_commessa=Assegnazione.Ruolo.PROJECT_MANAGER, stato=Assegnazione.Stato.ATTIVA).exists():
         return User.objects.none()
     return User.objects.filter(is_active=True, assegnazioni__fase=fase, assegnazioni__stato=Assegnazione.Stato.ATTIVA).distinct().order_by("last_name", "first_name", "email")

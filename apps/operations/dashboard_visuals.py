@@ -45,8 +45,13 @@ def admin_visuals(
     commessa_id=None,
     consulente_id=None,
     fase_id=None,
+    business_unit_ids=None,
 ) -> dict:
     righe = RigaOre.objects.filter(data__year=anno, data__month=mese)
+    if business_unit_ids is not None:
+        righe = righe.filter(
+            assegnazione__commessa__business_unit_id__in=list(business_unit_ids)
+        )
     if cliente_id:
         righe = righe.filter(assegnazione__commessa__cliente_id=cliente_id)
     if commessa_id:

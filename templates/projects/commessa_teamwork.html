@@ -115,17 +115,17 @@
             <article class="metric-card">
                 <span>Avanzamento agenda</span>
                 <strong>{{ agenda_progress.percentuale_ore|floatformat:"-1" }}%</strong>
-                <small>{{ agenda_progress.ore_risolte }} / {{ agenda_progress.ore_pianificate }} h risolte</small>
+                <small>{{ agenda_progress.ore_risolte }} di {{ agenda_progress.ore_pianificate }} h completate</small>
             </article>
             <article class="metric-card">
-                <span>Giornate/sessioni</span>
+                <span>Sessioni pianificate</span>
                 <strong>{{ agenda_progress.sessioni_risolte }} / {{ agenda_progress.sessioni_totali }}</strong>
-                <small>{{ agenda_progress.sessioni_da_confermare }} da risolvere</small>
+                <small>{{ agenda_progress.sessioni_da_confermare }} ancora da completare</small>
             </article>
             <article class="metric-card">
-                <span>Chiusura commessa</span>
-                <strong>{% if agenda_progress.completa %}Pronta{% else %}Bloccata{% endif %}</strong>
-                <small>{% if agenda_progress.completa %}Tutte le sessioni sono risolte{% else %}{{ agenda_progress.ore_da_confermare }} h ancora da risolvere{% endif %}</small>
+                <span>Chiusura operativa</span>
+                <strong>{% if agenda_progress.completa %}Disponibile{% else %}Non ancora disponibile{% endif %}</strong>
+                <small>{% if agenda_progress.sessioni_totali == 0 %}Nessuna sessione pianificata{% elif agenda_progress.completa %}Tutte le sessioni pianificate sono completate{% else %}Mancano {{ agenda_progress.ore_da_confermare }} h pianificate al completamento{% endif %}</small>
             </article>
         </div>
     </section>

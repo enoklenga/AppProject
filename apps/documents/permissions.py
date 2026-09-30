@@ -1,6 +1,6 @@
 from apps.projects.models import Commessa
 from apps.projects.permissions import is_active_team_member, is_active_phase_member
-from apps.accounts.access import can_view_all_documents
+from apps.accounts.access import can_manage_commessa, can_view_all_documents
 
 from .models import DocumentoCommessa
 
@@ -8,10 +8,12 @@ from .models import DocumentoCommessa
 def can_view_documents(user, commessa: Commessa, fase=None, privato=False) -> bool:
     if not getattr(user, "is_authenticated", False):
         return False
-    if getattr(user, "is_admin_lef", False):
+    # Chi gestisce la commessa (Admin, Amministrazione, Resp. BU) vede tutto,
+    # compresi i documenti privati.
+    if can_manage_commessa(user, commessa):
         return True
     if privato:
-        # Un documento privato è riservato agli Admin LEF, indipendentemente
+        # Un documento privato è riservato alla gestione, indipendentemente
         # dall'appartenenza al team della commessa/fase.
         return False
     if can_view_all_documents(user):
@@ -24,7 +26,7 @@ def can_view_documents(user, commessa: Commessa, fase=None, privato=False) -> bo
 def can_upload_document(user, commessa: Commessa, fase=None) -> bool:
     if not getattr(user, "is_authenticated", False):
         return False
-    if getattr(user, "is_admin_lef", False):
+    if can_manage_commessa(user, commessa):
         return True
     if commessa.stato != Commessa.Stato.APERTA:
         return False
@@ -36,10 +38,10 @@ def can_upload_document(user, commessa: Commessa, fase=None) -> bool:
 def can_delete_document(user, documento: DocumentoCommessa) -> bool:
     if not getattr(user, "is_authenticated", False):
         return False
-    if getattr(user, "is_admin_lef", False):
+    if can_manage_commessa(user, documento.commessa):
         return True
     if documento.privato:
-        # Un documento privato può essere eliminato solo da un Admin LEF.
+        # Un documento privato può essere eliminato solo dalla gestione.
         return False
     if documento.commessa.stato != Commessa.Stato.APERTA:
         return False

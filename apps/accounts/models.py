@@ -24,7 +24,7 @@ class User(AbstractUser):
         CONSULENTE = "CONSULENTE", "Consulente / Team esecutivo"
         RESPONSABILE_CONSULENZA = (
             "RESP_CONSULENZA",
-            "Responsabile consulenza / Business Unit",
+            "Responsabile Business Unit",
         )
         AMMINISTRAZIONE = "AMMINISTRAZIONE", "Amministrazione"
         COMMERCIALE = "COMMERCIALE", "Commerciale"
@@ -57,6 +57,13 @@ class User(AbstractUser):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS: list[str] = []
 
+    business_units = models.ManyToManyField(
+        "BusinessUnit",
+        through="UserBusinessUnit",
+        related_name="utenti",
+        blank=True,
+    )
+
     objects = UserManager()
 
     class Meta:
@@ -73,7 +80,73 @@ class User(AbstractUser):
 
     @property
     def is_responsabile_consulenza(self) -> bool:
+        # Alias legacy mantenuto per compatibilità con template e permessi esistenti.
         return self.ruolo == self.Ruolo.RESPONSABILE_CONSULENZA
+
+    @property
+    def is_responsabile_business_unit(self) -> bool:
+        return self.is_responsabile_consulenza
+
+    # -- Livelli di gestione (vedi apps/accounts/access.py) -----------------
+    @property
+    def is_gestore_globale(self) -> bool:
+        """Admin o Amministrazione: gestione di tutto il portafoglio."""
+        from .access import is_global_manager
+
+        return is_global_manager(self)
+
+    @property
+    def is_gestore_bu(self) -> bool:
+        """Responsabile di almeno una Business Unit attiva."""
+        from .access import is_bu_manager
+
+        return is_bu_manager(self)
+
+    @property
+    def is_gestore(self) -> bool:
+        """Ha l'interfaccia di gestione (Admin, Amministrazione, Resp. BU)."""
+        from .access import is_manager
+
+        return is_manager(self)
+
+    def puo_gestire_commessa(self, commessa) -> bool:
+        from .access import can_manage_commessa
+
+        return can_manage_commessa(self, commessa)
+
+    def business_unit_attive(self):
+        from .access import membership_current_q
+
+        return BusinessUnit.objects.filter(
+            membership_current_q("membership__"),
+            membership__utente=self,
+            attiva=True,
+        ).distinct()
+
+    def business_unit_gestite(self):
+        from .access import membership_current_q
+
+        return BusinessUnit.objects.filter(
+            membership_current_q("membership__"),
+            membership__utente=self,
+            membership__responsabile=True,
+            attiva=True,
+        ).distinct()
+
+    def puo_essere_pm_in_business_unit(self, business_unit) -> bool:
+        if self.is_admin_lef:
+            return True
+        if business_unit is None:
+            # Compatibilità con commesse legacy non ancora classificate per BU.
+            return self.is_risorsa_ingaggiabile
+        from .access import membership_current_q
+
+        return UserBusinessUnit.objects.filter(
+            membership_current_q(),
+            utente=self,
+            business_unit=business_unit,
+            puo_essere_pm=True,
+        ).exists()
 
     @property
     def is_amministrazione(self) -> bool:
@@ -112,6 +185,123 @@ class User(AbstractUser):
     def is_pending_activation(self) -> bool:
         """Account creato tramite invito che non ha ancora una password propria."""
         return not self.has_usable_password()
+
+
+class BusinessUnit(UUIDTimeStampedModel):
+    """Area organizzativa LEF (es. Consulenza, Formazione, AI)."""
+
+    nome = models.CharField(max_length=120, unique=True)
+    codice = models.CharField(max_length=40, unique=True)
+    descrizione = models.TextField(blank=True)
+    attiva = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = "business_unit"
+        ordering = ("nome",)
+        constraints = [
+            models.UniqueConstraint(Lower("nome"), name="uq_business_unit_nome_ci"),
+            models.UniqueConstraint(Lower("codice"), name="uq_business_unit_codice_ci"),
+        ]
+
+    def clean(self):
+        super().clean()
+        self.nome = (self.nome or "").strip()
+        self.codice = (self.codice or "").strip().upper()
+        if BusinessUnit.objects.filter(nome__iexact=self.nome).exclude(pk=self.pk).exists():
+            raise ValidationError({"nome": "Esiste già una Business Unit con questo nome."})
+        if BusinessUnit.objects.filter(codice__iexact=self.codice).exclude(pk=self.pk).exists():
+            raise ValidationError({"codice": "Esiste già una Business Unit con questo codice."})
+
+        # Una BU con commesse ancora aperte non può essere disattivata: il
+        # perimetro autorizzativo sparirebbe mentre il lavoro e ancora attivo.
+        if self.pk and not self.attiva:
+            originale_attiva = (
+                BusinessUnit.objects.filter(pk=self.pk)
+                .values_list("attiva", flat=True)
+                .first()
+            )
+            if originale_attiva:
+                from apps.projects.models import Commessa
+
+                aperte = Commessa.objects.filter(
+                    business_unit_id=self.pk,
+                    stato=Commessa.Stato.APERTA,
+                ).count()
+                if aperte:
+                    raise ValidationError(
+                        {
+                            "attiva": (
+                                f"La Business Unit non può essere disattivata: "
+                                f"sono presenti {aperte} commesse aperte. "
+                                "Chiudile o riclassificale prima di procedere."
+                            )
+                        }
+                    )
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+    def __str__(self) -> str:
+        return self.nome
+
+
+class UserBusinessUnit(UUIDTimeStampedModel):
+    """Appartenenza di una persona a una o più Business Unit.
+
+    Le capability sono indipendenti: una persona può essere membro operativo,
+    responsabile di BU e/o PM abilitato nello stesso perimetro.
+    """
+
+    utente = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="membership_business_unit",
+    )
+    business_unit = models.ForeignKey(
+        BusinessUnit,
+        on_delete=models.PROTECT,
+        related_name="membership",
+    )
+    responsabile = models.BooleanField(default=False)
+    puo_essere_pm = models.BooleanField(default=False)
+    attiva = models.BooleanField(default=True)
+    data_inizio = models.DateField(null=True, blank=True)
+    data_fine = models.DateField(null=True, blank=True)
+
+    class Meta:
+        db_table = "utente_business_unit"
+        ordering = ("business_unit__nome", "utente__last_name", "utente__first_name")
+        constraints = [
+            models.UniqueConstraint(
+                fields=("utente", "business_unit"),
+                name="uq_utente_business_unit",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(data_fine__isnull=True) | models.Q(data_inizio__isnull=True) | models.Q(data_fine__gte=models.F("data_inizio")),
+                name="utente_bu_fine_non_precede_inizio",
+            ),
+        ]
+
+    def clean(self):
+        super().clean()
+        if self.data_inizio and self.data_fine and self.data_fine < self.data_inizio:
+            raise ValidationError({"data_fine": "La data di fine non può precedere la data di inizio."})
+        if self.responsabile and self.utente_id and not self.utente.is_active:
+            raise ValidationError({"utente": "Un responsabile di Business Unit deve essere un utente attivo."})
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+    def __str__(self) -> str:
+        qualifiche = []
+        if self.responsabile:
+            qualifiche.append("Responsabile")
+        if self.puo_essere_pm:
+            qualifiche.append("PM")
+        suffix = f" ({', '.join(qualifiche)})" if qualifiche else ""
+        return f"{self.utente} – {self.business_unit}{suffix}"
 
 
 class Skill(UUIDTimeStampedModel):

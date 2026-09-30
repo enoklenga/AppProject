@@ -22,6 +22,10 @@
 
             <h1>Dashboard</h1>
 
+            {% if perimetro_nomi %}
+                <p class="page-subtitle">Perimetro: {{ perimetro_nomi|join:", " }}</p>
+            {% endif %}
+
         </div>
 
 
@@ -30,7 +34,7 @@
 
             <a
                 class="button button-secondary"
-                href="{% url 'operations:periodo-detail' %}?mese={{ mese_selezionato }}">
+                href="{% url 'operations:periodo-detail' %}?mese={{ mese_selezionato }}{% if bu_selezionata %}&bu={{ bu_selezionata }}{% endif %}">
 
                 <svg class="btn-icon" aria-hidden="true">
                     <use href="#icon-calendar-lock"></use>
@@ -68,6 +72,18 @@
                     value="{{ mese_selezionato }}">
 
             </div>
+
+            {% if business_units_filtro|length > 1 %}
+            <div class="field">
+                <label for="id_bu">Business Unit</label>
+                <select id="id_bu" name="bu">
+                    <option value="">{% if user.is_gestore_globale or user.is_direzione_generale %}Tutte le Business Unit{% else %}Tutte le mie Business Unit{% endif %}</option>
+                    {% for bu in business_units_filtro %}
+                        <option value="{{ bu.pk }}" {% if bu_selezionata == bu.pk|stringformat:'s' %}selected{% endif %}>{{ bu.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
 
 
             <div class="field">
@@ -265,7 +281,7 @@
         {% if puo_gestire_controllo %}
         <a class="kpi-card dashboard-admin-anomaly"
            data-tone="{% if dashboard.numero_righe_senza_tariffa %}danger{% else %}success{% endif %}"
-           href="{% url 'operations:periodo-detail' %}?mese={{ mese_selezionato }}">
+           href="{% url 'operations:periodo-detail' %}?mese={{ mese_selezionato }}{% if bu_selezionata %}&bu={{ bu_selezionata }}{% endif %}">
         {% else %}
         <article class="kpi-card dashboard-admin-anomaly"
                  data-tone="{% if dashboard.numero_righe_senza_tariffa %}danger{% else %}success{% endif %}">

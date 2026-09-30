@@ -63,6 +63,24 @@
     </select>
 
 
+    {% if business_units_filtro|length > 1 %}
+    <select
+        name="bu"
+        aria-label="Filtra per Business Unit">
+
+        <option value="">Tutte le Business Unit</option>
+
+        {% for bu in business_units_filtro %}
+            <option value="{{ bu.pk }}" {% if request.GET.bu == bu.pk|stringformat:'s' %}selected{% endif %}>
+                {{ bu.nome }}
+            </option>
+        {% endfor %}
+        <option value="nessuna" {% if request.GET.bu == 'nessuna' %}selected{% endif %}>Senza Business Unit</option>
+
+    </select>
+    {% endif %}
+
+
     <select
         name="stato"
         aria-label="Filtra per stato">
@@ -216,10 +234,11 @@
                                 <div class="entity-copy">
 
                                     <strong>
-                                        <a href="{% url 'projects:commessa-teamwork' commessa.pk %}">
-                                            {{ commessa.codice }}
-                                        </a>
+                                        <a href="{% url 'projects:commessa-teamwork' commessa.pk %}">{{ commessa.codice }}</a>
                                     </strong>
+                                    <small class="muted">
+                                        {% if commessa.business_unit %}{{ commessa.business_unit.nome }}{% else %}Senza Business Unit{% endif %}
+                                    </small>
 
                                 </div>
 
@@ -362,7 +381,7 @@
                             <div class="row-actions">
 
 
-                                {% if puo_modificare %}
+                                {% if commessa.riga_modificabile %}
                                     <a
                                         class="row-action commessa-action-icon"
                                         href="{% url 'projects:commessa-update' commessa.pk %}">
@@ -380,7 +399,7 @@
                                     </a>
                                 {% endif %}
 
-                                {% if puo_cambiare_stato %}
+                                {% if commessa.riga_stato_modificabile %}
                                     <form
                                         method="post"
                                         action="{% url 'projects:commessa-toggle-state' commessa.pk %}">

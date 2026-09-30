@@ -117,7 +117,7 @@ def _user_can_manage_tasks(user):
         se ha almeno una commessa attiva assegnata.
     """
 
-    if user.is_admin_lef:
+    if user.is_gestore_globale:
         return True
 
     return (

@@ -37,13 +37,15 @@
     <link
     rel="icon"
     type="image/png"
-    href="{% static 'branding/android-chrome-192x192.png' %}"
+    href="{% static 'images/branding/android-chrome-192x192.png' %}"
         sizes="192x192">
 
     <link
         rel="apple-touch-icon"
         sizes="180x180"
         href="{% static 'images/branding/apple-touch-icon.png' %}">
+
+    <link rel="manifest" href="{% static 'images/branding/site.webmanifest' %}">
 
     <link rel="preload" href="{% static 'fonts/inter-var-latin.woff' %}" as="font" type="font/woff" crossorigin>
     <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
@@ -77,6 +79,7 @@
     {% if user.is_authenticated %}
         <link rel="stylesheet" href="{% static 'css/ui-final.css' %}">
         <link rel="stylesheet" href="{% static 'css/ui-system.css' %}">
+        <link rel="stylesheet" href="{% static 'css/business-unit.css' %}">
     {% endif %}
 </head>
 
@@ -317,6 +320,22 @@
 
         </symbol>
 
+
+        <symbol
+            id="icon-building"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round">
+
+            <path d="M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"/>
+            <path d="M16 9h2a2 2 0 0 1 2 2v10"/>
+            <path d="M3 21h18"/>
+            <path d="M8 7h4M8 11h4M8 15h4"/>
+
+        </symbol>
 
         <symbol
             id="icon-layers"
@@ -764,16 +783,10 @@
 
                 </span>
 
-                <span class="brand-copy">
-
-                    <strong>
-                        LEFTRACK
+                <span class="brand-copy brand-copy-leftrack">
+                    <strong aria-label="LEFTRACK">
+                        <span class="brand-word-lef">LEF</span><span class="brand-word-track">TRACK</span>
                     </strong>
-
-                    <small>
-                        LEF
-                    </small>
-
                 </span>
 
             </a>
@@ -837,727 +850,48 @@
 
 
             <!-- =================================================
-                 OPERATIVITÀ
+                 MENU GUIDATO DAI PERMESSI
+                 Un solo menu per tutti i profili: le voci vengono da
+                 apps/operations/templatetags/navigation.py
+                 (build_sidebar_menu) e da apps/accounts/access.py.
                  ================================================= -->
 
-            {% if user.is_admin_lef or user.is_risorsa_ingaggiabile or can_view_pm_dashboard %}
-            <div class="nav-group">
+            {% sidebar_menu user as menu_groups %}
 
-                <div class="nav-group-label">
-                    Operatività
-                </div>
+            {% for gruppo in menu_groups %}
 
-
-                <!-- ORE -->
-
-                <a
-                    class="nav-link{% if current_section == 'ore' %} is-active{% endif %}"
-                    href="{% url 'timesheets:ore-list' %}"
-                    {% if current_section == 'ore' %}aria-current="page"{% endif %}>
-
-                    <span
-                        class="nav-indicator"
-                        aria-hidden="true">
-                    </span>
-
-                    <svg
-                        class="nav-icon"
-                        aria-hidden="true">
-
-                        <use href="#icon-clock"></use>
-
-                    </svg>
-
-                    <span class="nav-link-label">
-                        Ore
-                    </span>
-
-                </a>
-
-
-                <!-- SPESE -->
-
-                <a
-                    class="nav-link{% if current_section == 'spese' %} is-active{% endif %}"
-                    href="{% url 'timesheets:spesa-list' %}"
-                    {% if current_section == 'spese' %}aria-current="page"{% endif %}>
-
-                    <span
-                        class="nav-indicator"
-                        aria-hidden="true">
-                    </span>
-
-                    <svg
-                        class="nav-icon"
-                        aria-hidden="true">
-
-                        <use href="#icon-receipt"></use>
-
-                    </svg>
-
-                    <span class="nav-link-label">
-                        Spese
-                    </span>
-
-                </a>
-
-
-                <!-- PIANIFICAZIONE -->
-
-                <a
-                    class="nav-link{% if current_section == 'pianificazione' %} is-active{% endif %}"
-                    href="{% url 'planning:pianificazione-list' %}"
-                    {% if current_section == 'pianificazione' %}aria-current="page"{% endif %}>
-
-                    <span
-                        class="nav-indicator"
-                        aria-hidden="true">
-                    </span>
-
-                    <svg
-                        class="nav-icon"
-                        aria-hidden="true">
-
-                        <use href="#icon-calendar"></use>
-
-                    </svg>
-
-                    <span class="nav-link-label">
-                        Pianificazione
-                    </span>
-
-                </a>
-
-
-                <!-- LE MIE ATTIVITÀ -->
-
-                <a
-                    class="nav-link{% if current_section == 'mie_attivita' %} is-active{% endif %}"
-                    href="{% url 'tasks:my-task-list' %}"
-                    {% if current_section == 'mie_attivita' %}aria-current="page"{% endif %}>
-
-                    <span
-                        class="nav-indicator"
-                        aria-hidden="true">
-                    </span>
-
-                    <svg
-                        class="nav-icon"
-                        aria-hidden="true">
-
-                        <use href="#icon-task-check"></use>
-
-                    </svg>
-
-                    <span class="nav-link-label">
-                        Le mie attività
-                    </span>
-
-                </a>
-
-
-                <!-- DOCUMENTI
-                     Visibile a tutti: Admin, PM e consulenti assegnati
-                     vedono i documenti delle proprie commesse. -->
-
-                <a
-                    class="nav-link{% if current_section == 'documenti' %} is-active{% endif %}"
-                    href="{% url 'documents:document-list' %}"
-                    {% if current_section == 'documenti' %}aria-current="page"{% endif %}>
-
-                    <span
-                        class="nav-indicator"
-                        aria-hidden="true">
-                    </span>
-
-                    <svg
-                        class="nav-icon"
-                        aria-hidden="true">
-
-                        <use href="#icon-file-text"></use>
-
-                    </svg>
-
-                    <span class="nav-link-label">
-                        Documenti
-                    </span>
-
-                </a>
-
-
-                <!-- FASI
-                     Visibile a tutti (visualizzazione): la gestione
-                     (creare/modificare/eliminare) resta riservata a
-                     PM e Admin, verificata lato backend. -->
-
-                <a
-                    class="nav-link{% if current_section == 'fasi' %} is-active{% endif %}"
-                    href="{% url 'phases:fase-list' %}"
-                    {% if current_section == 'fasi' %}aria-current="page"{% endif %}>
-
-                    <span
-                        class="nav-indicator"
-                        aria-hidden="true">
-                    </span>
-
-                    <svg
-                        class="nav-icon"
-                        aria-hidden="true">
-
-                        <use href="#icon-layers"></use>
-
-                    </svg>
-
-                    <span class="nav-link-label">
-                        Fasi
-                    </span>
-
-                </a>
-
-
-                <!-- ATTIVITÀ GESTIONALE
-                     Solo Admin e PM -->
-
-                {% if user.is_admin_lef or can_view_pm_dashboard %}
-
-                    <a
-                        class="nav-link{% if current_section == 'attivita' %} is-active{% endif %}"
-                        href="{% url 'tasks:task-list' %}"
-                        {% if current_section == 'attivita' %}aria-current="page"{% endif %}>
-
-                        <span
-                            class="nav-indicator"
-                            aria-hidden="true">
-                        </span>
-
-                        <svg
-                            class="nav-icon"
-                            aria-hidden="true">
-
-                            <use href="#icon-task-list"></use>
-
-                        </svg>
-
-                        <span class="nav-link-label">
-                            Attività
-                        </span>
-
-                    </a>
-
-                {% endif %}
-
-
-                <!-- DASHBOARD DI PROGETTO -->
-
-                {% if can_view_pm_dashboard and not user.is_admin_lef %}
-
-                    <a
-                        class="nav-link{% if current_section == 'dashboard' %} is-active{% endif %}"
-                        href="{% url 'operations:dashboard-pm' %}"
-                        {% if current_section == 'dashboard' %}aria-current="page"{% endif %}>
-
-                        <span
-                            class="nav-indicator"
-                            aria-hidden="true">
-                        </span>
-
-                        <svg
-                            class="nav-icon"
-                            aria-hidden="true">
-
-                            <use href="#icon-chart"></use>
-
-                        </svg>
-
-                        <span class="nav-link-label">
-                            Dashboard
-                        </span>
-
-                    </a>
-
-                {% endif %}
-
-            </div>
-            {% endif %}
-
-
-            {% if user.is_admin_lef %}
-
-
-                <!-- =================================================
-                     GESTIONE
-                     ================================================= -->
-
-                <div class="nav-group">
+                <div class="nav-group{% if gruppo.key == 'bu' %} nav-group-bu{% endif %}">
 
                     <div class="nav-group-label">
-                        Gestione
+                        {{ gruppo.label }}
                     </div>
 
+                    {% for voce in gruppo.items %}
 
-                    <a
-                        class="nav-link{% if current_section == 'consulenti' %} is-active{% endif %}"
-                        href="{% url 'accounts:consulente-list' %}"
-                        {% if current_section == 'consulenti' %}aria-current="page"{% endif %}>
+                        {% if voce.key and voce.key == current_section or voce.url == request.path %}
+                            <a
+                                class="nav-link is-active"
+                                href="{{ voce.url }}"
+                                aria-current="page">
+                                <span class="nav-indicator" aria-hidden="true"></span>
+                                <svg class="nav-icon" aria-hidden="true"><use href="#{{ voce.icon }}"></use></svg>
+                                <span class="nav-link-label">{{ voce.label }}</span>
+                            </a>
+                        {% else %}
+                            <a
+                                class="nav-link"
+                                href="{{ voce.url }}">
+                                <span class="nav-indicator" aria-hidden="true"></span>
+                                <svg class="nav-icon" aria-hidden="true"><use href="#{{ voce.icon }}"></use></svg>
+                                <span class="nav-link-label">{{ voce.label }}</span>
+                            </a>
+                        {% endif %}
 
-                        <span
-                            class="nav-indicator"
-                            aria-hidden="true">
-                        </span>
-
-                        <svg
-                            class="nav-icon"
-                            aria-hidden="true">
-
-                            <use href="#icon-users"></use>
-
-                        </svg>
-
-                        <span class="nav-link-label">
-                            Persone e ruoli
-                        </span>
-
-                    </a>
-
-
-                    <a
-                        class="nav-link{% if current_section == 'skill-matrix' %} is-active{% endif %}"
-                        href="{% url 'accounts:skill-matrix' %}"
-                        {% if current_section == 'skill-matrix' %}aria-current="page"{% endif %}>
-
-                        <span class="nav-indicator" aria-hidden="true"></span>
-                        <svg class="nav-icon" aria-hidden="true">
-                            <use href="#icon-layers"></use>
-                        </svg>
-                        <span class="nav-link-label">Skill Matrix</span>
-                    </a>
-
-
-                    <a
-                        class="nav-link{% if current_section == 'clienti' %} is-active{% endif %}"
-                        href="{% url 'projects:cliente-list' %}"
-                        {% if current_section == 'clienti' %}aria-current="page"{% endif %}>
-
-                        <span
-                            class="nav-indicator"
-                            aria-hidden="true">
-                        </span>
-
-                        <svg
-                            class="nav-icon"
-                            aria-hidden="true">
-
-                            <use href="#icon-briefcase"></use>
-
-                        </svg>
-
-                        <span class="nav-link-label">
-                            Clienti
-                        </span>
-
-                    </a>
-
-
-                    <a
-                        class="nav-link{% if current_section == 'commesse' %} is-active{% endif %}"
-                        href="{% url 'projects:commessa-list' %}"
-                        {% if current_section == 'commesse' %}aria-current="page"{% endif %}>
-
-                        <span
-                            class="nav-indicator"
-                            aria-hidden="true">
-                        </span>
-
-                        <svg
-                            class="nav-icon"
-                            aria-hidden="true">
-
-                            <use href="#icon-folder"></use>
-
-                        </svg>
-
-                        <span class="nav-link-label">
-                            Commesse
-                        </span>
-
-                    </a>
-
-
-                    <a
-                        class="nav-link{% if current_section == 'assegnazioni' %} is-active{% endif %}"
-                        href="{% url 'projects:assegnazione-list' %}"
-                        {% if current_section == 'assegnazioni' %}aria-current="page"{% endif %}>
-
-                        <span
-                            class="nav-indicator"
-                            aria-hidden="true">
-                        </span>
-
-                        <svg
-                            class="nav-icon"
-                            aria-hidden="true">
-
-                            <use href="#icon-link"></use>
-
-                        </svg>
-
-                        <span class="nav-link-label">
-                            Assegnazioni
-                        </span>
-
-                    </a>
-
-
-                    <a
-                        class="nav-link{% if current_section == 'tariffe' %} is-active{% endif %}"
-                        href="{% url 'projects:tariffa-list' %}"
-                        {% if current_section == 'tariffe' %}aria-current="page"{% endif %}>
-
-                        <span
-                            class="nav-indicator"
-                            aria-hidden="true">
-                        </span>
-
-                        <svg
-                            class="nav-icon"
-                            aria-hidden="true">
-
-                            <use href="#icon-tag"></use>
-
-                        </svg>
-
-                        <span class="nav-link-label">
-                            Tariffe
-                        </span>
-
-                    </a>
+                    {% endfor %}
 
                 </div>
 
-
-                <!-- =================================================
-                     CONTROLLO
-                     ================================================= -->
-
-                <div class="nav-group">
-
-                    <div class="nav-group-label">
-                        Controllo
-                    </div>
-
-
-                    <a
-                        class="nav-link{% if current_section == 'dashboard' %} is-active{% endif %}"
-                        href="{% url 'operations:dashboard-admin' %}"
-                        {% if current_section == 'dashboard' %}aria-current="page"{% endif %}>
-
-                        <span
-                            class="nav-indicator"
-                            aria-hidden="true">
-                        </span>
-
-                        <svg
-                            class="nav-icon"
-                            aria-hidden="true">
-
-                            <use href="#icon-chart"></use>
-
-                        </svg>
-
-                        <span class="nav-link-label">
-                            Dashboard
-                        </span>
-
-                    </a>
-
-
-                    <a
-                        class="nav-link{% if current_section == 'periodi' %} is-active{% endif %}"
-                        href="{% url 'operations:periodo-detail' %}"
-                        {% if current_section == 'periodi' %}aria-current="page"{% endif %}>
-
-                        <span
-                            class="nav-indicator"
-                            aria-hidden="true">
-                        </span>
-
-                        <svg
-                            class="nav-icon"
-                            aria-hidden="true">
-
-                            <use href="#icon-calendar-lock"></use>
-
-                        </svg>
-
-                        <span class="nav-link-label">
-                            Periodi
-                        </span>
-
-                    </a>
-
-
-                    <a
-                        class="nav-link{% if current_section == 'promemoria' %} is-active{% endif %}"
-                        href="{% url 'operations:promemoria' %}"
-                        {% if current_section == 'promemoria' %}aria-current="page"{% endif %}>
-
-                        <span
-                            class="nav-indicator"
-                            aria-hidden="true">
-                        </span>
-
-                        <svg
-                            class="nav-icon"
-                            aria-hidden="true">
-
-                            <use href="#icon-bell"></use>
-
-                        </svg>
-
-                        <span class="nav-link-label">
-                            Promemoria
-                        </span>
-
-                    </a>
-
-
-                    <a
-                        class="nav-link{% if current_section == 'importazioni' %} is-active{% endif %}"
-                        href="{% url 'operations:importazione-list' %}"
-                        {% if current_section == 'importazioni' %}aria-current="page"{% endif %}>
-
-                        <span
-                            class="nav-indicator"
-                            aria-hidden="true">
-                        </span>
-
-                        <svg
-                            class="nav-icon"
-                            aria-hidden="true">
-
-                            <use href="#icon-upload"></use>
-
-                        </svg>
-
-                        <span class="nav-link-label">
-                            Importazioni
-                        </span>
-
-                    </a>
-
-
-                    <a
-                        class="nav-link{% if current_section == 'audit' %} is-active{% endif %}"
-                        href="{% url 'operations:audit-list' %}"
-                        {% if current_section == 'audit' %}aria-current="page"{% endif %}>
-
-                        <span
-                            class="nav-indicator"
-                            aria-hidden="true">
-                        </span>
-
-                        <svg
-                            class="nav-icon"
-                            aria-hidden="true">
-
-                            <use href="#icon-shield-check"></use>
-
-                        </svg>
-
-                        <span class="nav-link-label">
-                            Registro audit
-                        </span>
-
-                    </a>
-
-
-                    <a
-                        class="nav-link{% if current_section == 'report' %} is-active{% endif %}"
-                        href="{% url 'operations:report-mensile' %}"
-                        {% if current_section == 'report' %}aria-current="page"{% endif %}>
-
-                        <span
-                            class="nav-indicator"
-                            aria-hidden="true">
-                        </span>
-
-                        <svg
-                            class="nav-icon"
-                            aria-hidden="true">
-
-                            <use href="#icon-file-text"></use>
-
-                        </svg>
-
-                        <span class="nav-link-label">
-                            Report mensile
-                        </span>
-
-                    </a>
-
-                </div>
-
-            {% endif %}
-
-
-            {% if user.is_commerciale %}
-                <div class="nav-group">
-                    <div class="nav-group-label">Portafoglio</div>
-
-                    <a class="nav-link{% if current_section == 'clienti' %} is-active{% endif %}"
-                       href="{% url 'projects:cliente-list' %}">
-                        <span class="nav-indicator" aria-hidden="true"></span>
-                        <svg class="nav-icon" aria-hidden="true"><use href="#icon-briefcase"></use></svg>
-                        <span class="nav-link-label">Clienti</span>
-                    </a>
-
-                    <a class="nav-link{% if current_section == 'commesse' %} is-active{% endif %}"
-                       href="{% url 'projects:commessa-list' %}">
-                        <span class="nav-indicator" aria-hidden="true"></span>
-                        <svg class="nav-icon" aria-hidden="true"><use href="#icon-folder"></use></svg>
-                        <span class="nav-link-label">Commesse</span>
-                    </a>
-
-                    <a class="nav-link{% if current_section == 'documenti' %} is-active{% endif %}"
-                       href="{% url 'documents:document-list' %}">
-                        <span class="nav-indicator" aria-hidden="true"></span>
-                        <svg class="nav-icon" aria-hidden="true"><use href="#icon-file-text"></use></svg>
-                        <span class="nav-link-label">Documenti</span>
-                    </a>
-                </div>
-            {% endif %}
-
-
-            {% if user.is_responsabile_consulenza %}
-                <div class="nav-group">
-                    <div class="nav-group-label">Team e capacità</div>
-
-                    <a class="nav-link{% if current_section == 'consulenti' %} is-active{% endif %}"
-                       href="{% url 'accounts:consulente-list' %}">
-                        <span class="nav-indicator" aria-hidden="true"></span>
-                        <svg class="nav-icon" aria-hidden="true"><use href="#icon-users"></use></svg>
-                        <span class="nav-link-label">Persone</span>
-                    </a>
-
-                    <a class="nav-link{% if current_section == 'skill-matrix' %} is-active{% endif %}"
-                       href="{% url 'accounts:skill-matrix' %}">
-                        <span class="nav-indicator" aria-hidden="true"></span>
-                        <svg class="nav-icon" aria-hidden="true"><use href="#icon-layers"></use></svg>
-                        <span class="nav-link-label">Skill Matrix</span>
-                    </a>
-                </div>
-            {% endif %}
-
-
-            {% if user.is_direzione_generale %}
-                <div class="nav-group">
-                    <div class="nav-group-label">Direzione</div>
-
-                    <a class="nav-link{% if current_section == 'dashboard' %} is-active{% endif %}"
-                       href="{% url 'operations:dashboard-admin' %}">
-                        <span class="nav-indicator" aria-hidden="true"></span>
-                        <svg class="nav-icon" aria-hidden="true"><use href="#icon-chart"></use></svg>
-                        <span class="nav-link-label">Dashboard direzionale</span>
-                    </a>
-
-                    <a class="nav-link{% if current_section == 'report' %} is-active{% endif %}"
-                       href="{% url 'operations:report-mensile' %}">
-                        <span class="nav-indicator" aria-hidden="true"></span>
-                        <svg class="nav-icon" aria-hidden="true"><use href="#icon-file-text"></use></svg>
-                        <span class="nav-link-label">Report</span>
-                    </a>
-
-                    <a class="nav-link{% if current_section == 'pianificazione' %} is-active{% endif %}"
-                       href="{% url 'planning:pianificazione-list' %}">
-                        <span class="nav-indicator" aria-hidden="true"></span>
-                        <svg class="nav-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg>
-                        <span class="nav-link-label">Pianificazione</span>
-                    </a>
-
-                    <a class="nav-link{% if current_section == 'commesse' %} is-active{% endif %}"
-                       href="{% url 'projects:commessa-list' %}">
-                        <span class="nav-indicator" aria-hidden="true"></span>
-                        <svg class="nav-icon" aria-hidden="true"><use href="#icon-folder"></use></svg>
-                        <span class="nav-link-label">Commesse</span>
-                    </a>
-
-                    <a class="nav-link{% if current_section == 'clienti' %} is-active{% endif %}"
-                       href="{% url 'projects:cliente-list' %}">
-                        <span class="nav-indicator" aria-hidden="true"></span>
-                        <svg class="nav-icon" aria-hidden="true"><use href="#icon-briefcase"></use></svg>
-                        <span class="nav-link-label">Clienti</span>
-                    </a>
-
-                    <a class="nav-link{% if current_section == 'attivita' %} is-active{% endif %}"
-                       href="{% url 'tasks:task-list' %}">
-                        <span class="nav-indicator" aria-hidden="true"></span>
-                        <svg class="nav-icon" aria-hidden="true"><use href="#icon-task-list"></use></svg>
-                        <span class="nav-link-label">Attività</span>
-                    </a>
-
-                    <a class="nav-link{% if current_section == 'documenti' %} is-active{% endif %}"
-                       href="{% url 'documents:document-list' %}">
-                        <span class="nav-indicator" aria-hidden="true"></span>
-                        <svg class="nav-icon" aria-hidden="true"><use href="#icon-file-text"></use></svg>
-                        <span class="nav-link-label">Documenti</span>
-                    </a>
-
-                    <a class="nav-link{% if current_section == 'skill-matrix' %} is-active{% endif %}"
-                       href="{% url 'accounts:skill-matrix' %}">
-                        <span class="nav-indicator" aria-hidden="true"></span>
-                        <svg class="nav-icon" aria-hidden="true"><use href="#icon-layers"></use></svg>
-                        <span class="nav-link-label">Skill Matrix</span>
-                    </a>
-
-                    <a class="nav-link{% if current_section == 'audit' %} is-active{% endif %}"
-                       href="{% url 'operations:audit-list' %}">
-                        <span class="nav-indicator" aria-hidden="true"></span>
-                        <svg class="nav-icon" aria-hidden="true"><use href="#icon-shield-check"></use></svg>
-                        <span class="nav-link-label">Audit</span>
-                    </a>
-                </div>
-            {% endif %}
-
-            {% if user.is_amministrazione %}
-                <div class="nav-group">
-                    <div class="nav-group-label">Amministrazione</div>
-
-                    <a class="nav-link{% if current_section == 'ore' %} is-active{% endif %}"
-                       href="{% url 'timesheets:ore-list' %}">
-                        <span class="nav-indicator" aria-hidden="true"></span>
-                        <svg class="nav-icon" aria-hidden="true"><use href="#icon-clock"></use></svg>
-                        <span class="nav-link-label">Ore</span>
-                    </a>
-
-                    <a class="nav-link{% if current_section == 'spese' %} is-active{% endif %}"
-                       href="{% url 'timesheets:spesa-list' %}">
-                        <span class="nav-indicator" aria-hidden="true"></span>
-                        <svg class="nav-icon" aria-hidden="true"><use href="#icon-receipt"></use></svg>
-                        <span class="nav-link-label">Spese</span>
-                    </a>
-
-                    <a class="nav-link{% if current_section == 'periodi' %} is-active{% endif %}"
-                       href="{% url 'operations:periodo-detail' %}">
-                        <span class="nav-indicator" aria-hidden="true"></span>
-                        <svg class="nav-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg>
-                        <span class="nav-link-label">Chiusura mese</span>
-                    </a>
-
-                    <a class="nav-link{% if current_section == 'tariffe' %} is-active{% endif %}"
-                       href="{% url 'projects:tariffa-list' %}">
-                        <span class="nav-indicator" aria-hidden="true"></span>
-                        <svg class="nav-icon" aria-hidden="true"><use href="#icon-link"></use></svg>
-                        <span class="nav-link-label">Tariffe</span>
-                    </a>
-
-                    <a class="nav-link{% if current_section == 'report' %} is-active{% endif %}"
-                       href="{% url 'operations:report-mensile' %}">
-                        <span class="nav-indicator" aria-hidden="true"></span>
-                        <svg class="nav-icon" aria-hidden="true"><use href="#icon-file-text"></use></svg>
-                        <span class="nav-link-label">Report mensile</span>
-                    </a>
-                </div>
-            {% endif %}
+            {% endfor %}
 
         </nav>
 

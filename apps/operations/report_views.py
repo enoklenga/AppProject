@@ -15,7 +15,7 @@ def _form_iniziale(request):
     dati = request.GET.copy()
     if not dati.get("mese"):
         dati["mese"] = f"{oggi.year:04d}-{oggi.month:02d}"
-    return ReportMensileFilterForm(dati)
+    return ReportMensileFilterForm(dati, user=request.user)
 
 
 def _filtri_da_form(form):
@@ -31,6 +31,7 @@ def _filtri_da_form(form):
         commessa_id=commessa.id if commessa else None,
         consulente_id=consulente.id if consulente else None,
         fase_id=fase.id if fase else None,
+        business_unit_ids=form.business_unit_ids(),
     )
 
 

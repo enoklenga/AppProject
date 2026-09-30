@@ -4,7 +4,13 @@ from apps.common.widgets import DateInput
 from django.core.exceptions import ValidationError
 from django.db.models import Max, Min, Q, Sum
 
-from apps.accounts.models import User
+from apps.accounts.access import (
+    can_be_project_manager,
+    commesse_in_scope,
+    is_global_manager,
+    managed_business_unit_ids,
+)
+from apps.accounts.models import BusinessUnit, User
 from apps.phases.models import FaseCommessa
 
 from .models import Assegnazione, Cliente, Commessa, TariffaAssegnazione
@@ -38,6 +44,7 @@ class CommessaForm(forms.ModelForm):
         model = Commessa
         fields = (
             "cliente",
+            "business_unit",
             "codice",
             "descrizione",
             "ore_budget",
@@ -46,6 +53,7 @@ class CommessaForm(forms.ModelForm):
             "note",
         )
         labels = {
+            "business_unit": "Business Unit",
             "ore_budget": "Budget complessivo ore",
             "data_inizio": "Data inizio",
             "data_fine_prevista": "Data fine prevista",
@@ -56,19 +64,41 @@ class CommessaForm(forms.ModelForm):
             "note": forms.Textarea(attrs={"rows": 4}),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.user = user
         current_cliente_id = getattr(self.instance, "cliente_id", None)
         self.fields["cliente"].queryset = Cliente.objects.filter(
             Q(attivo=True) | Q(pk=current_cliente_id)
         ).order_by("ragione_sociale")
+        current_bu_id = getattr(self.instance, "business_unit_id", None)
+        self.fields["business_unit"].queryset = BusinessUnit.objects.filter(
+            Q(attiva=True) | Q(pk=current_bu_id)
+        ).order_by("nome")
+        self.fields["business_unit"].help_text = ""
+        # Flusso TO-BE: ogni nuova commessa nasce dentro una Business Unit.
+        # Le commesse legacy senza BU restano modificabili finché non vengono
+        # classificate.
+        if self.instance._state.adding and BusinessUnit.objects.filter(attiva=True).exists():
+            self.fields["business_unit"].required = True
+        # Il Responsabile BU crea e modifica commesse solo nelle proprie BU.
+        if user is not None and not is_global_manager(user) and not getattr(user, "is_commerciale", False):
+            gestite = managed_business_unit_ids(user)
+            if gestite:
+                self.fields["business_unit"].queryset = BusinessUnit.objects.filter(
+                    pk__in=gestite
+                ).order_by("nome")
+                self.fields["business_unit"].required = True
+                self.fields["business_unit"].empty_label = None
 
     def clean_codice(self):
         return self.cleaned_data["codice"].strip().upper()
 
     def _valida_figli_nel_nuovo_intervallo(self, inizio, fine):
         """Impedisce che una modifica della commessa invalidi dati esistenti."""
-        if not self.instance.pk or not inizio:
+        # L'id UUID esiste già prima del salvataggio: per distinguere una
+        # creazione si usa _state.adding.
+        if self.instance._state.adding or not inizio:
             return
 
         commessa_id = self.instance.pk
@@ -168,10 +198,50 @@ class CommessaForm(forms.ModelForm):
                 "Esistono dati operativi successivi alla nuova fine prevista.",
             )
 
+    def _valida_cambio_business_unit(self, nuova_bu):
+        """Blocca trasferimenti impliciti di commesse gia operative.
+
+        La prima classificazione di una commessa legacy (BU None -> BU) resta
+        consentita. Un vero cambio da una BU a un'altra, o la rimozione della
+        BU, richiede invece un futuro workflow esplicito di trasferimento.
+        """
+        if self.instance._state.adding:
+            return
+        originale = Commessa.objects.filter(pk=self.instance.pk).values(
+            "business_unit_id", "handover_completato"
+        ).first()
+        if not originale:
+            return
+        vecchia_bu_id = originale["business_unit_id"]
+        nuova_bu_id = getattr(nuova_bu, "pk", None)
+        if not vecchia_bu_id or vecchia_bu_id == nuova_bu_id:
+            return
+
+        from apps.planning.models import GiornoPianificato
+        from apps.tasks.models import Task
+        from apps.timesheets.models import RigaOre, SpesaTrasferta
+
+        ha_storia = (
+            originale["handover_completato"]
+            or FaseCommessa.objects.filter(commessa_id=self.instance.pk, sistema=False).exists()
+            or Assegnazione.objects.filter(commessa_id=self.instance.pk).exists()
+            or GiornoPianificato.objects.filter(assegnazione__commessa_id=self.instance.pk).exists()
+            or RigaOre.objects.filter(assegnazione__commessa_id=self.instance.pk).exists()
+            or SpesaTrasferta.objects.filter(assegnazione__commessa_id=self.instance.pk).exists()
+            or Task.objects.filter(commessa_id=self.instance.pk).exists()
+        )
+        if ha_storia:
+            self.add_error(
+                "business_unit",
+                "La Business Unit non può essere cambiata su una commessa già operativa. "
+                "Chiudi/riclassifica il lavoro con una procedura di trasferimento dedicata.",
+            )
+
     def clean(self):
         cleaned = super().clean()
         inizio = cleaned.get("data_inizio")
         fine = cleaned.get("data_fine_prevista")
+        self._valida_cambio_business_unit(cleaned.get("business_unit"))
         if inizio and fine and fine < inizio:
             self.add_error(
                 "data_fine_prevista",
@@ -248,8 +318,9 @@ class AssegnazioneForm(forms.ModelForm):
             "data_fine": DateInput(),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.user = user
         current_consulente_id = getattr(self.instance, "consulente_id", None)
         current_commessa_id = getattr(self.instance, "commessa_id", None)
         current_fase_id = getattr(self.instance, "fase_id", None)
@@ -263,9 +334,29 @@ class AssegnazioneForm(forms.ModelForm):
         ).order_by("last_name", "first_name", "email")
         self.fields["commessa"].queryset = Commessa.objects.filter(
             Q(stato=Commessa.Stato.APERTA) | Q(pk=current_commessa_id)
-        ).select_related("cliente").order_by("codice")
+        ).select_related("cliente", "business_unit").order_by("codice")
+        if user is not None:
+            # Perimetro di gestione: tutte (Admin/Amministrazione) o solo BU gestite.
+            self.fields["commessa"].queryset = self.fields["commessa"].queryset.filter(
+                pk__in=commesse_in_scope(user).values("pk")
+            )
 
         commessa_id = self.data.get("commessa") if self.is_bound else current_commessa_id
+        commessa_selezionata = None
+        if commessa_id:
+            commessa_selezionata = (
+                Commessa.objects.filter(pk=commessa_id)
+                .select_related("business_unit")
+                .first()
+            )
+
+        # Il team di commessa è operativo e può essere cross-BU: una persona può
+        # contribuire a una commessa anche se la sua BU principale è diversa.
+        # La BU owner governa invece ownership, permessi e abilitazione del PM.
+        self.fields["consulente"].help_text = (
+            "Il team può includere risorse di altre Business Unit. "
+            "Solo il Project Manager deve essere abilitato nella Business Unit owner della commessa."
+        )
         if commessa_id:
             self.fields["fase"].queryset = FaseCommessa.objects.filter(
                 commessa_id=commessa_id
@@ -277,7 +368,7 @@ class AssegnazioneForm(forms.ModelForm):
 
         # Dopo la creazione lo stato cambia esclusivamente tramite il workflow
         # dedicato (conclusione/riattivazione), che applica lock, validazioni e audit.
-        if self.instance.pk:
+        if not self.instance._state.adding:
             self.fields["stato"].disabled = True
             self.fields["stato"].help_text = (
                 "Per concludere o riattivare l'assegnazione usa l'azione dedicata "
@@ -285,7 +376,7 @@ class AssegnazioneForm(forms.ModelForm):
             )
 
     def _valida_integrita_storica(self, cleaned):
-        if not self.instance.pk:
+        if self.instance._state.adding:
             return
 
         originale = Assegnazione.objects.filter(pk=self.instance.pk).first()
@@ -375,6 +466,18 @@ class AssegnazioneForm(forms.ModelForm):
         elif commessa and fase.commessa_id != commessa.id:
             self.add_error("fase", "La fase non appartiene alla commessa selezionata.")
 
+        ruolo_commessa = cleaned.get("ruolo_commessa")
+        if (
+            commessa
+            and consulente
+            and ruolo_commessa == Assegnazione.Ruolo.PROJECT_MANAGER
+            and not can_be_project_manager(consulente, commessa.business_unit)
+        ):
+            self.add_error(
+                "ruolo_commessa",
+                "La risorsa non è abilitata come Project Manager nella Business Unit owner della commessa.",
+            )
+
         if commessa and inizio and inizio < commessa.data_inizio:
             self.add_error(
                 "data_inizio",
@@ -401,7 +504,7 @@ class AssegnazioneForm(forms.ModelForm):
 
         if stato == Assegnazione.Stato.ATTIVA:
             deve_verificare_ingaggiabilita = (
-                not self.instance.pk
+                self.instance._state.adding
                 or "consulente" in self.changed_data
                 or "data_inizio" in self.changed_data
             )
@@ -464,10 +567,13 @@ class TariffaAssegnazioneForm(forms.ModelForm):
             ),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
+        assegnazioni = Assegnazione.objects.all()
+        if user is not None:
+            assegnazioni = assegnazioni.filter(commessa__in=commesse_in_scope(user))
         self.fields["assegnazione"].queryset = (
-            Assegnazione.objects.select_related(
+            assegnazioni.select_related(
                 "consulente",
                 "commessa",
                 "commessa__cliente",

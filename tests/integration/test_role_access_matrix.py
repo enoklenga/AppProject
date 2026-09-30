@@ -182,7 +182,9 @@ class RoleAccessMatrixTests(TestCase):
         self.assertEqual(self.client.get(reverse("timesheets:ore-list")).status_code, 200)
         self.assertEqual(self.client.get(reverse("planning:pianificazione-list")).status_code, 200)
 
-    def test_amministrazione_ha_backoffice_completo_ma_non_configurazione(self):
+    def test_amministrazione_gestisce_tutto_tranne_la_piattaforma(self):
+        """Revisione 29/09/2026: l'Amministrazione gestisce tutto ciò che
+        gestisce l'Admin; resta esclusa solo la piattaforma (account e ruoli)."""
         self.client.force_login(self.amministrazione)
         for name in (
             "home",
@@ -191,38 +193,52 @@ class RoleAccessMatrixTests(TestCase):
             "projects:tariffa-list",
             "operations:periodo-detail",
             "operations:report-mensile",
+            "projects:cliente-list",
+            "projects:commessa-list",
+            "projects:assegnazione-list",
+            "operations:dashboard-admin",
+            "operations:promemoria",
+            "operations:importazione-list",
+            "operations:audit-list",
+            "accounts:consulente-list",
+            "accounts:business-unit-list",
+            "accounts:business-unit-create",
+            "accounts:skill-list",
+            "projects:cliente-create",
+            "projects:commessa-create",
+            "projects:assegnazione-create",
+            "planning:pianificazione-list",
         ):
             self.assertEqual(self.client.get(reverse(name)).status_code, 200, name)
 
-        for name in (
-            "accounts:consulente-list",
-            "projects:cliente-list",
-            "projects:commessa-list",
-            "planning:pianificazione-list",
-            "operations:audit-list",
-        ):
-            self.assertEqual(self.client.get(reverse(name)).status_code, 403, name)
+        # Piattaforma: account, ruoli e inviti restano all'Admin LEF.
+        self.assertEqual(
+            self.client.get(reverse("accounts:consulente-create")).status_code, 403
+        )
+        self.assertEqual(
+            self.client.get(
+                reverse("accounts:consulente-update", args=[self.consulente.pk])
+            ).status_code,
+            403,
+        )
 
-    def test_responsabile_consulenza_vede_team_skill_e_planning(self):
+    def test_responsabile_senza_business_unit_opera_come_consulente(self):
+        """Il ruolo da solo non concede la gestione: serve la nomina su una BU."""
         self.client.force_login(self.responsabile)
         for name in (
             "home",
-            "accounts:consulente-list",
-            "accounts:skill-matrix",
             "planning:pianificazione-list",
             "timesheets:ore-list",
             "timesheets:spesa-list",
         ):
             self.assertEqual(self.client.get(reverse(name)).status_code, 200, name)
-
-        self.assertEqual(
-            self.client.get(reverse("accounts:consulente-create")).status_code,
-            403,
-        )
-        self.assertEqual(
-            self.client.get(reverse("operations:report-mensile")).status_code,
-            403,
-        )
+        for name in (
+            "accounts:consulente-list",
+            "accounts:consulente-create",
+            "operations:report-mensile",
+            "projects:commessa-list",
+        ):
+            self.assertEqual(self.client.get(reverse(name)).status_code, 403, name)
 
     def test_profili_readonly_non_vedono_colonna_azioni(self):
         self.client.force_login(self.dg)
@@ -233,26 +249,6 @@ class RoleAccessMatrixTests(TestCase):
             reverse("planning:pianificazione-list"),
             reverse("tasks:task-list"),
             reverse("projects:commessa-teamwork", args=[self.commessa.pk]),
-        ):
-            response = self.client.get(url)
-            self.assertEqual(response.status_code, 200, url)
-            self.assertNotContains(response, ">Azioni<", html=False)
-            self.assertNotContains(response, "Sola lettura")
-
-        self.client.force_login(self.responsabile)
-        for url in (
-            reverse("accounts:consulente-list"),
-            reverse("accounts:skill-matrix"),
-        ):
-            response = self.client.get(url)
-            self.assertEqual(response.status_code, 200, url)
-            self.assertNotContains(response, ">Azioni<", html=False)
-            self.assertNotContains(response, "Sola lettura")
-
-        self.client.force_login(self.amministrazione)
-        for url in (
-            reverse("timesheets:ore-list"),
-            reverse("timesheets:spesa-list"),
         ):
             response = self.client.get(url)
             self.assertEqual(response.status_code, 200, url)

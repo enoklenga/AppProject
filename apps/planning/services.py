@@ -166,7 +166,7 @@ def update_planning(*, user, pianificazione: GiornoPianificato, data, ore_pianif
     pianificazione.ore_pianificate = ore_pianificate
     pianificazione.tipo_attivita = tipo_attivita
     pianificazione.ultima_modifica_da = user
-    if user.is_admin_lef:
+    if user.id != assegnazione.consulente_id and user.puo_gestire_commessa(assegnazione.commessa):
         pianificazione.modificata_da_admin = True
     pianificazione.save(
         update_fields=[

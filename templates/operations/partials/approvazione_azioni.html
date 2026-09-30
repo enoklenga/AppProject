@@ -10,7 +10,7 @@
         <input
             type="hidden"
             name="next"
-            value="{% url 'operations:periodo-detail' %}?mese={{ mese_selezionato }}">
+            value="{% url 'operations:periodo-detail' %}?mese={{ mese_selezionato }}{% if bu_selezionata %}&bu={{ bu_selezionata }}{% endif %}">
 
 
         <button
@@ -62,7 +62,7 @@
             <input
                 type="hidden"
                 name="next"
-                value="{% url 'operations:periodo-detail' %}?mese={{ mese_selezionato }}">
+                value="{% url 'operations:periodo-detail' %}?mese={{ mese_selezionato }}{% if bu_selezionata %}&bu={{ bu_selezionata }}{% endif %}">
 
 
             <label class="approval-reject-label">

@@ -43,6 +43,18 @@ class Commessa(UUIDTimeStampedModel):
         on_delete=models.PROTECT,
         related_name="commesse",
     )
+    business_unit = models.ForeignKey(
+        "accounts.BusinessUnit",
+        on_delete=models.PROTECT,
+        related_name="commesse",
+        null=True,
+        blank=True,
+        verbose_name="Business Unit owner",
+        help_text=(
+            "Business Unit responsabile della commessa. Il campo resta facoltativo "
+            "per consentire la classificazione graduale delle commesse esistenti."
+        ),
+    )
     codice = models.CharField(max_length=80, unique=True)
     descrizione = models.TextField()
     ore_budget = models.PositiveIntegerField(null=True, blank=True)

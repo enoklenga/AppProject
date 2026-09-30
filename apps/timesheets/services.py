@@ -9,6 +9,7 @@ from django.db import transaction
 from django.db.models import Sum
 from django.utils import timezone
 
+from apps.accounts.access import can_manage_commessa
 from apps.operations.models import AuditLog, PeriodoMensile
 from apps.operations.period_lock import verifica_periodi_aperti
 from apps.projects.models import Assegnazione, Commessa, TariffaAssegnazione
@@ -60,8 +61,16 @@ def importo_riga(riga: RigaOre) -> Decimal | None:
     return Decimal(riga.ore) * tariffa.tariffa_oraria
 
 
-def _is_admin(attore: User) -> bool:
-    return bool(getattr(attore, "is_admin_lef", False))
+def _is_admin(attore: User, assegnazione: Assegnazione) -> bool:
+    """Intervento di *supervisione* su ore/spese di un'altra persona.
+
+    Consentito a chi gestisce la commessa (Admin, Amministrazione o
+    Responsabile della Business Unit). Sui propri dati anche un Responsabile
+    BU agisce come normale consulente: niente blocco "modificata da Admin".
+    """
+    if assegnazione is None or assegnazione.consulente_id == getattr(attore, "id", None):
+        return False
+    return can_manage_commessa(attore, assegnazione.commessa)
 
 
 def _valida_assegnazione(
@@ -70,7 +79,7 @@ def _valida_assegnazione(
     assegnazione: Assegnazione,
     giorno: date,
 ) -> None:
-    if not _is_admin(attore) and assegnazione.consulente_id != attore.id:
+    if not _is_admin(attore, assegnazione) and assegnazione.consulente_id != attore.id:
         raise PermissionDenied(
             "Non puoi registrare dati per un altro consulente."
         )
@@ -126,7 +135,7 @@ def _valida_assegnazione(
 
 
 def _valida_modifica_consulente(attore: User, oggetto: Any) -> None:
-    if _is_admin(attore):
+    if _is_admin(attore, oggetto.assegnazione):
         return
 
     if oggetto.assegnazione.consulente_id != attore.id:
@@ -265,7 +274,7 @@ def inserisci_ore(
         giorno=giorno,
     ) + ore
 
-    admin = _is_admin(attore)
+    admin = _is_admin(attore, assegnazione)
     if not admin and nuovo_totale > 8:
         raise ValidationError(
             {"ore": "Il totale giornaliero supererebbe il limite di 8 ore."}
@@ -365,7 +374,7 @@ def modifica_ore(
         escludi_riga_id=riga.id,
     ) + ore
 
-    admin = _is_admin(attore)
+    admin = _is_admin(attore, riga.assegnazione)
     if not admin and nuovo_totale > 8:
         raise ValidationError(
             {"ore": "Il totale giornaliero supererebbe il limite di 8 ore."}
@@ -444,7 +453,7 @@ def elimina_ore(
     riga_id_salvato = riga.id
     riga.delete()
 
-    if _is_admin(attore):
+    if _is_admin(attore, riga.assegnazione):
         _registra_audit(
             attore=attore,
             entita="RigaOre",
@@ -485,7 +494,7 @@ def inserisci_spesa(
             {"importo": "L'importo deve essere maggiore di zero."}
         )
 
-    admin = _is_admin(attore)
+    admin = _is_admin(attore, assegnazione)
     spesa = SpesaTrasferta.objects.create(
         assegnazione=assegnazione,
         data=giorno,
@@ -560,7 +569,7 @@ def modifica_spesa(
         )
 
     precedente = _spesa_dict(spesa)
-    admin = _is_admin(attore)
+    admin = _is_admin(attore, spesa.assegnazione)
 
     spesa.assegnazione = nuova_assegnazione
     spesa.data = giorno
@@ -622,7 +631,7 @@ def elimina_spesa(
     spesa_id_salvato = spesa.id
     spesa.delete()
 
-    if _is_admin(attore):
+    if _is_admin(attore, spesa.assegnazione):
         _registra_audit(
             attore=attore,
             entita="SpesaTrasferta",
@@ -634,24 +643,25 @@ def elimina_spesa(
         )
 
 
-def _verifica_admin(attore: User) -> None:
-    if not (
-        _is_admin(attore)
-        or getattr(attore, "is_amministrazione", False)
-    ):
+def _verifica_admin(attore: User, oggetto: Any) -> None:
+    """Approvazione/rifiuto: gestione della commessa, mai sui propri dati."""
+    if oggetto.assegnazione.consulente_id == getattr(attore, "id", None):
+        raise PermissionDenied("Non puoi approvare o rifiutare ore e spese tue.")
+    if not can_manage_commessa(attore, oggetto.assegnazione.commessa):
         raise PermissionDenied(
-            "L'approvazione di ore e spese è riservata ad Admin LEF e Amministrazione."
+            "L'approvazione di ore e spese è riservata ad Admin, Amministrazione "
+            "e al Responsabile della Business Unit della commessa."
         )
 
 
 @transaction.atomic
 def approva_riga_ore(*, attore: User, riga_id, motivazione: str = "") -> RigaOre:
     riga = (
-        RigaOre.objects.select_related("assegnazione")
+        RigaOre.objects.select_related("assegnazione", "assegnazione__commessa")
         .select_for_update()
         .get(pk=riga_id)
     )
-    _verifica_admin(attore)
+    _verifica_admin(attore, riga)
 
     verifica_periodi_aperti(riga.data)
 
@@ -685,11 +695,11 @@ def approva_riga_ore(*, attore: User, riga_id, motivazione: str = "") -> RigaOre
 @transaction.atomic
 def rifiuta_riga_ore(*, attore: User, riga_id, motivazione: str) -> RigaOre:
     riga = (
-        RigaOre.objects.select_related("assegnazione")
+        RigaOre.objects.select_related("assegnazione", "assegnazione__commessa")
         .select_for_update()
         .get(pk=riga_id)
     )
-    _verifica_admin(attore)
+    _verifica_admin(attore, riga)
 
     motivazione = motivazione.strip()
     if not motivazione:
@@ -732,11 +742,11 @@ def rifiuta_riga_ore(*, attore: User, riga_id, motivazione: str) -> RigaOre:
 @transaction.atomic
 def approva_spesa(*, attore: User, spesa_id, motivazione: str = "") -> SpesaTrasferta:
     spesa = (
-        SpesaTrasferta.objects.select_related("assegnazione")
+        SpesaTrasferta.objects.select_related("assegnazione", "assegnazione__commessa")
         .select_for_update()
         .get(pk=spesa_id)
     )
-    _verifica_admin(attore)
+    _verifica_admin(attore, spesa)
 
     verifica_periodi_aperti(spesa.data)
 
@@ -770,11 +780,11 @@ def approva_spesa(*, attore: User, spesa_id, motivazione: str = "") -> SpesaTras
 @transaction.atomic
 def rifiuta_spesa(*, attore: User, spesa_id, motivazione: str) -> SpesaTrasferta:
     spesa = (
-        SpesaTrasferta.objects.select_related("assegnazione")
+        SpesaTrasferta.objects.select_related("assegnazione", "assegnazione__commessa")
         .select_for_update()
         .get(pk=spesa_id)
     )
-    _verifica_admin(attore)
+    _verifica_admin(attore, spesa)
 
     motivazione = motivazione.strip()
     if not motivazione:

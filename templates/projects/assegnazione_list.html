@@ -10,9 +10,11 @@
         <div class="eyebrow">Gestione</div>
 
         <h1>Assegnazioni</h1>
+            <p class="page-subtitle">Le assegnazioni definiscono il team reale delle singole commesse. Sono distinte dall'appartenenza organizzativa alle Business Unit.</p>
 
     </div>
 
+    {% if puo_modificare %}
     <a
         class="button button-primary"
         href="{% url 'projects:assegnazione-create' %}">
@@ -24,6 +26,7 @@
         Nuova assegnazione
 
     </a>
+    {% endif %}
 
 </div>
 
@@ -313,56 +316,22 @@
                         <!-- AZIONI -->
 
                         <td class="table-actions">
-
+                            {% if puo_modificare %}
                             <div class="row-actions">
-
-                                <a
-                                    class="row-action"
-                                    href="{% url 'projects:assegnazione-update' assegnazione.pk %}">
-
-                                    <svg
-                                        class="btn-icon"
-                                        aria-hidden="true">
-
-                                        <use href="#icon-edit"></use>
-
-                                    </svg>
-
+                                <a class="row-action" href="{% url 'projects:assegnazione-update' assegnazione.pk %}">
+                                    <svg class="btn-icon" aria-hidden="true"><use href="#icon-edit"></use></svg>
                                     Modifica
-
                                 </a>
-
-
-                                <form
-                                    method="post"
-                                    action="{% url 'projects:assegnazione-toggle-state' assegnazione.pk %}">
-
+                                <form method="post" action="{% url 'projects:assegnazione-toggle-state' assegnazione.pk %}">
                                     {% csrf_token %}
-
-                                    <button
-                                        class="
-                                            row-action
-                                            row-action-state
-                                            {% if assegnazione.stato != 'ATTIVA' %}is-success{% endif %}
-                                        "
-                                        type="submit">
-
-                                        {% if assegnazione.stato == 'ATTIVA' %}
-
-                                            Concludi
-
-                                        {% else %}
-
-                                            Riattiva
-
-                                        {% endif %}
-
+                                    <button class="row-action row-action-state {% if assegnazione.stato != 'ATTIVA' %}is-success{% endif %}" type="submit">
+                                        {% if assegnazione.stato == 'ATTIVA' %}Concludi{% else %}Riattiva{% endif %}
                                     </button>
-
                                 </form>
-
                             </div>
-
+                            {% else %}
+                            <span class="table-muted" aria-label="Nessuna azione disponibile">—</span>
+                            {% endif %}
                         </td>
 
                     </tr>

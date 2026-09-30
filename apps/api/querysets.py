@@ -1,20 +1,23 @@
 from django.db.models import Q
 
-from apps.projects.models import Assegnazione
+from apps.accounts.access import managed_business_unit_ids
+from apps.projects.models import Assegnazione, Commessa
 
 
 def commesse_gestite_ids(user):
+    """Commesse gestite: PM attivo o commesse delle BU di cui è Responsabile."""
     if not user or not user.is_authenticated:
-        return Assegnazione.objects.none().values_list(
-            "commessa_id",
-            flat=True,
-        )
+        return Commessa.objects.none().values_list("id", flat=True)
 
-    return Assegnazione.objects.filter(
-        consulente=user,
-        ruolo_commessa=Assegnazione.Ruolo.PROJECT_MANAGER,
-        stato=Assegnazione.Stato.ATTIVA,
-    ).values_list("commessa_id", flat=True)
+    filtro = Q(
+        assegnazioni__consulente=user,
+        assegnazioni__ruolo_commessa=Assegnazione.Ruolo.PROJECT_MANAGER,
+        assegnazioni__stato=Assegnazione.Stato.ATTIVA,
+    )
+    bu_gestite = managed_business_unit_ids(user)
+    if bu_gestite:
+        filtro |= Q(business_unit_id__in=bu_gestite)
+    return Commessa.objects.filter(filtro).values_list("id", flat=True).distinct()
 
 
 def filtro_visibilita_assegnazioni(user) -> Q:

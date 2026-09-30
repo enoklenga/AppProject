@@ -47,6 +47,9 @@
         <form method="post" class="modern-form">
 
             {% csrf_token %}
+            {% if request.GET.next %}<input type="hidden" name="next" value="{{ request.GET.next }}">{% endif %}
+            {% if request.GET.return_bu %}<input type="hidden" name="return_bu" value="{{ request.GET.return_bu }}">{% endif %}
+            {% if request.GET.return_to %}<input type="hidden" name="return_to" value="{{ request.GET.return_to }}">{% endif %}
 
             {% if form.non_field_errors %}
                 <div class="form-global-errors">
@@ -96,13 +99,15 @@
 
             <div class="form-actions form-actions-modern">
 
-                <a
-                    class="button button-ghost"
-                    href="{% url 'projects:commessa-list' %}">
-
-                    Annulla
-
-                </a>
+                {% if cancel_url %}
+                    <a class="button button-ghost" href="{{ cancel_url }}">Annulla</a>
+                {% elif request.GET.next == 'bu' and request.GET.return_bu %}
+                    <a class="button button-ghost" href="{% url 'accounts:business-unit-detail' request.GET.return_bu %}">Annulla</a>
+                {% elif request.GET.next == 'home-responsabile' %}
+                    <a class="button button-ghost" href="{% url 'home' %}">Annulla</a>
+                {% else %}
+                    <a class="button button-ghost" href="{% url 'projects:commessa-list' %}">Annulla</a>
+                {% endif %}
 
                 <button
                     class="button button-primary"

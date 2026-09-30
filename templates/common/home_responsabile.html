@@ -1,48 +1,122 @@
 {% extends "base.html" %}
-{% block title %}Team e capacità | LEFTRACK{% endblock %}
+{% load static %}
+{% block title %}La mia Business Unit | LEFTRACK{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">{% endblock %}
 {% block content %}
-<div class="page-header">
-  <div>
-    <div class="eyebrow">Responsabile consulenza</div>
-    <h1>Team e capacità</h1>
-    <p>Vista sul pool consulenza · {{ mese_selezionato|slice:"5:7" }}/{{ mese_selezionato|slice:":4" }}</p>
-  </div>
-  <div class="page-header-actions">
-    <a class="button button-secondary" href="{% url 'accounts:skill-matrix' %}">Skill Matrix</a>
-    <a class="button button-primary" href="{% url 'planning:pianificazione-list' %}">Pianificazione</a>
-  </div>
-</div>
+<div class="bu-page">
 
-<div class="metric-grid dashboard-kpi-grid">
-  <article class="metric-card"><span>Risorse attive</span><strong>{{ risorse_attive }}</strong></article>
-  <article class="metric-card"><span>Assegnazioni attive</span><strong>{{ assegnazioni_attive }}</strong></article>
-  <article class="metric-card"><span>Commesse presidiate</span><strong>{{ commesse_presidiate }}</strong></article>
-  <article class="metric-card"><span>Ore pianificate</span><strong>{{ ore_pianificate }} h</strong></article>
-  <article class="metric-card"><span>Ore consuntivate</span><strong>{{ ore_consuntivate }} h</strong></article>
-</div>
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">Responsabile Business Unit</div>
+      <h1>{% if business_units|length == 1 %}{{ business_units.0.nome }}{% else %}Le mie Business Unit{% endif %}</h1>
+      <p class="page-subtitle">Persone, commesse e consuntivi della tua Business Unit · {{ mese_selezionato|slice:"5:7" }}/{{ mese_selezionato|slice:":4" }}</p>
+    </div>
+    <div class="page-header-actions">
+      <form method="get" class="bu-month">
+        <label class="a11y-only" for="home-bu-mese">Mese di riferimento</label>
+        <input id="home-bu-mese" type="month" name="mese" value="{{ mese_selezionato }}">
+        <button class="button button-secondary" type="submit">Aggiorna mese</button>
+      </form>
+      {% if business_units|length == 1 %}
+        <a class="button button-secondary" href="{% url 'accounts:business-unit-detail' business_units.0.pk %}">
+          <svg class="btn-icon" aria-hidden="true"><use href="#icon-building"></use></svg>
+          Cruscotto BU
+        </a>
+      {% endif %}
+      <a class="button button-secondary" href="{% url 'planning:pianificazione-list' %}">
+        <svg class="btn-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg>
+        Pianificazione
+      </a>
+      <a class="button button-primary" href="{% url 'projects:commessa-create' %}?return_to={{ request.get_full_path|urlencode }}{% if business_units|length == 1 %}&business_unit={{ business_units.0.pk }}{% endif %}">
+        <svg class="btn-icon" aria-hidden="true"><use href="#icon-plus"></use></svg>
+        Nuova commessa
+      </a>
+    </div>
+  </div>
 
-<section class="panel data-panel">
-  <div class="panel-heading">
-    <div><div class="eyebrow">Capacità</div><h2>Carico del pool consulenza</h2></div>
-    <a class="button button-secondary" href="{% url 'accounts:consulente-list' %}">Persone</a>
-  </div>
-  <div class="table-wrapper">
-    <table class="data-table">
-      <thead><tr><th>Risorsa</th><th>Ruolo</th><th>Assegnazioni</th><th>Ore pianificate</th><th>Ore consuntivate</th></tr></thead>
-      <tbody>
-        {% for voce in carichi %}
-          <tr>
-            <td class="table-primary"><strong>{{ voce.risorsa }}</strong><div class="table-muted">{{ voce.risorsa.email }}</div></td>
-            <td>{{ voce.risorsa.get_ruolo_display }}</td>
-            <td>{{ voce.assegnazioni_attive }}</td>
-            <td>{{ voce.ore_pianificate }} h</td>
-            <td>{{ voce.ore_consuntivate }} h</td>
-          </tr>
-        {% empty %}
-          <tr><td colspan="5" class="empty-state">Nessuna risorsa attiva.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</section>
+  <section class="bu-kpi-grid" aria-label="Indicatori della Business Unit">
+    <a class="bu-kpi" href="{% url 'accounts:consulente-list' %}"><span class="bu-kpi-label">Persone</span><strong class="bu-kpi-value">{{ indicatori.membri_attivi }}</strong><span class="bu-kpi-meta">{{ indicatori.pm_abilitati }} abilitate PM</span></a>
+    <a class="bu-kpi" href="{% url 'projects:commessa-list' %}?stato=APERTA"><span class="bu-kpi-label">Commesse aperte</span><strong class="bu-kpi-value">{{ indicatori.commesse_aperte }}</strong><span class="bu-kpi-meta">{{ indicatori.ore_budget_aperte }} h di budget</span></a>
+    <div class="bu-kpi" {% if indicatori.commesse_senza_pm %}data-tone="warning"{% endif %}><span class="bu-kpi-label">Commesse senza PM</span><strong class="bu-kpi-value">{{ indicatori.commesse_senza_pm }}</strong><span class="bu-kpi-meta">da assegnare</span></div>
+    <div class="bu-kpi"><span class="bu-kpi-label">Ore pianificate</span><strong class="bu-kpi-value">{{ indicatori.ore_pianificate_mese }}</strong><span class="bu-kpi-meta">nel mese</span></div>
+    <div class="bu-kpi"><span class="bu-kpi-label">Ore consuntivate</span><strong class="bu-kpi-value">{{ indicatori.ore_consuntivate_mese }}</strong><span class="bu-kpi-meta">nel mese</span></div>
+    <div class="bu-kpi" data-tone="{% if periodo_chiuso %}neutral{% else %}success{% endif %}"><span class="bu-kpi-label">Stato mese {{ mese_selezionato|slice:"5:7" }}/{{ mese_selezionato|slice:":4" }}</span><strong class="bu-kpi-value">{{ periodo_stato }}</strong><span class="bu-kpi-meta">periodo amministrativo selezionato</span></div>
+    <a class="bu-kpi" {% if da_approvare %}data-tone="warning"{% else %}data-tone="success"{% endif %} href="{% url 'operations:periodo-detail' %}?mese={{ mese_selezionato }}">
+      <span class="bu-kpi-label">Da approvare nel mese</span><strong class="bu-kpi-value">{{ da_approvare }}</strong><span class="bu-kpi-meta">{% if periodo_chiuso %}mese chiuso{% else %}ore e spese della BU{% endif %}</span>
+    </a>
+  </section>
+
+  {% if schede_bu %}
+    <section class="bu-card-grid" aria-label="Le mie Business Unit">
+      {% for scheda in schede_bu %}{% include "accounts/partials/_bu_card.html" %}{% endfor %}
+    </section>
+  {% endif %}
+
+  <section class="panel data-panel">
+    <div class="panel-heading">
+      <div><div class="eyebrow">Portafoglio</div><h2>Commesse aperte</h2></div>
+      <a class="button button-secondary" href="{% url 'projects:commessa-list' %}">Tutte le commesse</a>
+    </div>
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead><tr><th scope="col">Commessa</th><th scope="col">Cliente</th><th scope="col">Fase operativa</th><th scope="col">PM</th><th scope="col" class="table-numeric">Team commessa</th><th scope="col" class="actions-column">Azioni</th></tr></thead>
+        <tbody>
+          {% for commessa in commesse %}
+            <tr>
+              <td class="table-primary"><strong><a href="{% url 'projects:commessa-teamwork' commessa.pk %}">{{ commessa.codice }}</a></strong>{% if business_units|length > 1 %}<span class="muted">{{ commessa.business_unit.nome }}</span>{% endif %}</td>
+              <td>{{ commessa.cliente.ragione_sociale }}</td>
+              <td><span class="badge badge-wf badge-wf-{{ commessa.workflow_stato|lower }}">{{ commessa.get_workflow_stato_display }}</span></td>
+              <td>{% if commessa.ha_pm %}<span class="badge badge-success">Assegnato</span>{% else %}<span class="badge badge-warning">Da assegnare</span>{% endif %}</td>
+              <td class="table-numeric">{{ commessa.membri_attivi }}</td>
+              <td class="table-actions"><div class="row-actions">
+                <a class="row-action" href="{% url 'projects:assegnazione-create' %}?commessa={{ commessa.pk }}&return_to={{ request.get_full_path|urlencode }}"><svg class="btn-icon" aria-hidden="true"><use href="#icon-users"></use></svg>Gestisci team</a>
+                <a class="row-action" href="{% url 'projects:commessa-update' commessa.pk %}?return_to={{ request.get_full_path|urlencode }}"><svg class="btn-icon" aria-hidden="true"><use href="#icon-edit"></use></svg>Modifica</a>
+              </div></td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6" class="empty-state">Nessuna commessa aperta nella Business Unit.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel data-panel">
+    <div class="panel-heading">
+      <div><div class="eyebrow">Persone delle BU</div><h2>Persone e carico</h2></div>
+      <a class="button button-secondary" href="{% url 'accounts:skill-matrix' %}">Skill Matrix</a>
+    </div>
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead><tr><th scope="col">Persona</th><th scope="col">Abilitazioni</th><th scope="col" class="table-numeric">Assegnazioni</th><th scope="col" class="table-numeric">Pianificate</th><th scope="col" class="table-numeric">Consuntivate</th></tr></thead>
+        <tbody>
+          {% for voce in carichi %}
+            <tr>
+              <td class="table-primary"><strong>{{ voce.utente }}</strong><span class="muted">{{ voce.utente.get_ruolo_display }}{% if business_units|length > 1 %} · {{ voce.business_units_label }}{% endif %}</span></td>
+              <td><div class="bu-flags">{% if voce.responsabile %}<span class="badge badge-info">Responsabile</span>{% endif %}{% if voce.puo_essere_pm %}<span class="badge badge-success">PM abilitato</span>{% endif %}{% if not voce.responsabile and not voce.puo_essere_pm %}<span class="badge badge-neutral">Membro</span>{% endif %}</div></td>
+              <td class="table-numeric">{{ voce.assegnazioni_attive }}</td>
+              <td class="table-numeric">{{ voce.ore_pianificate }} h</td>
+              <td class="table-numeric">{{ voce.ore_consuntivate }} h</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5" class="empty-state">Nessuna persona nella Business Unit.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel data-panel">
+    <div class="panel-heading">
+      <div><div class="eyebrow">Il mio lavoro</div><h2>Come consulente o PM</h2></div>
+    </div>
+    <div class="bu-quick-links">
+      <a class="button button-secondary" href="{% url 'timesheets:ore-list' %}">Le mie ore</a>
+      <a class="button button-secondary" href="{% url 'timesheets:spesa-list' %}">Le mie spese</a>
+      <a class="button button-secondary" href="{% url 'tasks:my-task-list' %}">Le mie attività</a>
+      <span class="muted">{{ mie_assegnazioni }} assegnazion{{ mie_assegnazioni|pluralize:"e,i" }} attiv{{ mie_assegnazioni|pluralize:"a,e" }}</span>
+    </div>
+  </section>
+
+</div>
 {% endblock %}

@@ -396,7 +396,7 @@
 
                             <div class="row-actions">
 
-                                {% if can_write and not periodo_chiuso and is_admin or can_write and not periodo_chiuso and not riga.bloccata_per_consulente %}
+                                {% if riga.modificabile %}
 
                                     <a
                                         class="row-action"

@@ -1,0 +1,338 @@
+/* ==========================================================================
+   LEFTRACK — Business Unit (cruscotto BU, home Responsabile, schede BU)
+   Usa i token del design system (ui-system.css).
+   ========================================================================== */
+
+.bu-page {
+    display: grid;
+    gap: 20px;
+}
+
+/* ---- Intestazione BU ---------------------------------------------------- */
+.bu-hero {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.bu-hero-title {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+}
+
+.bu-hero-mark {
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: var(--ds-primary-soft, #edf4ff);
+    color: var(--ds-primary, #1769e8);
+}
+
+.bu-hero-mark svg {
+    width: 24px;
+    height: 24px;
+}
+
+.bu-hero h1 {
+    margin: 0;
+}
+
+.bu-hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    margin-top: 6px;
+    color: var(--ds-muted, #73859e);
+    font-size: 13.5px;
+}
+
+.bu-code {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--ds-border, #dfe7f1);
+    background: var(--ds-surface-soft, #f8fafd);
+    color: var(--ds-text, #29415f);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .02em;
+}
+
+.bu-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.bu-month {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+
+.bu-month input[type="month"] {
+    width: 168px;
+    min-height: var(--ds-action-height, 34px);
+    height: 40px;
+}
+
+.bu-hero-actions {
+    align-items: center;
+}
+
+.bu-quick-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 20px 20px;
+}
+
+/* ---- Indicatori --------------------------------------------------------- */
+.bu-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+    gap: 12px;
+}
+
+.bu-kpi {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 14px 16px;
+    border: 1px solid var(--ds-border, #dfe7f1);
+    border-radius: 14px;
+    background: var(--ds-surface, #fff);
+    box-shadow: var(--ds-shadow);
+    color: inherit;
+    text-decoration: none;
+    transition: border-color .15s ease, transform .15s ease;
+}
+
+a.bu-kpi:hover {
+    border-color: var(--ds-border-strong, #c8d6e6);
+    transform: translateY(-1px);
+}
+
+.bu-kpi-label {
+    color: var(--ds-muted, #73859e);
+    font-size: 12.5px;
+    font-weight: 500;
+}
+
+.bu-kpi-value {
+    color: var(--ds-navy-950, #071d3d);
+    font-size: 24px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.15;
+}
+
+.bu-kpi-meta {
+    color: var(--ds-muted, #73859e);
+    font-size: 12px;
+}
+
+.bu-kpi[data-tone="warning"] {
+    border-color: var(--ds-warning-border, #f0deb2);
+    background: var(--ds-warning-soft, #fff8e8);
+}
+
+.bu-kpi[data-tone="warning"] .bu-kpi-value {
+    color: var(--ds-warning, #8a5a00);
+}
+
+.bu-kpi[data-tone="success"] .bu-kpi-value {
+    color: var(--ds-success, #137a53);
+}
+
+/* ---- Schede BU (home gestione, elenco) ---------------------------------- */
+.bu-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+}
+
+.bu-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid var(--ds-border, #dfe7f1);
+    border-radius: var(--ds-radius-panel, 16px);
+    background: var(--ds-surface, #fff);
+    box-shadow: var(--ds-shadow);
+}
+
+.bu-card.is-inactive {
+    opacity: .7;
+}
+
+.bu-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.bu-card-head h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.bu-card-head h3 a {
+    color: var(--ds-navy-950, #071d3d);
+    text-decoration: none;
+}
+
+.bu-card-head h3 a:hover {
+    color: var(--ds-primary, #1769e8);
+}
+
+.bu-card-owner {
+    color: var(--ds-muted, #73859e);
+    font-size: 13px;
+}
+
+.bu-card-owner.is-missing {
+    color: var(--ds-warning, #8a5a00);
+}
+
+.bu-card-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0;
+}
+
+.bu-card-stats div {
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: var(--ds-surface-soft, #f8fafd);
+}
+
+.bu-card-stats dt {
+    color: var(--ds-muted, #73859e);
+    font-size: 11.5px;
+}
+
+.bu-card-stats dd {
+    margin: 2px 0 0;
+    color: var(--ds-navy-950, #071d3d);
+    font-size: 17px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.bu-card-foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: auto;
+}
+
+/* ---- Tabelle BU --------------------------------------------------------- */
+.bu-flags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.bu-load {
+    display: grid;
+    gap: 4px;
+    min-width: 120px;
+}
+
+.bu-load-bar {
+    position: relative;
+    height: 6px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--ds-border, #dfe7f1);
+}
+
+.bu-load-bar span {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: inherit;
+    background: var(--ds-primary, #1769e8);
+}
+
+.bu-load-bar span.is-over {
+    background: var(--ds-danger, #b4232d);
+}
+
+.bu-load-text {
+    color: var(--ds-muted, #73859e);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+}
+
+.bu-two-columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+}
+
+.bu-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px solid var(--ds-warning-border, #f0deb2);
+    border-radius: 12px;
+    background: var(--ds-warning-soft, #fff8e8);
+    color: var(--ds-warning, #8a5a00);
+    font-size: 13.5px;
+}
+
+.bu-note a {
+    color: inherit;
+    font-weight: 600;
+}
+
+.page-subtitle {
+    margin: 4px 0 0;
+    color: var(--ds-muted, #73859e);
+    font-size: 13.5px;
+}
+
+.table-meta.muted,
+small.muted,
+span.muted {
+    display: block;
+    color: var(--ds-muted, #73859e);
+    font-size: 12px;
+    font-weight: 400;
+}
+
+/* Sidebar: gruppo "La mia Business Unit" leggermente evidenziato */
+.nav-group-bu .nav-group-label {
+    color: #9ec5ff;
+}
+
+@media (max-width: 720px) {
+    .bu-card-stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .bu-kpi-value {
+        font-size: 21px;
+    }
+}
+
+.bu-panel-body {
+    display: grid;
+    gap: 14px;
+    padding: 16px 20px 20px;
+}

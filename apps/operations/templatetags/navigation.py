@@ -78,6 +78,11 @@ SECTION_CONFIG: dict[str, dict[str, str]] = {
         "root": "operations:dashboard-admin",
         "back_label": "Torna alla Dashboard",
     },
+    "dashboard-pm": {
+        "label": "Dashboard di progetto",
+        "root": "operations:dashboard-pm",
+        "back_label": "Torna alla dashboard di progetto",
+    },
     "periodi": {
         "label": "Chiusura mese",
         "root": "operations:periodo-detail",
@@ -121,6 +126,14 @@ SECTION_CONFIG: dict[str, dict[str, str]] = {
         "root": "phases:fase-list",
         "back_label": "Torna alle fasi",
     },
+
+    # Prima mancava: le pagine Business Unit generavano un KeyError (errore 500)
+    # nella costruzione del percorso di navigazione.
+    "business-unit": {
+        "label": "Business Unit",
+        "root": "accounts:business-unit-list",
+        "back_label": "Torna alle Business Unit",
+    },
 }
 
 
@@ -147,6 +160,14 @@ PAGE_LABELS: dict[str, str] = {
     "accounts:consulente-update": "Modifica consulente",
     "accounts:consulente-toggle-active": "Cambia stato consulente",
     "accounts:consulente-resend-invite": "Reinvia invito",
+    "accounts:business-unit-list": "Business Unit",
+    "accounts:business-unit-detail": "Cruscotto Business Unit",
+    "accounts:business-unit-create": "Nuova Business Unit",
+    "accounts:business-unit-update": "Modifica Business Unit",
+    "accounts:user-business-unit-list": "Appartenenze",
+    "accounts:user-business-unit-create": "Nuova appartenenza",
+    "accounts:user-business-unit-update": "Modifica appartenenza",
+    "accounts:profile": "Profilo",
     "accounts:skill-list": "Catalogo skill",
     "accounts:skill-create": "Nuova skill",
     "accounts:skill-update": "Modifica skill",
@@ -292,7 +313,7 @@ def _can_manage_tasks(user) -> bool:
 
     if getattr(
         user,
-        "is_admin_lef",
+        "is_gestore",
         False,
     ):
         return True
@@ -413,6 +434,12 @@ def section_for_match(
     # CONSULENTI
     # =====================================================
 
+    if namespace == "accounts" and (
+        url_name.startswith("business-unit-")
+        or url_name.startswith("user-business-unit-")
+    ):
+        return "business-unit"
+
     if namespace == "accounts" and url_name.startswith("skill-"):
         return "skill-matrix"
 
@@ -455,6 +482,9 @@ def section_for_match(
     # =====================================================
 
     if namespace == "operations":
+
+        if url_name == "dashboard-pm":
+            return "dashboard-pm"
 
         if url_name.startswith(
             "dashboard-"
@@ -522,7 +552,7 @@ def build_navigation_data(
     # TEAMWORK — spazio operativo contestuale
     # =====================================================
     if route == "projects:commessa-teamwork":
-        is_admin = bool(getattr(user, "is_admin_lef", False))
+        is_admin = bool(getattr(user, "is_gestore", False))
         is_portfolio = can_view_portfolio(user)
         commessa_id = getattr(match, "kwargs", {}).get("pk") if match else None
         teamwork_url = (
@@ -703,6 +733,13 @@ def build_navigation_data(
         ):
             current_label = "Dashboard direzionale"
 
+        if route == "operations:periodo-detail" and user is not None:
+            from apps.accounts.access import can_close_periods
+
+            if not can_close_periods(user):
+                # Responsabile BU: approva i consuntivi, non chiude il mese.
+                current_label = "Approvazioni"
+
         if route == section_root:
 
             breadcrumbs = [
@@ -843,46 +880,155 @@ def navigation_data(
 def has_pm_access(
     user,
 ) -> bool:
+    """Dashboard di progetto: PM attivi e chi gestisce commesse.
+
+    Admin e Amministrazione vedono tutte le commesse aperte, il Responsabile
+    BU quelle della propria Business Unit (prima la pagina risultava vuota
+    per l'Admin).
     """
-    Mostra la Dashboard PM solo agli utenti
-    che gestiscono almeno una commessa tramite
-    un'assegnazione attiva.
+    if not user or not getattr(user, "is_authenticated", False):
+        return False
+    from apps.operations.services.dashboard import commesse_gestite_da_pm
 
-    L'Admin dispone della dashboard economica
-    dedicata e non viene classificato come PM.
+    return commesse_gestite_da_pm(user).exists()
+
+
+# =========================================================
+# MENU LATERALE UNICO, GUIDATO DAI PERMESSI
+# =========================================================
+def _voce(key, label, url_name, icon, *, url=None, badge=None):
+    link = url or _safe_reverse(url_name)
+    if not link:
+        return None
+    return {"key": key, "label": label, "url": link, "icon": icon, "badge": badge}
+
+
+def build_sidebar_menu(user) -> list[dict[str, Any]]:
+    """Gruppi del menu costruiti dalle funzioni di ``apps.accounts.access``.
+
+    Un solo menu per tutti i profili: ogni voce compare solo se l'utente ha
+    davvero accesso alla pagina (nessun link che porta a un 403).
     """
+    from apps.accounts import access
 
-    if not user:
-        return False
+    if not user or not getattr(user, "is_authenticated", False):
+        return []
 
-    if not getattr(
-        user,
-        "is_authenticated",
-        False,
-    ):
-        return False
+    gruppi: list[dict[str, Any]] = []
 
-    if getattr(
-        user,
-        "is_admin_lef",
-        False,
-    ):
-        return False
+    def gruppo(label, voci, key=""):
+        voci = [v for v in voci if v]
+        if voci:
+            gruppi.append({"label": label, "items": voci, "key": key})
 
-    return (
-        Assegnazione.objects
-        .filter(
-            consulente=user,
-            ruolo_commessa=(
-                Assegnazione
-                .Ruolo
-                .PROJECT_MANAGER
-            ),
-            stato=(
-                Assegnazione
-                .Stato
-                .ATTIVA
-            ),
-        )
-        .exists()
+    # -- La mia Business Unit (Responsabile BU) -----------------------------
+    bu_gestite = []
+    if access.is_bu_manager(user):
+        bu_gestite = list(access.managed_business_units(user).order_by("nome"))
+    gruppo(
+        "La mia Business Unit" if len(bu_gestite) <= 1 else "Le mie Business Unit",
+        [
+            _voce(
+                "",
+                bu.nome,
+                "",
+                "icon-building",
+                url=_safe_reverse_args("accounts:business-unit-detail", bu.pk),
+            )
+            for bu in bu_gestite
+        ],
+        key="bu",
     )
+
+    operativo = access.can_view_operational_details(user)
+    registro = operativo or access.can_view_finance_ledger(user)
+    gruppo(
+        "Operatività",
+        [
+            registro and _voce("ore", "Ore", "timesheets:ore-list", "icon-clock"),
+            registro and _voce("spese", "Spese", "timesheets:spesa-list", "icon-receipt"),
+            (operativo or access.can_view_planning_portfolio(user))
+            and _voce("pianificazione", "Pianificazione", "planning:pianificazione-list", "icon-calendar"),
+            (access.is_manager(user) or getattr(user, "is_risorsa_ingaggiabile", False))
+            and _voce("mie_attivita", "Le mie attività", "tasks:my-task-list", "icon-task-check"),
+            _can_manage_tasks(user)
+            and _voce("attivita", "Attività", "tasks:task-list", "icon-task-list"),
+            operativo and _voce("fasi", "Fasi", "phases:fase-list", "icon-layers"),
+            (operativo or access.can_view_all_documents(user))
+            and _voce("documenti", "Documenti", "documents:document-list", "icon-file-text"),
+            has_pm_access(user)
+            and _voce("dashboard-pm", "Dashboard di progetto", "operations:dashboard-pm", "icon-chart"),
+        ],
+    )
+
+    gruppo(
+        "Portafoglio",
+        [
+            access.can_view_reference_portfolio(user)
+            and _voce("clienti", "Clienti", "projects:cliente-list", "icon-briefcase"),
+            access.can_view_reference_portfolio(user)
+            and _voce("commesse", "Commesse", "projects:commessa-list", "icon-folder"),
+            access.can_view_assignments_register(user)
+            and _voce("assegnazioni", "Assegnazioni", "projects:assegnazione-list", "icon-users"),
+            access.can_manage_finance(user)
+            and _voce("tariffe", "Tariffe", "projects:tariffa-list", "icon-link"),
+        ],
+    )
+
+    gruppo(
+        "Organizzazione",
+        [
+            access.can_view_business_units(user)
+            and _voce("business-unit", "Business Unit", "accounts:business-unit-list", "icon-building"),
+            access.can_view_people(user)
+            and _voce(
+                "consulenti",
+                "Persone e ruoli" if access.can_manage_users(user) else "Persone",
+                "accounts:consulente-list",
+                "icon-users",
+            ),
+            access.can_view_skill_matrix(user)
+            and _voce("skill-matrix", "Skill Matrix", "accounts:skill-matrix", "icon-tag"),
+        ],
+    )
+
+    gruppo(
+        "Controllo",
+        [
+            access.can_view_executive_dashboard(user)
+            and _voce(
+                "dashboard",
+                "Dashboard direzionale" if getattr(user, "is_direzione_generale", False) else "Dashboard",
+                "operations:dashboard-admin",
+                "icon-chart",
+            ),
+            access.can_manage_finance(user)
+            and _voce(
+                "periodi",
+                "Chiusura mese" if access.can_close_periods(user) else "Approvazioni",
+                "operations:periodo-detail",
+                "icon-calendar-lock",
+            ),
+            access.can_view_reports(user)
+            and _voce("report", "Report mensile", "operations:report-mensile", "icon-file-text"),
+            access.can_use_backoffice_control(user)
+            and _voce("promemoria", "Promemoria", "operations:promemoria", "icon-bell"),
+            access.can_use_backoffice_control(user)
+            and _voce("importazioni", "Importazioni", "operations:importazione-list", "icon-upload"),
+            access.can_view_audit(user)
+            and _voce("audit", "Registro audit", "operations:audit-list", "icon-shield-check"),
+        ],
+    )
+    return gruppi
+
+
+def _safe_reverse_args(name: str, *args) -> str:
+    try:
+        return reverse(name, args=args)
+    except NoReverseMatch:
+        return ""
+
+
+@register.simple_tag
+def sidebar_menu(user) -> list[dict[str, Any]]:
+    return build_sidebar_menu(user)

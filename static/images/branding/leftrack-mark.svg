@@ -1,8 +1,14 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 909 513" width="909" height="513">
-  <polygon points="136,3 136,390 150,396 314,402 418,513 96,513 2,400 2,102" fill="#072345"/>
-  <polygon points="326,11 803,11 679,119 563,125 432,479 426,479 430,125 194,119" fill="#007CFC"/>
-  <polygon points="659,184.5 806.5,145 909,149.5 758.8,188" fill="#007CFC"/>
-  <polygon points="587,256.5 732,218 833,222 688,260" fill="#007CFC"/>
-  <polygon points="518,328.5 659,290 757,294 614.5,332" fill="#007CFC"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <title>LEFTRACK</title>
+  <defs>
+    <linearGradient id="mp1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#005ca9"/><stop offset="1" stop-color="#005ca9"/></linearGradient>
+    <linearGradient id="mp2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#243986"/><stop offset=".32" stop-color="#004c98"/><stop offset="1" stop-color="#0a5aa8"/></linearGradient>
+    <linearGradient id="mp3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#243986"/><stop offset=".28" stop-color="#0f6fbf"/><stop offset=".6" stop-color="#0086ce"/><stop offset="1" stop-color="#1f9ad8"/></linearGradient>
+    <linearGradient id="mhl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5fa7d5" stop-opacity=".85"/><stop offset=".35" stop-color="#5fa7d5" stop-opacity="0"/></linearGradient>
+  </defs>
+  <path d="M36 196 L206 172 Q230 169 230 193 L230 472 L36 472 Z" fill="url(#mp1)"/>
+  <path d="M150 128 L326 102 Q352 99 352 126 L352 472 L150 472 Z" fill="url(#mp2)"/>
+  <path d="M272 64 L396 44 Q476 34 476 116 L476 472 L272 472 Z" fill="url(#mp3)"/>
+  <path d="M272 64 L396 44 Q476 34 476 116 L476 472 L272 472 Z" fill="url(#mhl)"/>
+  <path d="M78 236 h50 v138 h90 v50 h-140 Z" fill="#fff"/><path d="M252 236 h192 v50 h-71 v138 h-50 v-138 h-71 Z" fill="#fff"/>
 </svg>

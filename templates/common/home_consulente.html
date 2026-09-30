@@ -12,6 +12,13 @@
 
 <div class="dashboard-page dashboard-consultant-page">
 
+    {% if responsabile_senza_bu %}
+        <div class="bu-note" role="note">
+            <span aria-hidden="true">!</span>
+            <span>Hai il ruolo di Responsabile Business Unit ma non sei ancora stato nominato responsabile di una Business Unit: l'Admin LEF può farlo da <strong>Business Unit › Appartenenze</strong>. Nel frattempo vedi l'interfaccia da consulente.</span>
+        </div>
+    {% endif %}
+
 
     <section class="dashboard-hero">
 

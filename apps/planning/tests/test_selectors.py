@@ -9,6 +9,7 @@ from apps.planning.selectors import (
     planned_hours_for_assignment,
     remaining_plannable_hours,
     visible_planning_for_user,
+    plannable_assignments_for_user,
     weekly_load,
 )
 from apps.projects.models import Assegnazione, Cliente, Commessa
@@ -125,6 +126,31 @@ class PlanningSelectorTests(TestCase):
             queryset.count(),
             2,
         )
+
+
+    def test_consulente_puo_selezionare_solo_assegnazioni_del_proprio_perimetro(self):
+        queryset = plannable_assignments_for_user(self.consulente)
+        self.assertIn(self.assegnazione, queryset)
+
+        altra_commessa = Commessa.objects.create(
+            cliente=self.cliente,
+            codice="SELECTOR-002",
+            descrizione="Fuori perimetro",
+            ore_budget=20,
+            data_inizio=self.today,
+            data_fine_prevista=self.today + timedelta(days=30),
+        )
+        fuori_perimetro = Assegnazione.objects.create(
+            consulente=self.altro,
+            commessa=altra_commessa,
+            ore_previste=8,
+            stato=Assegnazione.Stato.ATTIVA,
+            data_inizio=self.today,
+        )
+        self.assertNotIn(fuori_perimetro, queryset)
+
+    def test_admin_puo_selezionare_tutte_le_assegnazioni(self):
+        self.assertIn(self.assegnazione, plannable_assignments_for_user(self.admin))
 
     def test_carico_settimanale(self):
         risultato = weekly_load(

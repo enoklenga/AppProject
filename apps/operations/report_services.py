@@ -20,6 +20,8 @@ class FiltriReport:
     commessa_id: Any = None
     consulente_id: Any = None
     fase_id: Any = None
+    # None = nessun limite; tupla di id = perimetro Business Unit.
+    business_unit_ids: Any = None
 
     @property
     def mese_testo(self) -> str:
@@ -51,6 +53,10 @@ def _filtra_righe(filtri: FiltriReport):
         queryset = queryset.filter(assegnazione__consulente_id=filtri.consulente_id)
     if filtri.fase_id:
         queryset = queryset.filter(assegnazione__fase_id=filtri.fase_id)
+    if filtri.business_unit_ids is not None:
+        queryset = queryset.filter(
+            assegnazione__commessa__business_unit_id__in=list(filtri.business_unit_ids)
+        )
     return queryset.order_by(
         "data",
         "assegnazione__commessa__codice",
@@ -84,6 +90,10 @@ def _filtra_spese(filtri: FiltriReport):
         queryset = queryset.filter(assegnazione__consulente_id=filtri.consulente_id)
     if filtri.fase_id:
         queryset = queryset.filter(assegnazione__fase_id=filtri.fase_id)
+    if filtri.business_unit_ids is not None:
+        queryset = queryset.filter(
+            assegnazione__commessa__business_unit_id__in=list(filtri.business_unit_ids)
+        )
     return queryset.order_by(
         "data",
         "assegnazione__commessa__codice",
@@ -100,6 +110,7 @@ def dati_report(filtri: FiltriReport):
         commessa_id=filtri.commessa_id,
         consulente_id=filtri.consulente_id,
         fase_id=filtri.fase_id,
+        business_unit_ids=filtri.business_unit_ids,
     )
     return {
         "filtri": filtri,

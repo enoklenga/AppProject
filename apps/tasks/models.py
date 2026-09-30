@@ -121,7 +121,7 @@ class Task(UUIDTimeStampedModel):
             raise ValidationError({"fase": "La fase non appartiene alla commessa selezionata."})
         if self.fase_id and self.assegnato_a_id:
             from apps.projects.models import Assegnazione
-            if not self.assegnato_a.is_admin_lef and not Assegnazione.objects.filter(
+            if not self.assegnato_a.puo_gestire_commessa(self.commessa) and not Assegnazione.objects.filter(
                 consulente_id=self.assegnato_a_id,
                 fase_id=self.fase_id,
                 stato=Assegnazione.Stato.ATTIVA,

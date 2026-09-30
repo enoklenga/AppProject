@@ -5,7 +5,7 @@ from datetime import timedelta
 from django.db.models import Count, Exists, OuterRef, Q
 from django.utils import timezone
 
-from apps.accounts.models import User
+from apps.accounts.models import User, UserBusinessUnit
 from apps.projects.models import Assegnazione
 from apps.tasks.models import Task
 
@@ -299,9 +299,21 @@ def _tasks_with_current_assignee_access(queryset):
         .annotate(
             assegnatario_ha_accesso=Exists(active_assignment),
         )
+        .annotate(
+            assegnatario_resp_bu=Exists(
+                UserBusinessUnit.objects.filter(
+                    utente_id=OuterRef("assegnato_a_id"),
+                    business_unit_id=OuterRef("commessa__business_unit_id"),
+                    responsabile=True,
+                    attiva=True,
+                    utente__ruolo=User.Ruolo.RESPONSABILE_CONSULENZA,
+                )
+            ),
+        )
         .filter(
-            Q(assegnato_a__ruolo=User.Ruolo.ADMIN)
+            Q(assegnato_a__ruolo__in=(User.Ruolo.ADMIN, User.Ruolo.AMMINISTRAZIONE))
             | Q(assegnatario_ha_accesso=True)
+            | Q(assegnatario_resp_bu=True)
         )
     )
 

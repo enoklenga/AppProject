@@ -352,8 +352,8 @@
     "use strict";
 
     document.querySelectorAll("[data-password-toggle]").forEach((button) => {
-        const wrapper = button.closest(".input-with-icon");
-        const input = wrapper?.querySelector("input");
+        const wrapper = button.closest(".input-with-icon, .login-input");
+        const input = wrapper?.querySelector('input[type="password"], input[type="text"]');
         const use = button.querySelector("use");
         if (!input) return;
 

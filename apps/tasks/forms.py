@@ -309,10 +309,10 @@ class TaskForm(forms.Form):
                     "L'utente selezionato non è attivo.",
                 )
 
-            # Gli Admin LEF possono ricevere task
-            # anche senza un'assegnazione formale
-            # sulla commessa.
-            elif not assegnato_a.is_admin_lef:
+            # Chi gestisce la commessa (Admin, Amministrazione,
+            # Responsabile BU) può ricevere task anche senza
+            # un'assegnazione formale sulla commessa.
+            elif not assegnato_a.puo_gestire_commessa(commessa):
 
                 assegnazione_valida = (
                     Assegnazione.objects
